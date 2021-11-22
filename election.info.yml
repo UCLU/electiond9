@@ -1,0 +1,11 @@
+name: "Election"
+type: module
+description: "Run democratic elections through nomination, voting and results counting."
+core_version_requirement: ^8 || ^9
+package: "Election"
+dependencies:
+  - field_group
+  - twig_tweak
+  - encrypt
+  - pluginreference
+  - election:election_fptp

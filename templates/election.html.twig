@@ -1,0 +1,33 @@
+{#
+/**
+ * @file election.html.twig
+ * Default theme implementation to present Election data.
+ *
+ * This template is used when viewing Election pages.
+ *
+ *
+ * Available variables:
+ * - content: A list of content items. Use 'content' to print all content, or
+ * - attributes: HTML attributes for the container element.
+ *
+ * @see template_preprocess_election()
+ *
+ * @ingroup themeable
+ */
+#}
+<div{{attributes.addClass('election')}}>
+	{% if startVoting %}
+		<p>
+			<a href="{{ path('entity.election.voting', {'election' : election.id() }) }}">{{ 'Start voting'|t }}</a>
+		</p>
+	{% endif %}
+
+	{{status_summary}}
+
+	{% if content %}
+		{{- content -}}
+	{% endif %}
+
+	<h2>{{posts_name}}</h2>
+	{{ drupal_view('election_posts_for_election_page', 'embed') }}
+</div>

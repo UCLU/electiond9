@@ -1,0 +1,26 @@
+services:
+  election.route_subscriber:
+    class: Drupal\election\Routing\RouteSubscriber
+    tags:
+      - { name: event_subscriber }
+  election.election_route_context:
+    class: 'Drupal\election\ContextProvider\ElectionContextProvider'
+    arguments:
+      ["@current_route_match", "@entity_type.manager", "@string_translation"]
+    tags:
+      - { name: "context_provider" }
+  cache.election_bin:
+    class: Drupal\Core\Cache\CacheBackendInterface
+    tags:
+      - { name: cache.bin }
+    factory: cache_factory:get
+    arguments: [election_bin]
+  election.post_eligibility_checker:
+    class: Drupal\election\Service\ElectionPostEligibilityChecker
+    arguments: []
+  plugin.manager.election_post_condition:
+    class: Drupal\election\Plugin\ElectionPostConditionPluginManager
+    parent: default_plugin_manager
+  plugin.manager.election_voting_method_plugin:
+    class: Drupal\election\Plugin\ElectionVotingMethodPluginManager
+    parent: default_plugin_manager

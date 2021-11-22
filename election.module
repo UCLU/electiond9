@@ -1,0 +1,94 @@
+<?php
+
+/**
+ * @file
+ * Contains election.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Form\SubformState;
+use Drupal\Core\Plugin\PluginWithFormsInterface;
+use Drupal\election\Annotation\ElectionVotingMethodPlugin;
+
+/** @file modules/custom/artwork_provider/artwork_provider.module
+ *
+ * Provides a theme definition for custom content entity
+ * {@inheritdoc}
+ */
+function election_theme($existing, $type, $theme, $path) {
+  $theme = [
+    'election' => [
+      'render element' => 'elements',
+      'file' => 'election.page.inc',
+    ],
+    'election_post' => [
+      'render element' => 'elements',
+      'file' => 'election_post.page.inc',
+    ],
+    'election_ballot' => [
+      'render element' => 'elements',
+      'file' => 'election_ballot.page.inc',
+    ],
+    'election_candidate' => [
+      'render element' => 'elements',
+      'file' => 'election_candidate.page.inc',
+    ],
+    'election_status_summary' => [
+      'variables' => [
+        'phases' => []
+      ],
+    ],
+  ];
+  return $theme;
+}
+
+/**
+ * Implements hook_help().
+ */
+function election_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+      // Main module help for the election module.
+    case 'help.page.election':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Run democratic elections through nomination, voting and results counting.') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+
+/**
+ * Helper function to extract the entity for the supplied route.
+ *
+ * @return null|ContentEntityInterface
+ */
+function election_get_route_entity() {
+  $route_match = \Drupal::routeMatch();
+  // Entity will be found in the route parameters.
+  if (($route = $route_match->getRouteObject()) && ($parameters = $route->getOption('parameters'))) {
+    // Determine if the current route represents an entity.
+    foreach ($parameters as $name => $options) {
+      if (isset($options['type']) && strpos($options['type'], 'entity:') === 0) {
+        $entity = $route_match->getParameter($name);
+        if ($entity instanceof ContentEntityInterface && $entity->hasLinkTemplate('canonical')) {
+          return $entity;
+        }
+
+        // Since entity was found, no need to iterate further.
+        return NULL;
+      }
+    }
+  }
+}
+
+function election_form_alter($form) {
+  // dd($form['field_a']);
+}
+
+function election_election_post_update() {
+  // \Drupal::service('plugin.manager.block')->clearCachedDefinitions();
+}

@@ -1,0 +1,9 @@
+langcode: en
+status: true
+dependencies: {}
+id: default
+label: "Default election type"
+allowed_post_types:
+  default: default
+naming_singular: "election"
+naming_plural: "elections"

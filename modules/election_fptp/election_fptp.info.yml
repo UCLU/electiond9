@@ -1,0 +1,7 @@
+name: "Election First Past the Post"
+type: module
+description: "Provides first past the post voting method."
+core_version_requirement: ^8 || ^9
+package: "Election"
+dependencies:
+  - election:election

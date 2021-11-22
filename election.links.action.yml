@@ -1,0 +1,50 @@
+# Elections
+entity.election.add_page:
+  route_name: entity.election.add_page
+  title: "Add election"
+  appears_on:
+    - entity.election.collection
+election.election_local_tasks:
+  deriver: 'Drupal\election\Plugin\Derivative\ElectionLocalTasks'
+  weight: 100
+  appears_on:
+    - entity.election.canonical
+
+# Posts
+election.election_post_local_tasks:
+  deriver: 'Drupal\election\Plugin\Derivative\ElectionPostLocalTasks'
+  weight: 100
+  appears_on:
+    - entity.election_post.canonical
+entity.election_post.add_form:
+  route_name: entity.election_post.add_page
+  title: "Add election post"
+  appears_on:
+    - entity.election_post.collection
+entity.election_post_type.add_form:
+  route_name: entity.election_post_type.add_form
+  title: "Add Election post type"
+  appears_on:
+    - entity.election_post_type.collection
+
+# Candidates
+election.election_candidate_local_tasks:
+  deriver: 'Drupal\election\Plugin\Derivative\ElectionCandidateLocalTasks'
+  weight: 100
+  appears_on:
+    - entity.election_candidate.canonical
+entity.election_candidate.add_form:
+  route_name: entity.election_candidate.add_page
+  title: "Add Election candidate"
+  appears_on:
+    - entity.election_candidate.collection
+entity.election_candidate_type.add_form:
+  route_name: entity.election_candidate_type.add_form
+  title: "Add Election candidate type"
+  appears_on:
+    - entity.election_candidate_type.collection
+entity.election_type.add_form:
+  route_name: entity.election_type.add_form
+  title: "Add Election type"
+  appears_on:
+    - entity.election_type.collection

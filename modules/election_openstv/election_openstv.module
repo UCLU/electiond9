@@ -1,0 +1,93 @@
+<?php
+
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
+
+/**
+ * Get a list of valid OpenSTV counting methods.
+ */
+function _election_openstv_get_methods() {
+  return array(
+    'Approval' => t('Approval Voting'),
+    'Borda' => t('Borda Count'),
+    'Bucklin' => t('Bucklin System'),
+    'CambridgeSTV' => t('Cambridge STV'),
+    'Condorcet' => t('Condorcet Voting'),
+    'Coombs' => t('Coombs Method'),
+    'ERS97STV' => t('ERS97 STV'),
+    'FTSTV' => t('Fractional Transfer STV'),
+    'GPCA2000STV' => t('GPCA 2000 STV'),
+    'IRV' => t('Instant-Runoff Voting (IRV)'),
+    'MeekNZSTV' => t('Meek NZ STV'),
+    'MeekQXSTV' => t('Meek QX STV'),
+    'MeekSTV' => t('Meek STV'),
+    'MinneapolisSTV' => t('Minneapolis STV'),
+    'NIrelandSTV' => t('N. Ireland STV'),
+    'QPQ' => t('QPQ (Quota-Preferential by Quotient)'),
+    'RTSTV' => t('Random Transfer STV'),
+    'SNTV' => t('Single Non-Transferable Vote (SNTV)'),
+    'ScottishSTV' => t('Scottish STV'),
+    'SuppVote' => t('Supplementary Vote'),
+    'WarrenQXSTV' => t('Warren QX STV'),
+    'WarrenSTV' => t('Warren STV'),
+  );
+}
+
+
+/**
+ * Find out whether OpenSTV can be executed with the configured command.
+ *
+ * @param string $command
+ *   A shell command to run OpenSTV, which could be the full path to
+ *   runElection.py (if it is executable), another shell command such as
+ *   'openstv-run-election', or 'python FILENAME'.
+ *
+ * @return bool
+ *   FALSE if the command is definitely not executable, TRUE otherwise.
+ */
+function _election_openstv_executable($command) {
+  // Split up the command by spaces, ignoring any spaces that are escaped by a
+  // backslash.
+  $command_parts = preg_split('/(?<!\\\) /', $command);
+  $command_name = reset($command_parts);
+  // Test whether the command name is an executable.
+  if (!is_executable($command_name)) {
+    // It still might be executable by the shell: test it with 'which'.
+    $which = shell_exec('which ' . escapeshellarg($command_name));
+    if (empty($which)) {
+      return FALSE;
+    }
+  }
+  // If the command format is something like "/usr/bin/python filename.py",
+  // check whether the file exists and is readable.
+  if (strpos($command_name, 'python') !== FALSE && count($command_parts) > 1) {
+    $filename = str_replace('\ ', ' ', end($command_parts));
+    if (!is_readable($filename)) {
+      return FALSE;
+    }
+  }
+  return TRUE;
+}
+/**
+ * Implements hook_entity_base_field_info().
+ */
+function election_openstv_entity_base_field_info(EntityTypeInterface $entity_type) {
+  $fields = array();
+
+  // Add a 'allow_equal_ranking' base field to all node types.
+  if ($entity_type->id() === 'election_post') {
+    $fields['allow_equal_ranking'] = BaseFieldDefinition::create('boolean')
+      ->setLabel(t('Allow equal ranking'))
+      ->setRevisionable(TRUE)
+      ->setTranslatable(TRUE)
+      ->setDisplayOptions('form', array(
+        'type' => 'boolean_checkbox',
+        'settings' => array(
+          'display_label' => TRUE,
+        ),
+      ))
+      ->setDisplayConfigurable('form', TRUE);
+  }
+
+  return $fields;
+}

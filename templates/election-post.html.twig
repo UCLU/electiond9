@@ -1,0 +1,29 @@
+{#
+/**
+ * @file election_post.html.twig
+ * Default theme implementation to present Election post data.
+ *
+ * This template is used when viewing Election post pages.
+ *
+ *
+ * Available variables:
+ * - content: A list of content items. Use 'content' to print all content, or
+ * - attributes: HTML attributes for the container element.
+ * - candidate_name: what to call candidates
+ * - election_details: election status etc
+ *
+ * @see template_preprocess_election_post()
+ *
+ * @ingroup themeable
+ */
+#}
+<div{{attributes.addClass('election_post')}}>
+
+	{{status_summary}}
+
+	{% if content %}
+		{{ content }}
+	{% endif %}
+
+	<h2>{{candidate_name}}</h2>
+	{{ drupal_view('election_candidates_for_post', 'embed') }}</div>

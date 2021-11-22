@@ -1,0 +1,93 @@
+# Election menu items definition
+entity.election.collection:
+  title: "Elections"
+  route_name: entity.election.collection
+  description: "List elections"
+  parent: system.admin_content
+  weight: 100
+
+# election.admin.structure.settings:
+#   title: "Election settings"
+#   description: "Configure elections"
+#   route_name: election.settings
+#   parent: entity.election.collection
+
+# Election post menu items definition
+entity.election_post.collection:
+  title: "Election post list"
+  route_name: entity.election_post.collection
+  description: "List election posts"
+  parent: entity.election.collection
+  weight: 100
+
+# election_post.admin.structure.settings:
+#   title: "Election post settings"
+#   description: "Configure election posts"
+#   route_name: election_post.settings
+#   parent: entity.election_post.collection
+
+# Election candidate menu items definition
+entity.election_candidate.collection:
+  title: "Election candidate list"
+  route_name: entity.election_candidate.collection
+  description: "List election candidates"
+  parent: entity.election.collection
+  weight: 100
+
+# election_candidate.admin.structure.settings:
+#   title: "Election candidate settings"
+#   description: "Configure election candidates"
+#   route_name: election_candidate.settings
+#   parent: entity.election_candidate.collection
+
+# # Election ballot menu items definition
+# entity.election_ballot.collection:
+#   title: 'Election ballot list'
+#   route_name: entity.election_ballot.collection
+#   description: 'List election ballots'
+#   parent: entity.election.collection
+#   weight: 100
+
+election_ballot.admin.structure.settings:
+  title: "Election ballot settings"
+  description: "Configure election ballots"
+  route_name: election_ballot.settings
+  parent: entity.election.collection
+
+# Election ballot vote menu items definition
+# entity.election_ballot_vote.collection:
+#   title: 'Election ballot vote list'
+#   route_name: entity.election_ballot_vote.collection
+#   description: 'List election ballot votes'
+#   parent: entity.election.collection
+#   weight: 100
+
+election_ballot_vote.admin.structure.settings:
+  title: "Election ballot vote settings"
+  description: "Configure election ballot votes"
+  route_name: election_ballot_vote.settings
+  parent: entity.election.collection
+
+# Election candidate type menu items definition
+entity.election_candidate_type.collection:
+  title: "Election candidate type"
+  route_name: entity.election_candidate_type.collection
+  description: "List Election candidate type (bundles)"
+  parent: entity.election.collection
+  weight: 99
+
+# Election post type menu items definition
+entity.election_post_type.collection:
+  title: "Election post type"
+  route_name: entity.election_post_type.collection
+  description: "List election post types (bundles)"
+  parent: entity.election.collection
+  weight: 99
+
+# Election type menu items definition
+entity.election_type.collection:
+  title: "Election type"
+  route_name: entity.election_type.collection
+  description: "List election types (bundles)"
+  parent: entity.election.collection
+  weight: 99

@@ -1,0 +1,15 @@
+ballot:
+  version: VERSION
+  js:
+    js/ballot.js: {}
+  dependencies:
+    - core/drupal
+    - core/jquery
+
+conditions:
+  version: VERSION
+  js:
+    js/conditions.js: {}
+  dependencies:
+    - core/drupal
+    - core/jquery

@@ -1,0 +1,23 @@
+<?php
+
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
+
+/**
+ * Implements hook_entity_base_field_info().
+ */
+function election_fptp_entity_base_field_info(EntityTypeInterface $entity_type) {
+  $fields = array();
+
+  // Add a 'allow_equal_ranking' base field to all node types.
+  if ($entity_type->id() === 'election_post') {
+    $fields['options_allowed'] = BaseFieldDefinition::create('integer')
+      ->setLabel(t('How many options the voter can select in a first-past-the-post or block vote position'))
+      ->setRevisionable(TRUE)
+      ->setTranslatable(TRUE)
+      ->setDefaultValue(1)
+      ->setDisplayConfigurable('form', TRUE);
+  }
+
+  return $fields;
+}

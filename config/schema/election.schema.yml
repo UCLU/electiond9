@@ -1,0 +1,10 @@
+election.settings:
+  type: config_object
+  label: 'Elections configuration'
+  mapping:
+    cache_eligibility_roles:
+      type: sequence
+      label: 'User roles to cache eligibility for'
+      sequence:
+        type: string
+        label: 'User role'

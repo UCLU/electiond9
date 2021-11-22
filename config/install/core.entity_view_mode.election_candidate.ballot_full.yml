@@ -1,0 +1,9 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - election
+id: election_candidate.ballot_full
+label: "Ballot - full"
+targetEntityType: election_candidate
+cache: true

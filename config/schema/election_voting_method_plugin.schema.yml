@@ -1,0 +1,15 @@
+election.election_voting_method_plugin.base:
+  type: config_entity
+  label: "Voting method configuration"
+  mapping:
+    id:
+      type: string
+      label: "ID"
+
+election.election_voting_method_plugin.open_stv:
+  type: election_voting_method_plugin.schema
+  label: "OpenSTV voting plugin configuration"
+  mapping:
+    method:
+      type: string
+      label: "STV voting method"

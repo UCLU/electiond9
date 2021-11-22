@@ -1,0 +1,142 @@
+express interest in posts:
+  title: "Nominate for posts (subject to eligibility)"
+
+nominate for posts:
+  title: "Nominate for posts (subject to eligibility)"
+
+view full nomination form:
+  title: "View full nomination form (including admin fields) "
+
+add election ballot entities:
+  title: "Vote in elections (create ballots)"
+
+# Below are automatically generated
+
+add elections:
+  title: "Create new elections"
+
+administer election:
+  title: "Administer elections"
+  description: "Allow to access the administration form to configure elections."
+  restrict access: true
+
+delete elections:
+  title: "Delete elections"
+
+edit elections:
+  title: "Edit elections"
+
+view published elections:
+  title: "View published elections"
+
+view unpublished elections:
+  title: "View unpublished elections"
+
+view all election revisions:
+  title: "View all Election revisions"
+
+revert all election revisions:
+  title: "Revert all Election revisions"
+  description: "Role requires permission <em>view Election revisions</em> and <em>edit rights</em> for elections in question or <em>administer elections</em>."
+
+delete all election revisions:
+  title: "Delete all revisions"
+  description: "Role requires permission to <em>view Election revisions</em> and <em>delete rights</em> for elections in question or <em>administer elections</em>."
+
+add election post entities:
+  title: "Create new election posts"
+
+administer election posts:
+  title: "Administer election posts"
+  description: "Allow to access the administration form to configure election posts."
+  restrict access: true
+
+delete election post entities:
+  title: "Delete election posts"
+
+edit election post entities:
+  title: "Edit election posts"
+
+view published election post entities:
+  title: "View published election posts"
+
+view unpublished election post entities:
+  title: "View unpublished election posts"
+
+view all election post revisions:
+  title: "View all Election post revisions"
+
+revert all election post revisions:
+  title: "Revert all Election post revisions"
+  description: "Role requires permission <em>view Election post revisions</em> and <em>edit rights</em> for election post entities in question or <em>administer election posts</em>."
+
+delete all election post revisions:
+  title: "Delete all revisions"
+  description: "Role requires permission to <em>view Election post revisions</em> and <em>delete rights</em> for election post entities in question or <em>administer election posts</em>."
+
+add election candidate entities:
+  title: "Create new election candidates"
+
+administer election candidate entities:
+  title: "Administer election candidates"
+  description: "Allow to access the administration form to configure election candidates."
+  restrict access: true
+
+delete election candidate entities:
+  title: "Delete election candidates"
+
+edit election candidate entities:
+  title: "Edit election candidates"
+
+view published election candidate entities:
+  title: "View published election candidates"
+
+view unpublished election candidate entities:
+  title: "View unpublished election candidates"
+
+view all election candidate revisions:
+  title: "View all Election candidate revisions"
+
+revert all election candidate revisions:
+  title: "Revert all Election candidate revisions"
+  description: "Role requires permission <em>view Election candidate revisions</em> and <em>edit rights</em> for election candidate entities in question or <em>administer election candidate entities</em>."
+
+delete all election candidate revisions:
+  title: "Delete all revisions"
+  description: "Role requires permission to <em>view Election candidate revisions</em> and <em>delete rights</em> for election candidate entities in question or <em>administer election candidate entities</em>."
+
+administer election ballot entities:
+  title: "Administer election ballots"
+  description: "Allow to access the administration form to configure election ballots."
+  restrict access: true
+
+delete election ballot entities:
+  title: "Delete election ballots"
+
+view published election ballot entities:
+  title: "View published election ballots"
+
+view unpublished election ballot entities:
+  title: "View unpublished election ballots"
+
+add election ballot vote entities:
+  title: "Create new election votes"
+
+administer election ballot vote entities:
+  title: "Administer election votes"
+  description: "Allow to access the administration form to configure election votes."
+  restrict access: true
+
+delete election ballot vote entities:
+  title: "Delete election votes"
+
+view published election ballot vote entities:
+  title: "View published election votes"
+
+view unpublished election ballot vote entities:
+  title: "View unpublished election votes"
+
+permission_callbacks:
+  - \Drupal\election\ElectionPermissions::generatePermissions
+  - \Drupal\election\ElectionPostPermissions::generatePermissions
+  - \Drupal\election\ElectionCandidatePermissions::generatePermissions

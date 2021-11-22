@@ -1,0 +1,22 @@
+election.election_type.*:
+  type: config_entity
+  label: "Election type config"
+  mapping:
+    id:
+      type: string
+      label: "ID"
+    label:
+      type: label
+      label: "Label"
+    uuid:
+      type: string
+    allowed_post_types:
+      type: sequence
+      label: "Allowed post types"
+      sequence:
+        type: string
+        label: "Election post type ID"
+    naming_singular:
+      type: string
+    naming_plural:
+      type: string

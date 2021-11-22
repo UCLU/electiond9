@@ -1,0 +1,11 @@
+status: true
+dependencies:
+  config:
+    - key.key.standard
+  module:
+    - real_aes
+id: election
+label: "Election"
+encryption_method: real_aes
+encryption_key: election
+encryption_method_configuration: {}

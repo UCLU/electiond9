@@ -1,0 +1,124 @@
+# Election routing definition
+election.settings_tab:
+  route_name: election.settings
+  title: "Settings"
+  base_route: election.settings
+
+entity.election.canonical:
+  route_name: entity.election.canonical
+  base_route: entity.election.canonical
+  title: "View"
+
+entity.election.edit_form:
+  route_name: entity.election.edit_form
+  base_route: entity.election.canonical
+  title: "Edit"
+
+entity.election.version_history:
+  route_name: entity.election.version_history
+  base_route: entity.election.canonical
+  title: "Revisions"
+
+entity.election.delete_form:
+  route_name: entity.election.delete_form
+  base_route: entity.election.canonical
+  title: Delete
+  weight: 10
+
+# Election post routing definition
+# election_post.settings_tab:
+#   route_name: election_post.settings
+#   title: 'Settings'
+#   base_route: election_post.settings
+
+entity.election_post.canonical:
+  route_name: entity.election_post.canonical
+  base_route: entity.election_post.canonical
+  title: "View"
+
+entity.election_post.edit_form:
+  route_name: entity.election_post.edit_form
+  base_route: entity.election_post.canonical
+  title: "Edit"
+
+entity.election_post.version_history:
+  route_name: entity.election_post.version_history
+  base_route: entity.election_post.canonical
+  title: "Revisions"
+
+entity.election_post.delete_form:
+  route_name: entity.election_post.delete_form
+  base_route: entity.election_post.canonical
+  title: Delete
+  weight: 10
+
+# Election candidate routing definition
+# election_candidate.settings_tab:
+#   route_name: election_candidate.settings
+#   title: 'Settings'
+#   base_route: election_candidate.settings
+
+entity.election_candidate.canonical:
+  route_name: entity.election_candidate.canonical
+  base_route: entity.election_candidate.canonical
+  title: "View"
+
+entity.election_candidate.edit_form:
+  route_name: entity.election_candidate.edit_form
+  base_route: entity.election_candidate.canonical
+  title: "Edit"
+
+entity.election_candidate.version_history:
+  route_name: entity.election_candidate.version_history
+  base_route: entity.election_candidate.canonical
+  title: "Revisions"
+
+entity.election_candidate.delete_form:
+  route_name: entity.election_candidate.delete_form
+  base_route: entity.election_candidate.canonical
+  title: Delete
+  weight: 10
+
+# Election ballot routing definition
+election_ballot.settings_tab:
+  route_name: election_ballot.settings
+  title: "Settings"
+  base_route: election_ballot.settings
+
+entity.election_ballot.canonical:
+  route_name: entity.election_ballot.canonical
+  base_route: entity.election_ballot.canonical
+  title: "View"
+
+entity.election_ballot.edit_form:
+  route_name: entity.election_ballot.edit_form
+  base_route: entity.election_ballot.canonical
+  title: "Edit"
+
+entity.election_ballot.delete_form:
+  route_name: entity.election_ballot.delete_form
+  base_route: entity.election_ballot.canonical
+  title: Delete
+  weight: 10
+
+# Election ballot vote routing definition
+election_ballot_vote.settings_tab:
+  route_name: election_ballot_vote.settings
+  title: "Settings"
+  base_route: election_ballot_vote.settings
+
+entity.election_ballot_vote.canonical:
+  route_name: entity.election_ballot_vote.canonical
+  base_route: entity.election_ballot_vote.canonical
+  title: "View"
+
+entity.election_ballot_vote.edit_form:
+  route_name: entity.election_ballot_vote.edit_form
+  base_route: entity.election_ballot_vote.canonical
+  title: "Edit"
+
+entity.election_ballot_vote.delete_form:
+  route_name: entity.election_ballot_vote.delete_form
+  base_route: entity.election_ballot_vote.canonical
+  title: Delete
+  weight: 10

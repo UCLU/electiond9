@@ -1,0 +1,24 @@
+election.election_post_type.*:
+  type: config_entity
+  label: "Election post type config"
+  mapping:
+    id:
+      type: string
+      label: "ID"
+    label:
+      type: label
+      label: "Label"
+    uuid:
+      type: string
+    naming_post_singular:
+      label: "Term to use for posts/position - singular"
+      type: string
+    naming_post_plural:
+      label: "Term to use for posts/positions - plural"
+      type: string
+    allowed_candidate_types:
+      type: sequence
+      label: "Allowed candidate types"
+      sequence:
+        type: string
+        label: "Election candidate type ID"

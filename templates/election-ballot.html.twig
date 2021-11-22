@@ -1,0 +1,24 @@
+{#
+/**
+ * @file election_ballot.html.twig
+ * Default theme implementation to present Election ballot data.
+ *
+ * This template is used when viewing Election ballot pages.
+ *
+ *
+ * Available variables:
+ * - content: A list of content items. Use 'content' to print all content, or
+ * - attributes: HTML attributes for the container element.
+ *
+ * @see template_preprocess_election_ballot()
+ *
+ * @ingroup themeable
+ */
+#}
+<div{{ attributes.addClass('election_ballot') }}>
+  {% if content %}
+    {{ content }}
+  {% endif %}
+  <h2>Candidates</h2>
+  {{ drupal_view('election_candidates', 'block_election_ballot') }}
+</div>

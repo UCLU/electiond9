@@ -1,0 +1,74 @@
+# Note that most routes for the entities are defined in the annotations at the start of the entities
+entity.election_post.add_to_election:
+  path: "/election/{election}/post/{election_post_type}/add"
+  defaults:
+    _entity_form: "election_post.add"
+  requirements:
+    _entity_access: "election.update"
+  options:
+    parameters:
+      election:
+        type: entity:election
+      election_post_type:
+        type: entity:election_post_type
+
+entity.election_candidate.add_to_election_post:
+  path: "/election/post/{election_post}/candidate/{election_candidate_type}/add"
+  defaults:
+    _entity_form: "election_candidate.add"
+  requirements:
+    _entity_access: "election_post.update"
+  options:
+    parameters:
+      election_post:
+        type: entity:election_post
+      election_candidate_type:
+        type: entity:election_candidate_type
+
+entity.election_post.voting:
+  path: "/election/post/{election_post}/vote"
+  defaults:
+    _entity_form: "election_ballot.add"
+  requirements:
+    _entity_access: "election_ballot.add"
+  options:
+    parameters:
+      election_post:
+        type: entity:election_post
+    _admin_route: FALSE
+
+entity.election.voting:
+  path: "/election/{election}/vote"
+  defaults:
+    _controller: '\Drupal\election\Controller\ElectionController::startVoting'
+  requirements:
+    _permission: "add election ballot entities"
+  options:
+    parameters:
+      election:
+        type: entity:election
+    _admin_route: FALSE
+
+entity.election_post.nominations:
+  path: "/election/post/{election_post}/nominate"
+  defaults:
+    _entity_form: "election_candidate.add"
+  requirements:
+    _entity_access: "election_candidate.add"
+  options:
+    parameters:
+      election_post:
+        type: entity:election_post
+    _admin_route: FALSE
+
+entity.election_post.interest:
+  path: "/election/post/{election_post}/express-interest"
+  defaults:
+    _entity_form: "election_candidate.add"
+  requirements:
+    _entity_access: "election_candidate.add"
+  options:
+    parameters:
+      election_post:
+        type: entity:election_post
+    _admin_route: FALSE

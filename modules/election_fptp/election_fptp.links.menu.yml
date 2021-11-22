@@ -1,0 +1,6 @@
+election_fptp.settings_form:
+  title: "First past the post configuration"
+  route_name: election_fptp.settings_form
+  description: "A description for the menu entry"
+  parent: system.admin_config_system
+  weight: 99
