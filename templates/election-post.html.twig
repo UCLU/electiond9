@@ -17,13 +17,17 @@
  * @ingroup themeable
  */
 #}
-<div{{attributes.addClass('election_post')}}>
+<div {{ attributes.addClass('election_post') }}>
+  {{ actions }}
 
-	{{status_summary}}
+  {{ status_summary }}
 
-	{% if content %}
-		{{ content }}
-	{% endif %}
+  {% if content %}
+    {{ content }}
+  {% endif %}
 
-	<h2>{{candidate_name}}</h2>
-	{{ drupal_view('election_candidates_for_post', 'embed') }}</div>
+  <h2>
+    {{ candidate_name }}
+  </h2>
+  {{ drupal_view('election_candidates_for_post', 'embed') }}
+</div>

@@ -1,0 +1,12 @@
+{% if (actions|length) > 0 %}
+  <p class="election_actions_container election_post__actions_container">
+    {% for action in actions %}
+      <a class="btn button button--{{
+        action.button_type
+        }} election_action election_post__action"
+        href="{{ action.link }}">
+        {{ action.title }}
+      </a>
+    {% endfor %}
+  </p>
+{% endif %}

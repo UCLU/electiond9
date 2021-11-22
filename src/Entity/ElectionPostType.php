@@ -31,6 +31,7 @@ use Drupal\election\Annotation\ElectionVotingMethodPlugin;
  *     "label",
  *     "naming_post_singular",
  *     "naming_post_plural",
+ *     "naming_post_action",
  *     "allowed_candidate_types",
  *   },
  *   admin_permission = "administer site configuration",
@@ -48,9 +49,7 @@ use Drupal\election\Annotation\ElectionVotingMethodPlugin;
  *   }
  * )
  */
-class ElectionPostType extends ConfigEntityBundleBase implements
-    ElectionPostTypeInterface
-{
+class ElectionPostType extends ConfigEntityBundleBase implements ElectionPostTypeInterface {
     /**
      * The Election post type ID.
      *
@@ -82,6 +81,13 @@ class ElectionPostType extends ConfigEntityBundleBase implements
     /**
      * The Election type label.
      *
+     * @var string
+     */
+    public $naming_post_action;
+
+    /**
+     * The Election type label.
+     *
      * @var array
      */
     public $allowed_candidate_types;
@@ -92,8 +98,7 @@ class ElectionPostType extends ConfigEntityBundleBase implements
      * @return array|ElectionCandidateType
      *   Array of election post types.
      */
-    public function getAllowedCandidateTypes()
-    {
+    public function getAllowedCandidateTypes() {
         $types = $this->get('allowed_candidate_types');
         if ($types == null || count($types) == 0) {
             return ElectionCandidateType::loadMultiple();
@@ -113,12 +118,23 @@ class ElectionPostType extends ConfigEntityBundleBase implements
      * @return string
      *   The user-friendly name.
      */
-    public function getNaming($capital = false, $plural = false)
-    {
+    public function getNaming($capital = FALSE, $plural = FALSE) {
         $text = $this->get('naming_post_' . ($plural ? 'plural' : 'singular'));
         if ($capital) {
             $text = ucfirst($text);
         }
         return $text;
+    }
+
+    /**
+     * Get user-friendly name for action (e.g. "Nominate for role")
+     *
+     * @return void
+     */
+    public function getActionNaming() {
+        $text = $this->get('naming_post_action') ?? 'Create @post_type';
+        return t($text, [
+            '@post_type' => $this->getNaming(FALSE, FALSE),
+        ]);
     }
 }

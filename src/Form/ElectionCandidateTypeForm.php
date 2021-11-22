@@ -46,6 +46,11 @@ class ElectionCandidateTypeForm extends EntityForm {
         '#description' => $this->t("e.g. candidates, options, applicants"),
         '#default_value' => $this->t('candidates'),
       ],
+      'naming_candidate_action' => [
+        '#title' => $this->t('Label for button to create candidate'),
+        '#description' => $this->t("e.g. 'Add @candidate_type', 'Create', 'Nominate for @post_type'"),
+        '#default_value' => $this->t('Add @candidate_type'),
+      ],
     ];
 
     foreach ($textFields as $field => $data) {
@@ -65,6 +70,7 @@ class ElectionCandidateTypeForm extends EntityForm {
     $election_candidate_type = $this->entity;
     $this->entity->set('naming_candidate_singular', $form_state->getvalue('naming_candidate_singular'));
     $this->entity->set('naming_candidate_plural', $form_state->getvalue('naming_candidate_plural'));
+    $this->entity->set('naming_candidate_action', $form_state->getvalue('naming_candidate_action'));
     $status = $election_candidate_type->save();
 
     switch ($status) {

@@ -40,6 +40,16 @@ function election_theme($existing, $type, $theme, $path) {
         'phases' => []
       ],
     ],
+    'election_actions' => [
+      'variables' => [
+        'actions' => []
+      ],
+    ],
+    'election_post_actions' => [
+      'variables' => [
+        'actions' => []
+      ],
+    ],
   ];
   return $theme;
 }

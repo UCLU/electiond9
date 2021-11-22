@@ -30,6 +30,11 @@ function template_preprocess_election_post(array &$variables) {
     '#phases' => $election_post->getUserEligibility(\Drupal::currentUser()),
   ];
 
+  $variables['actions'] = [
+    '#theme' => 'election_post_actions',
+    '#actions' => $election_post->getActionLinks(\Drupal::currentUser()),
+  ];
+
   $variables['candidate_name'] = $election_post->getCandidateTypesAsLabel();
 
   // Helpful $content variable for templates.

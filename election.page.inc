@@ -25,7 +25,10 @@ function template_preprocess_election(array &$variables) {
 
   $variables['election'] = $variables['elements']['#election'];
 
-  $variables['startVoting'] = $election->checkStatusForPhase('voting', 'open') && $election->getNextPostId(\Drupal::currentUser());
+  $variables['actions'] = [
+    '#theme' => 'election_actions',
+    '#actions' => $election->getActionLinks(\Drupal::currentUser()),
+  ];
 
   $variables['status_summary'] = [
     '#theme' => 'election_status_summary',

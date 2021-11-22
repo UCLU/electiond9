@@ -215,12 +215,6 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = parent::baseFieldDefinitions($entity_type);
 
-    // $fields['type'] = BaseFieldDefinition::create('entity_reference')
-    //   ->setLabel(t('Type'))
-    //   ->setDescription(t('The election post type.'))
-    //   ->setSetting('target_type', 'election_post_type')
-    //   ->setReadOnly(TRUE);
-
     // Add the published field.
     $fields += static::publishedBaseFieldDefinitions($entity_type);
 
@@ -230,10 +224,6 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
       ->setSetting('target_type', 'user')
       ->setSetting('handler', 'default')
       ->setTranslatable(TRUE)
-      ->setDisplayOptions('view', [
-        'label' => 'hidden',
-        'type' => 'author',
-      ])
       ->setDisplayOptions('form', [
         'type' => 'entity_reference_autocomplete',
         'weight' => 5,
@@ -302,6 +292,10 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
           'size' => '60',
           'placeholder' => '',
         ],
+      ])
+      ->setDisplayOptions('view', [
+        'label' => 'inline',
+        'type' => 'label',
       ])
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
@@ -466,7 +460,8 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
         'type' => 'options_select',
       ])
       ->setDisplayConfigurable('form', TRUE)
-      ->setDisplayConfigurable('view', TRUE);
+      ->setDisplayConfigurable('view', TRUE)
+      ->setRequired(TRUE);
 
     $fields['voting_method'] = BaseFieldDefinition::create('plugin_reference')
       ->setLabel(t('Voting method'))
@@ -479,7 +474,8 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
         'provider_grouping' => FALSE,
       ])
       ->setDisplayConfigurable('form', TRUE)
-      ->setDisplayConfigurable('view', TRUE);
+      ->setDisplayConfigurable('view', TRUE)
+      ->setRequired(TRUE);
 
     static::addElectionStatusesFields($fields, 'election_post');
 
@@ -552,5 +548,48 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
 
     $result = implode('/', $types);
     return $result;
+  }
+
+  public function getActionLinks(AccountInterface $account = NULL) {
+    $eligibilityService = \Drupal::service('election.post_eligibility_checker');
+
+    $actions = [];
+
+    $phases = $this->getElection()->getEnabledPhases();
+    foreach ($phases as $key => $name) {
+      if ($eligibilityService->checkEligibility($account, $this, $key, TRUE, FALSE)) {
+        $url = Url::fromRoute('entity.election_post.' . $key, ['election' => $this->id()]);
+        if ($url) {
+          $actions[] = [
+            'title' => t('@label', ['@label' => $name]),
+            'link' => $url->toString(),
+            'button_type' => 'primary',
+          ];
+        }
+
+        if ($key == 'nominations') {
+          foreach ($this->getElectionPostType()->getAllowedCandidateTypes() as $election_candidate_type) {
+            $url = Url::fromRoute('entity.election_candidate.add_to_election_post', [
+              'election_post' => $this->id(),
+              'election_candidate_type' => $election_candidate_type->id(),
+            ]);
+            if ($url) {
+              $actions[] = [
+                'title' => t(
+                  '@label',
+                  [
+                    '@label' => $election_candidate_type->getActionNaming(),
+                  ]
+                ),
+                'link' => $url->toString(),
+                'button_type' => 'secondary',
+              ];
+            }
+          }
+        }
+      }
+    }
+
+    return $actions;
   }
 }

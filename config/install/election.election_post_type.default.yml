@@ -2,8 +2,9 @@ langcode: en
 status: true
 dependencies: {}
 id: default
-label: "Default position type"
+label: 'Default position type'
 naming_post_singular: position
 naming_post_plural: positions
+naming_post_action: Add @post_type
 allowed_candidate_types:
   default: default

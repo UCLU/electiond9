@@ -10,26 +10,24 @@ use Drupal\election\Plugin\ElectionVotingMethodPluginBase as PluginElectionVotin
  * Single transferable vote.
  *
  * @ElectionVotingMethodPlugin(
- *   id = "fptp",
- *   label = @Translation("First past the post (single non-transferable)"),
+ *   id = "block",
+ *   label = @Translation("Block voting (multiple non-transferable)"),
  * )
  */
-class FirstPastThePost extends PluginElectionVotingMethodPluginBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  public function countPosition(ElectionPost $electionPost, array $options = []) {
-    $result = [];
-
-    return $result;
-  }
+class BlockVoting extends FirstPastThePost {
 
   /**
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
     parent::buildConfigurationForm($form, $form_state);
+
+    $form['maximum_candidates'] = [
+      '#type' => 'number',
+      '#title' => 'Maximum candidates that can be selected',
+      '#min' => 1,
+      '#default_value' => $this->configuration['maximum_candidates'],
+    ];
 
     return $form;
   }
@@ -46,5 +44,6 @@ class FirstPastThePost extends PluginElectionVotingMethodPluginBase {
    */
   public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
     parent::submitConfigurationForm($form, $form_state);
+    $this->configuration['maximum_candidates'] = $form_state->getValue('maximum_candidates');
   }
 }

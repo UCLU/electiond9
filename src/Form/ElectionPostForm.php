@@ -47,7 +47,7 @@ class ElectionPostForm extends ContentEntityForm {
 
     $election_post = $this->entity;
     if ($election_post) {
-      $form['#title'] = 'Add ' . $election_post->getElectionPostType()->getNaming(FALSE, TRUE);
+      $form['#title'] =  $election_post->getElectionPostType()->getActionNaming();
     }
 
     if (!is_null($election)) {

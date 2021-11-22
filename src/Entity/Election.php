@@ -11,6 +11,7 @@ use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityPublishedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Url;
 use Drupal\election\ElectionConditionsTrait;
 use Drupal\election\ElectionStatusesTrait;
 use Drupal\user\UserInterface;
@@ -244,11 +245,6 @@ class Election extends EditorialContentEntityBase implements ElectionInterface {
       ->setSetting('target_type', 'user')
       ->setSetting('handler', 'default')
       ->setTranslatable(TRUE)
-      // ->setDisplayOptions('view', [
-      //   'label' => 'hidden',
-      //   'type' => 'author',
-      //   'weight' => 50,
-      // ])
       ->setDisplayOptions('form', [
         'type' => 'entity_reference_autocomplete',
         'weight' => 50,
@@ -373,10 +369,6 @@ class Election extends EditorialContentEntityBase implements ElectionInterface {
         ],
       ])
       ->setDefaultValue('table')
-      ->setDisplayOptions('view', [
-        'label' => 'inline',
-        'type' => 'string',
-      ])
       ->setDisplayOptions('form', [
         'type' => 'options_select',
       ])
@@ -473,5 +465,42 @@ class Election extends EditorialContentEntityBase implements ElectionInterface {
     $postIds = array_diff($postIds, $alreadyDoneOrSkippedIds, $currentId);
 
     return reset($postIds);
+  }
+
+  public function getActionLinks(AccountInterface $account) {
+
+    $actions = [];
+    $startVoting = $this->checkStatusForPhase('voting', 'open') && $this->getNextPostId($account);
+
+    if ($startVoting) {
+      $actions[] = [
+        'title' => t('Start voting'),
+        'link' => Url::fromRoute('entity.election.voting', ['election' => $this->id()])->toString(),
+        'button_type' => 'primary',
+      ];
+    }
+
+    if ($account->hasPermission('add election post entities')) {
+      foreach ($this->getElectionType()->getAllowedPostTypes() as $election_post_type) {
+        $url = Url::fromRoute('entity.election_post.add_to_election', [
+          'election' => $this->id(),
+          'election_post_type' => $election_post_type->id(),
+        ]);
+        if ($url) {
+          $actions[] = [
+            'title' => t(
+              '@label',
+              [
+                '@label' => $election_post_type->getActionNaming(),
+              ]
+            ),
+            'link' => $url->toString(),
+            'button_type' => 'secondary',
+          ];
+        }
+      }
+    }
+
+    return $actions;
   }
 }

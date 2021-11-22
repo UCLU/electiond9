@@ -1,18 +1,21 @@
 election.election_candidate_type.*:
   type: config_entity
-  label: "Election candidate type config"
+  label: 'Election candidate type config'
   mapping:
     id:
       type: string
-      label: "ID"
+      label: 'ID'
     label:
       type: label
-      label: "Label"
+      label: 'Label'
     uuid:
       type: string
     naming_candidate_singular:
-      label: "Term to use for candidates - singular"
+      label: 'Term to use for candidates - singular'
       type: string
     naming_candidate_plural:
-      label: "Term to use for candidates - plural"
+      label: 'Term to use for candidates - plural'
+      type: string
+    naming_candidate_action:
+      label: 'Label for buttons to create candidates'
       type: string

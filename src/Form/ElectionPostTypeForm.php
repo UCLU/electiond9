@@ -73,6 +73,11 @@ class ElectionPostTypeForm extends EntityForm {
         '#description' => $this->t("e.g. positions, questions, posts, roles, vacancies"),
         '#default_value' => $this->t('positions'),
       ],
+      'naming_post_action' => [
+        '#title' => $this->t('Label for button to create post'),
+        '#description' => $this->t("e.g. 'Create @post_type'"),
+        '#default_value' => $this->t('Create @post_type'),
+      ],
     ];
 
     foreach ($textFields as $field => $data) {
@@ -132,6 +137,7 @@ class ElectionPostTypeForm extends EntityForm {
 
     $this->entity->set('naming_post_singular', $form_state->getValue('naming_post_singular'));
     $this->entity->set('naming_post_plural', $form_state->getValue('naming_post_plural'));
+    $this->entity->set('naming_post_action', $form_state->getValue('naming_post_action'));
 
     $this->entity->set('voting_method', $form_state->getValue('voting_method'));
 

@@ -15,19 +15,17 @@
  * @ingroup themeable
  */
 #}
-<div{{attributes.addClass('election')}}>
-	{% if startVoting %}
-		<p>
-			<a href="{{ path('entity.election.voting', {'election' : election.id() }) }}">{{ 'Start voting'|t }}</a>
-		</p>
-	{% endif %}
+<div {{ attributes.addClass('election') }}>
+  {{ actions }}
 
-	{{status_summary}}
+  {{ status_summary }}
 
-	{% if content %}
-		{{- content -}}
-	{% endif %}
+  {% if content %}
+    {{- content -}}
+  {% endif %}
 
-	<h2>{{posts_name}}</h2>
-	{{ drupal_view('election_posts_for_election_page', 'embed') }}
+  <h2>
+    {{ posts_name }}
+  </h2>
+  {{ drupal_view('election_posts_for_election_page', 'embed') }}
 </div>

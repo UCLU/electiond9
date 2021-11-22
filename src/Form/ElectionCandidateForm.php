@@ -38,12 +38,14 @@ class ElectionCandidateForm extends ContentEntityForm {
     $form = parent::buildForm($form, $form_state);
 
     $election_candidate = $this->entity;
+    $election_candidate_type = $election_candidate->getElectionCandidateType();
     if ($election_candidate) {
-      $form['#title'] = 'Add ' . $election_candidate->getElectionCandidateType()->getNaming(FALSE, TRUE);
+      $form['#title'] = $election_candidate_type->getActionNaming();
     }
 
     if (!is_null($election_post)) {
       $election = $election_post->getElection();
+      $form['#title'] = $election_candidate_type->getActionNaming($election_post);
 
       if (isset($form['election_post'])) {
         if ($election->access('update')) {
