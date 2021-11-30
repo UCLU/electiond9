@@ -2,6 +2,7 @@
 
 namespace Drupal\election\Entity;
 
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\EditorialContentEntityBase;
@@ -11,7 +12,7 @@ use Drupal\Core\Entity\EntityPublishedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
-use Drupal\election\ElectionConditionsTrait;
+use Drupal\election_conditions\ElectionConditionsTrait;
 use Drupal\election\ElectionStatusesTrait;
 use Drupal\user\UserInterface;
 
@@ -591,5 +592,65 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
     }
 
     return $actions;
+  }
+
+
+  public function getUserEligibilityCacheTag(AccountInterface $account, string $phase) {
+    return implode(':', [
+      'election',
+      'eligibility',
+      $this->getEntityTypeId(),
+      $this->id(),
+      $account->id(),
+      $phase,
+    ]);
+  }
+
+  public function getUserEligibilityCacheTags(AccountInterface $account, string $phase) {
+    $eligibilityCacheTag = [$this->getUserEligibilityCacheTag($account, $phase)];
+
+    $otherTags = [];
+
+    // Future plan is to have one tag, and manually invalidate it
+    // By detecting changes to the election, post, candidates etc that might affect it
+    // But otherwise not invalidating it
+    // Which is excessive but will alow for much fewer eligibility checks
+    // On large elections.
+
+    // Entity tags
+    $otherTags = array_merge($this->getElection()->getCacheTags(), $this->getCacheTags());
+
+    // Get conditions and add relevant tags from there
+    $conditions = $this->getConditions($phase);
+    foreach ($conditions as $condition) {
+      $otherTags = array_merge($otherTags, $condition->getCacheTagsForEligibility());
+    }
+
+    return Cache::mergeTags($eligibilityCacheTag, $otherTags);
+  }
+
+  public function getConditions(string $phase) {
+    if (!\Drupal::moduleHandler()->moduleExists('election_conditions')) {
+      return [];
+    }
+
+    $postConditions = [];
+
+    // Get election codnitions if we're inheriting
+    if ($this->conditions_inherit_election->value == 'inherit') {
+      $election = $this->getElection();
+      $phaseToGet = $election->get('conditions_' . $phase . '_same_as')->value;
+      if ($phaseToGet != 'none') {
+        $postConditions = $election->get('conditions_' . $phaseToGet);
+      }
+    }
+
+    // @todo generic functionality in a service for managing conditions?
+    $phaseToGet = $this->get('conditions_' . $phase . '_same_as')->value;
+    if ($phaseToGet != 'none') {
+      $postConditions = array_merge($postConditions, $this->get('conditions_' . $phaseToGet));
+    }
+
+    return $postConditions;
   }
 }

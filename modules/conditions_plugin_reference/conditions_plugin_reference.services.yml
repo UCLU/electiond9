@@ -1,0 +1,14 @@
+services:
+  plugin.manager.conditions_plugin_reference:
+    class: Drupal\conditions_plugin_reference\ConditionManager
+    arguments:
+      [
+        '@container.namespaces',
+        '@cache.discovery',
+        '@module_handler',
+        '@entity_type.manager',
+        '@event_dispatcher',
+      ]
+  conditions_plugin_reference.conditions_evaluator:
+    class: Drupal\conditions_plugin_reference\ConditionsEvaluator
+    arguments: ['@plugin.manager.conditions_plugin_reference']

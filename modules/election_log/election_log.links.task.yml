@@ -1,0 +1,17 @@
+entity.election.log:
+  title: 'Log'
+  route_name: entity.election.log
+  parent_id: entity.election.canonical
+  weight: 30
+
+entity.election_post.log:
+  title: 'Log'
+  route_name: entity.election_post.log
+  parent_id: entity.election_post.canonical
+  weight: 30
+
+entity.election_candidate.log:
+  title: 'Log'
+  route_name: entity.election_candidate.log
+  parent_id: entity.election_candidate.canonical
+  weight: 30

@@ -29,7 +29,7 @@ class FirstPastThePost extends PluginElectionVotingMethodPluginBase {
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
-    parent::buildConfigurationForm($form, $form_state);
+    $form = parent::buildConfigurationForm($form, $form_state);
 
     return $form;
   }

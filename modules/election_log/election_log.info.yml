@@ -1,0 +1,7 @@
+name: 'Election Log'
+type: module
+description: 'Dedicated logging and reporting for elections.'
+package: Webform
+core_version_requirement: ^8.8 || ^9
+dependencies:
+  - 'election:election'

@@ -5,6 +5,7 @@
  * Contains election.module.
  */
 
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -97,8 +98,4 @@ function election_get_route_entity() {
 
 function election_form_alter($form) {
   // dd($form['field_a']);
-}
-
-function election_election_post_update() {
-  // \Drupal::service('plugin.manager.block')->clearCachedDefinitions();
 }

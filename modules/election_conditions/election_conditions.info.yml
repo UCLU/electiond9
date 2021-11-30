@@ -1,0 +1,9 @@
+name: 'Election conditions'
+type: module
+description: 'Restrict voting or nominations for elections and posts. [Required submodule]'
+core_version_requirement: ^8 || ^9
+package: 'Election'
+dependencies:
+  - pluginreference
+  - election
+  - conditions_plugin_reference

@@ -1,0 +1,27 @@
+<?php
+
+// /**
+//  * Implements hook_config_schema_info_alter().
+//  */
+// function election_conditions_config_schema_info_alter(&$definitions) {
+//   $definitions['election_condition_configuration']['mapping'] = [
+//     'parent' => [
+//       'type' => 'string',
+//       'label' => 'Parent condition',
+//     ],
+//     'depth' => [
+//       'type' => 'integer',
+//       'label' => 'Depth',
+//     ],
+//     'weight' => [
+//       'type' => 'integer',
+//       'label' => 'Weight',
+//     ],
+//     // We name this `negate_condition` to handle plugins which also have
+//     // their own negate functionality to prevent conflicts.
+//     'negate_condition' => [
+//       'type' => 'boolean',
+//       'label' => 'Negate',
+//     ],
+//   ];
+// }

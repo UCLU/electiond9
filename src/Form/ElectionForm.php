@@ -42,6 +42,8 @@ class ElectionForm extends ContentEntityForm {
     /* @var \Drupal\election\Entity\Election $entity */
     $form = parent::buildForm($form, $form_state);
 
+    $form['#attached']['library'][] = 'election_conditions/conditions';
+
     // Hide and show fields:
     static::addStatusesStatesToForm($form);
 

@@ -20,7 +20,7 @@ class BlockVoting extends FirstPastThePost {
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
-    parent::buildConfigurationForm($form, $form_state);
+    $form = parent::buildConfigurationForm($form, $form_state);
 
     $form['maximum_candidates'] = [
       '#type' => 'number',

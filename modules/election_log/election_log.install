@@ -1,0 +1,91 @@
+<?php
+
+/**
+ * @file
+ * Install, uninstall, and update hooks of the module.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function election_log_schema() {
+  $schema = [];
+
+  $schema['election_log'] = [
+    'description' => 'Table that contains logs of election events.',
+    'fields' => [
+      'lid' => [
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'Primary Key: Unique log event ID.',
+      ],
+      'election_id' => [
+        'description' => 'The election id.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+      ],
+      'post_id' => [
+        'description' => 'The post id.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+      ],
+      'candidate_id' => [
+        'description' => 'The candidate id.',
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => FALSE,
+      ],
+      'uid' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The {users}.uid of the user who triggered the event.',
+      ],
+      'operation' => [
+        'type' => 'varchar_ascii',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Type of operation, for example "view", "save", "create", or "update."',
+      ],
+      'message' => [
+        'type' => 'text',
+        'not null' => TRUE,
+        'size' => 'big',
+        'description' => 'Text of log message.',
+      ],
+      'variables' => [
+        'type' => 'blob',
+        'not null' => TRUE,
+        'size' => 'big',
+        'description' => 'Serialized array of variables that match the message string and that is passed into the t() function.',
+      ],
+      'data' => [
+        'type' => 'blob',
+        'not null' => TRUE,
+        'size' => 'big',
+        'description' => 'Serialized array of data.',
+      ],
+      'timestamp' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Unix timestamp of when event occurred.',
+      ],
+    ],
+    'primary key' => ['lid'],
+    'indexes' => [
+      'election_id' => ['election_id'],
+      'post_id' => ['post_id'],
+      'candidate_id' => ['candidate_id'],
+      'uid' => ['uid'],
+      'handler_id' => ['handler_id'],
+      'handler_id_operation' => ['handler_id', 'operation'],
+    ],
+  ];
+
+  return $schema;
+}

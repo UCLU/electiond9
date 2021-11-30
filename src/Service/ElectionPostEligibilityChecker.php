@@ -32,7 +32,7 @@ class ElectionPostEligibilityChecker {
    */
   public static function checkEligibility(AccountInterface $account, ElectionPostInterface $election_post, string $phase, $includePhaseStatus = FALSE, $return_reasons = FALSE, $refresh = FALSE) {
     $data = &drupal_static(__METHOD__);
-    $cid = 'election:post:' . $election_post->id() . ':' . $account->id() . ':' . $phase . ':' . ($includePhaseStatus ? 'with_phase_status' : 'no_phase_status') . ':' . ($return_reasons ? 'reasons' : 'boolean');
+    $cid = 'election:election_post:' . $election_post->id() . ':' . $account->id() . ':' . $phase . ':' . ($includePhaseStatus ? 'with_phase_status' : 'no_phase_status') . ':' . ($return_reasons ? 'reasons' : 'boolean');
 
     if (!$refresh && $cache = \Drupal::cache('election_bin')->get($cid)) {
       $data = $cache->data;
@@ -96,25 +96,17 @@ class ElectionPostEligibilityChecker {
           $reasons[] = 'You have already voted.';
         }
 
-        $electionConditions = [];
-        // Determine whether to check election conditions:
-        if ($election_post->conditions_inherit_election->value == 'inherit') {
-          // @todo load election conditions
-        }
+        if (\Drupal::moduleHandler()->moduleExists('election_conditions')) {
+          $conditions = $election_post->getConditions($phase);
 
-        // @todo generic functionality in a service for managing conditions?
-        $postConditions = [];
-
-        // Check all  conditions:
-        $conditionsSameForBothModes = $election_post->conditions_same_across_categories;
-        $phaseFieldName = 'conditions_' . ($phase == 'voting' && !$conditionsSameForBothModes ? 'vote' : 'nominate');
-        $postConditions = $election_post->$phaseFieldName;
-        if ($postConditions) {
-          foreach ($postConditions as $condition) {
-            $conditionReason = ElectionPostConditionChecker::checkCondition($account, $condition, $return_reasons);
-            if ($conditionReason && count($conditionReason) > 0) {
-              $reasons = array_merge($reasons, $conditionReason);
-              $eligible = FALSE;
+          // Check all  conditions:
+          if (count($conditions) > 0) {
+            foreach ($conditions as $condition) {
+              $conditionReason = $condition->evaluate($election_post, $account, $phase);
+              if ($conditionReason && count($conditionReason) > 0) {
+                $reasons = array_merge($reasons, $conditionReason);
+                $eligible = FALSE;
+              }
             }
           }
         }
@@ -129,8 +121,7 @@ class ElectionPostEligibilityChecker {
       // @todo $tags = get cache tags for conditions
       // @todo get specirfic tags so we don't have to rely on entity changes entirely
       // For now this. We want this to be more intelligent.
-      $tags = Cache::mergeTags($election_post->getCacheTags(), $election_post->getElection()->getCacheTags());
-      $tags = Cache::mergeTags($tags, $account->getCacheTags());
+      $tags = $election_post->getUserEligibilityCacheTags($account, $phase);
 
       \Drupal::cache('election_bin')->set($cid, $data, Cache::PERMANENT, $tags);
     }

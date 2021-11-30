@@ -271,7 +271,8 @@ trait ElectionStatusesTrait {
       if ($phaseStatuses[$phase] == 'open') {
         $eligibleText = $result[$phase]['eligible'] ? ' and you are eligible' : ' but you are not eligible';
       } else {
-        $eligibleText = isset($result[$phase]['eligible']) && $result[$phase]['eligible'] ? ' though you are eligible' : ' and you are not eligible';
+        // $eligibleText = isset($result[$phase]['eligible']) && $result[$phase]['eligible'] ? ' though you are eligible' : ' and you are not eligible';
+        $eligibleText = '';
       }
 
       $result[$phase]['status_full'] = t($status_full . '@eligible', [

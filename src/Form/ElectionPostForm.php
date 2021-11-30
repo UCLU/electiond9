@@ -4,7 +4,7 @@ namespace Drupal\election\Form;
 
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\election\ElectionConditionsTrait;
+use Drupal\election_conditions\ElectionConditionsTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\election\Entity\Election;
 use Drupal\election\ElectionStatusesTrait;
@@ -41,6 +41,8 @@ class ElectionPostForm extends ContentEntityForm {
   public function buildForm(array $form, FormStateInterface $form_state, $election = NULL) {
     /* @var \Drupal\election\Entity\ElectionPost $entity */
     $form = parent::buildForm($form, $form_state);
+
+    $form['#attached']['library'][] = 'election_conditions/conditions';
 
     // Hide and show fields:
     static::addStatusesStatesToForm($form);

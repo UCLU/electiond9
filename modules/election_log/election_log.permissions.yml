@@ -1,0 +1,6 @@
+'access election log':
+  title: 'Access the election log'
+  description: 'Allows viewing of <em>all</em> election events configured to be logged.'
+
+administer election logs:
+  title: 'Administer election logs configuration'

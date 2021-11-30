@@ -12,7 +12,7 @@ use Drupal\Core\Entity\EntityPublishedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
-use Drupal\election\ElectionConditionsTrait;
+use Drupal\election_conditions\ElectionConditionsTrait;
 use Drupal\election\ElectionStatusesTrait;
 use Drupal\user\UserInterface;
 

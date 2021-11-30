@@ -1,0 +1,17 @@
+services:
+  election_log.manager:
+    class: Drupal\election_log\ElectionLogManager
+    arguments: ['@database']
+
+  logger.election_log:
+    class: Drupal\election_log\ElectionLogLogger
+    arguments: ['@logger.log_message_parser', '@election_log.manager']
+    tags:
+      - { name: logger }
+
+  election_log.route_subscriber:
+    class: Drupal\election_log\Routing\ElectionLogRouteSubscriber
+    arguments: ['@module_handler']
+    tags:
+      - { name: event_subscriber }
+`

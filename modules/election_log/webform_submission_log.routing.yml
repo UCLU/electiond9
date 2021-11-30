@@ -1,0 +1,43 @@
+election_log.settings:
+  path: '/admin/election/log/settings'
+  defaults:
+    _form: '\Drupal\election_log\Form\ElectionLogSettingsForm'
+    _title: 'Election log settings'
+    default_ip: ''
+  requirements:
+    _permission: 'administer election logs'
+
+# Below not yet updates
+
+entity.webform_submission.collection_log:
+  path: '/admin/structure/webform/submissions/log'
+  defaults:
+    _controller: '\Drupal\webform_submission_log\Controller\WebformSubmissionLogController::overview'
+    _title: 'Webforms: Submissions log'
+  requirements:
+    _permission: 'access webform submission log'
+    _custom_access: '\Drupal\webform\Access\WebformAccountAccess:checkSubmissionAccess'
+
+entity.webform.results_log:
+  path: '/admin/structure/webform/manage/{webform}/results/log'
+  defaults:
+    _controller: '\Drupal\webform_submission_log\Controller\WebformSubmissionLogController::overview'
+    _title_callback: '\Drupal\webform\Controller\WebformEntityController::title'
+  options:
+    parameters:
+      webform:
+        type: 'entity:webform'
+  requirements:
+    _permission: 'access webform submission log'
+    _entity_access: 'webform.submission_view_any'
+    _custom_access: '\Drupal\webform\Access\WebformEntityAccess:checkLogAccess'
+
+entity.webform_submission.log:
+  path: '/admin/structure/webform/manage/{webform}/submission/{webform_submission}/log'
+  defaults:
+    _controller: '\Drupal\webform_submission_log\Controller\WebformSubmissionLogController::overview'
+    _title_callback: '\Drupal\webform\Controller\WebformSubmissionViewController::title'
+  requirements:
+    _permission: 'access webform submission log'
+    _entity_access: 'webform_submission.view_any'
+    _custom_access: '\Drupal\webform\Access\WebformEntityAccess::checkLogAccess'
