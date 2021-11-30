@@ -20,7 +20,7 @@ class WebformSubmissionLogNodeTest extends WebformNodeBrowserTestBase {
    *
    * @var array
    */
-  public static $modules = ['block', 'webform', 'webform_node', 'webform_submission_log'];
+  public static $modules = ['block', 'election', 'election_log'];
 
   /**
    * Webforms to load.
@@ -65,5 +65,4 @@ class WebformSubmissionLogNodeTest extends WebformNodeBrowserTestBase {
     $this->drupalGet("node/$nid/webform/submission/$sid/log");
     $this->assertResponse(200);
   }
-
 }

@@ -1,11 +1,10 @@
 <?php
 
-namespace Drupal\webform_submission_log\Controller;
+namespace Drupal\election_log\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\webform\EntityStorage\WebformEntityStorageTrait;
 use Drupal\webform\WebformInterface;
 use Drupal\webform\WebformSubmissionInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -15,9 +14,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * Copied from: \Drupal\dblog\Controller\DbLogController.
  */
-class WebformSubmissionLogController extends ControllerBase {
-
-  use WebformEntityStorageTrait;
+class ElectionLogController extends ControllerBase {
 
   /**
    * The database service.
@@ -43,7 +40,7 @@ class WebformSubmissionLogController extends ControllerBase {
   /**
    * The webform submission log manager.
    *
-   * @var \Drupal\webform_submission_log\WebformSubmissionLogManagerInterface
+   * @var \Drupal\election_log\ElectionLogManagerInterface
    */
   protected $logManager;
 
@@ -51,12 +48,12 @@ class WebformSubmissionLogController extends ControllerBase {
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    /** @var \Drupal\webform_submission_log\Controller\WebformSubmissionLogController $instance */
+    /** @var \Drupal\election_log\Controller\ElectionLogController $instance */
     $instance = parent::create($container);
     $instance->database = $container->get('database');
     $instance->dateFormatter = $container->get('date.formatter');
     $instance->requestHandler = $container->get('webform.request');
-    $instance->logManager = $container->get('webform_submission_log.manager');
+    $instance->logManager = $container->get('election_log.manager');
     $instance->entityTypeManager = $container->get('entity_type.manager');
     return $instance;
   }
@@ -124,12 +121,10 @@ class WebformSubmissionLogController extends ControllerBase {
           $entity_id = $log->entity_id;
           if ($entity = $this->entityTypeManager()->getStorage($entity_type)->load($entity_id)) {
             $row['entity'] = ($entity->hasLinkTemplate('canonical')) ? $entity->toLink() : "$entity_type:$entity_id";
-          }
-          else {
+          } else {
             $row['entity'] = "$entity_type:$entity_id";
           }
-        }
-        else {
+        } else {
           $row['entity'] = '';
         }
       }
@@ -143,8 +138,7 @@ class WebformSubmissionLogController extends ControllerBase {
               '#url' => $this->requestHandler->getUrl($log_webform_submission, $source_entity, 'webform_submission.log'),
             ],
           ];
-        }
-        else {
+        } else {
           $row['sid'] = '';
         }
       }
@@ -183,5 +177,4 @@ class WebformSubmissionLogController extends ControllerBase {
   public function nodeOverview(WebformInterface $webform = NULL, WebformSubmissionInterface $webform_submission = NULL, EntityInterface $node = NULL) {
     return $this->overview($webform, $webform_submission, $node);
   }
-
 }

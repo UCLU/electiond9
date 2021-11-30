@@ -460,7 +460,7 @@ class Election extends EditorialContentEntityBase implements ElectionInterface {
 
     $currentId = $current ? [$current->id()] : [];
 
-    $alreadyDoneOrSkippedIds = []; //$alreadyDoneOrSkippedIds ?? [];
+    $alreadyDoneOrSkippedIds = $alreadyDoneOrSkippedIds ?? [];
 
     $postIds = array_diff($postIds, $alreadyDoneOrSkippedIds, $currentId);
 

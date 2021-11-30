@@ -3,6 +3,13 @@ services:
     class: Drupal\election\Routing\RouteSubscriber
     tags:
       - { name: event_subscriber }
+
+  election.exception403.subscriber:
+    class: Drupal\election\EventSubscriber\RedirectOn403Subscriber
+    tags:
+      - { name: event_subscriber }
+    arguments: ['@current_user']
+
   election.election_route_context:
     class: 'Drupal\election\ContextProvider\ElectionContextProvider'
     arguments:

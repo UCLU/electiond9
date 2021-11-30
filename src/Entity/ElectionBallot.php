@@ -193,13 +193,7 @@ class ElectionBallot extends ContentEntityBase implements ElectionBallotInterfac
       ->setSetting('handler', 'default')
       ->setTranslatable(TRUE)
       ->setDisplayOptions('form', [
-        'type' => 'hidden',
-        'weight' => -1,
-        'settings' => [
-          'match_operator' => 'CONTAINS',
-          'size' => '60',
-          'placeholder' => '',
-        ],
+        'region' => 'hidden',
       ]);
 
     $fields['timestamp'] = BaseFieldDefinition::create('timestamp')
@@ -209,7 +203,7 @@ class ElectionBallot extends ContentEntityBase implements ElectionBallotInterfac
       ->setLabel((t('Abstained')))
       ->setDescription(t('A boolean indicating whether the user abstained for this post.'))
       ->setDisplayOptions('form', [
-        'type' => 'hidden',
+        'region' => 'hidden',
       ]);
 
     $fields['user_agent'] = BaseFieldDefinition::create('string')

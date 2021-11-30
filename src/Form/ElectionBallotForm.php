@@ -242,7 +242,7 @@ class ElectionBallotForm extends ContentEntityForm {
       $form_state->setErrorByName('rankings', $this->t('Must rank all options.'));
     }
 
-    if (count($rankingsUsed) > 0 && $action == 'submit-abstain') {
+    if (count($rankingsUsed) > 0 && $action == 'submit-abstain' && !in_array('NONE', $rankingsUsed)) {
       $form_state->setErrorByName('rankings', $this->t('You have abstained but there are preferences placed. Please remove preferences.'));
     }
   }
@@ -278,30 +278,46 @@ class ElectionBallotForm extends ContentEntityForm {
     $election_post = ElectionPost::load($form_state->get('election_post'));
     $form_state->setValue('election_post_id', $election_post->id());
 
-    if ($action == 'submit-abstain') {
-      $form_state->setValue('abstained', TRUE);
-    }
+    $messageParams = [
+      '%position_label' => $election_post->label(),
+    ];
 
-    $status = parent::save($form, $form_state);
-
-    if ($action == 'submit-vote') {
-      static::submitFormVote($this->entity, $form, $form_state);
-    }
-
-    switch ($status) {
-      case SAVED_NEW:
-        $this->messenger()->addMessage($this->t('Created the %label Election ballot.', [
-          '%label' => $entity->label(),
-        ]));
+    switch ($action) {
+      case 'submit-skip':
+        $this->messenger()->addMessage(
+          $this->t(
+            'Skipped position %position_label - you can return to vote as long as voting is still open.',
+            $messageParams
+          )
+        );
+        static::addSkippedPost($election_post);
         break;
 
-      default:
-        $this->messenger()->addMessage($this->t('Saved the %label Election ballot.', [
-          '%label' => $entity->label(),
-        ]));
+      case 'submit-abstain':
+        $this->messenger()->addMessage(
+          $this->t(
+            'Abstention recorded for %position_label.',
+            $messageParams
+          )
+        );
+        $form_state->setValue('abstained', TRUE);
+        $status = parent::save($form, $form_state);
+        static::addDonePost($election_post);
+        break;
+
+      case 'submit-vote':
+        $this->messenger()->addMessage(
+          $this->t(
+            'Vote recorded for %position_label.',
+            $messageParams
+          )
+        );
+        $status = parent::save($form, $form_state);
+        static::submitFormVote($this->entity, $form, $form_state);
+        static::addDonePost($election_post);
+        break;
     }
 
-    static::addDoneOrSkippedPost($election_post);
     $this->goNext($election_post, $form_state);
   }
 
@@ -315,23 +331,41 @@ class ElectionBallotForm extends ContentEntityForm {
       if ($nextPostId) {
         $form_state->setRedirect('entity.election_post.voting', ['election_post' => $nextPostId]);
       } else {
+        $this->messenger()->addMessage(
+          $this->t(
+            'All positions voted, abstained or skipped.',
+          )
+        );
+        $_SESSION[$election->id() . '_skipped'] = [];
         $form_state->setRedirect('entity.election.canonical', ['election' => $election->id()]);
       }
     }
   }
 
   public static function getDoneOrSkippedPosts($election) {
-    return $_SESSION[$election->id() . '-done_or_skipped'];
+    return array_merge(
+      $_SESSION[$election->id() . '_done'],
+      $_SESSION[$election->id() . '_skipped']
+    );
   }
 
-  public static function addDoneOrSkippedPost($election_post) {
+  public static function addDonePost($election_post) {
     $election = $election_post->getElection();
-    if (!isset($_SESSION[$election->id() . 'done_or_skipped'])) {
-      $_SESSION[$election->id() . '-done_or_skipped'] = [];
+    $key = $election->id() . '_done';
+    if (!isset($_SESSION[$key])) {
+      $_SESSION[$key] = [];
     }
-    $_SESSION[$election->id() . '-done_or_skipped'][] = $election_post->id();
+    $_SESSION[$key][] = $election_post->id();
   }
 
+  public static function addSkippedPost($election_post) {
+    $election = $election_post->getElection();
+    $key = $election->id() . '_skipped';
+    if (!isset($_SESSION[$key])) {
+      $_SESSION[$key] = [];
+    }
+    $_SESSION[$key][] = $election_post->id();
+  }
 
   /**
    * Find the ordinal of a number.

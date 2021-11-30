@@ -28,7 +28,7 @@ class ElectionPostEligibilityChecker {
    *   Set TRUE for hard checks like access,
    *   FALSE for soft checks where you need to differentiate.
    * @param boolean $return_reasons
-   * @return void
+   * @return boolean|array
    */
   public static function checkEligibility(AccountInterface $account, ElectionPostInterface $election_post, string $phase, $includePhaseStatus = FALSE, $return_reasons = FALSE, $refresh = FALSE) {
     $data = &drupal_static(__METHOD__);

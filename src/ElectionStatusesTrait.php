@@ -179,8 +179,8 @@ trait ElectionStatusesTrait {
 
     $phases = $this->getEnabledPhases();
     foreach ($phases as $phase_key => $phase_name) {
-      if ($this->getEntityTypeId() == 'election_post' && $this->get('status_' . $phase_key) == 'inherit') {
-        $electionResults = $this->getElection->getPhaseStatuses();
+      if ($this->getEntityTypeId() == 'election_post' && $this->get('status_' . $phase_key)->value == 'inherit') {
+        $electionResults = $this->getElection()->getPhaseStatuses();
         $results[$phase_key] = $electionResults[$phase_key];
       } else {
         $status = $this->get('status_' . $phase_key)->value;

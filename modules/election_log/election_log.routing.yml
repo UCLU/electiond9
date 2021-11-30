@@ -1,0 +1,44 @@
+election_log.settings:
+  path: '/admin/election/log/settings'
+  defaults:
+    _form: '\Drupal\election_log\Form\ElectionLogSettingsForm'
+    _title: 'Election log settings'
+    default_ip: ''
+  requirements:
+    _permission: 'administer election logs'
+
+entity.election.log:
+  path: '/election/{election}/log'
+  defaults:
+    _controller: '\Drupal\election_log\Controller\ElectionLogController::overview'
+    _title: 'Log'
+  options:
+    parameters:
+      webform:
+        type: 'entity:election'
+  requirements:
+    _permission: 'access election log'
+
+entity.election_post.log:
+  path: '/election/post/{election_post}/log'
+  defaults:
+    _controller: '\Drupal\election_log\Controller\ElectionLogController::overview'
+    _title: 'Log'
+  options:
+    parameters:
+      webform:
+        type: 'entity:election_post'
+  requirements:
+    _permission: 'access election log'
+
+entity.election_candidate.log:
+  path: '/election/candidate/{election_candidate}/log'
+  defaults:
+    _controller: '\Drupal\election_log\Controller\ElectionLogController::overview'
+    _title: 'Log'
+  options:
+    parameters:
+      webform:
+        type: 'entity:election_candidate'
+  requirements:
+    _permission: 'access election log'

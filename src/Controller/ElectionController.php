@@ -211,10 +211,18 @@ class ElectionController extends ControllerBase implements ContainerInjectionInt
    */
   public function startVoting(ElectionInterface $election) {
     $account = \Drupal::currentUser();
-    $alreadyDoneOrSkippedIds = $_SESSION[$election->id() . '-done_or_skipped'] ?? [];
+    $alreadyDoneOrSkippedIds = $_SESSION[$election->id() . '_done'] ?? [];
+    $_SESSION[$election->id() . '_skipped'] = [];
     $postID = $election->getNextPostId($account, NULL, $alreadyDoneOrSkippedIds);
-    return $this->redirect('entity.election_post.voting', [
-      'election_post' => $postID,
-    ]);
+    if ($postID) {
+      return $this->redirect('entity.election_post.voting', [
+        'election_post' => $postID,
+      ]);
+    } else {
+      \Drupal::messenger()->addMessage($this->t('No posts available to vote for.'));
+      return $this->redirect('entity.election.canonical', [
+        'election' => $election->id(),
+      ]);
+    }
   }
 }
