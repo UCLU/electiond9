@@ -457,6 +457,7 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
           'no_votes' => t('Only while no votes have been cast'),
         ],
       ])
+      ->setDefaultValue('false')
       ->setDisplayOptions('form', [
         'type' => 'options_select',
       ])
@@ -559,10 +560,10 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
     $phases = $this->getElection()->getEnabledPhases();
     foreach ($phases as $key => $name) {
       if ($eligibilityService->checkEligibility($account, $this, $key, TRUE, FALSE)) {
-        $url = Url::fromRoute('entity.election_post.' . $key, ['election' => $this->id()]);
+        $url = Url::fromRoute('entity.election_post.' . $key, ['election_post' => $this->id()]);
         if ($url) {
           $actions[] = [
-            'title' => t('@label', ['@label' => $name]),
+            'title' => t('@label', ['@label' => Election::getPhaseAction($key)]),
             'link' => $url->toString(),
             'button_type' => 'primary',
           ];
@@ -652,5 +653,47 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
     }
 
     return $postConditions;
+  }
+
+  public function formatEligibilityReasons(array $reasons) {
+    $formattedReasons = [];
+
+    $election = $this->getElection();
+
+    $params = [
+      '%positionName' => $this->label(),
+      '%positionTypeName' => $this->getTypeNaming(),
+      '%electionName' => $election->label(),
+    ];
+
+    $reasonDefinitions = [
+      'already_voting' => ['Already voted', $params],
+      'already_nominations' => ['Already nominated', $params],
+      'already_interest' => ['Already expressed interest', $params],
+      'not_logged_in' => ['Not logged in', $params],
+      'no_permission_voting' => ['No permission to vote', $params],
+      'election_post_not_published' => ['%positionTypeName not published', $params],
+      'election_not_published' => ['%electionName not published', $params],
+      'interest_not_enabled' => ['Expressions of interest not enabled', $params],
+      'interest_not_open_election' => ['Expressions of interest not open for election %electionName', $params],
+      'interest_not_open_election_post' => ['Expressions of interest not open for %positionTypeName %positionName', $params],
+      'nominations_not_enabled' => ['Nominations not enabled', $params],
+      'nominations_not_open_election' => ['Nominations not open for election %electionName', $params],
+      'nominations_not_open_election_post' => ['Nominations not open for %positionTypeName %positionName', $params],
+      'voting_not_enabled' => ['Voting not enabled', $params],
+      'voting_not_open_election' => ['Voting not open for election %electionName', $params],
+      'voting_not_open_election_post' => ['Voting not open for %positionTypeName %positionName', $params],
+    ];
+
+    // @todo translate nicely
+    foreach ($reasons as $reason) {
+      if (isset($reasonDefinitions[$reason])) {
+        $formattedReasons[] = t(
+          $reasonDefinitions[$reason][0],
+          $reasonDefinitions[$reason][1],
+        );
+      }
+    }
+    return $formattedReasons;
   }
 }

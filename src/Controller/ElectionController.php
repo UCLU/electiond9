@@ -7,6 +7,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Url;
 use Drupal\election\Entity\ElectionInterface;
+use Drupal\election\Entity\ElectionPost;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -210,19 +211,12 @@ class ElectionController extends ControllerBase implements ContainerInjectionInt
    * @param ElectionInterface $election
    */
   public function startVoting(ElectionInterface $election) {
-    $account = \Drupal::currentUser();
-    $alreadyDoneOrSkippedIds = $_SESSION[$election->id() . '_done'] ?? [];
-    $_SESSION[$election->id() . '_skipped'] = [];
-    $postID = $election->getNextPostId($account, NULL, $alreadyDoneOrSkippedIds);
-    if ($postID) {
-      return $this->redirect('entity.election_post.voting', [
-        'election_post' => $postID,
-      ]);
-    } else {
-      \Drupal::messenger()->addMessage($this->t('No posts available to vote for.'));
-      return $this->redirect('entity.election.canonical', [
-        'election' => $election->id(),
-      ]);
+    $redirect = $election->getRedirectToNextPost();
+    if ($redirect) {
+      if ($redirect['message']) {
+        \Drupal::messenger()->addMessage($redirect['message']);
+      }
+      return $this->redirect($redirect['route_name'], $redirect['route_parameters']);
     }
   }
 }

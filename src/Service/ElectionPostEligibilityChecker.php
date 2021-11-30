@@ -7,6 +7,7 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\election\ElectionPostConditionChecker;
 use Drupal\election\Entity\Election;
 use Drupal\election\Entity\ElectionBallot;
+use Drupal\election\Entity\ElectionCandidate;
 use Drupal\election\Entity\ElectionPostInterface;
 use \Drupal\user\Entity\User;
 
@@ -41,39 +42,36 @@ class ElectionPostEligibilityChecker {
 
       $election = $election_post->getElection();
 
-      $electionLabel = $election->getTypeNaming();
-      $postLabel = $election_post->getTypeNaming(FALSE, FALSE);
-
       $reasons = [];
       $eligible = TRUE;
 
       if (!$election_post->isPublished()) {
         $eligible = FALSE;
-        $reasons[] = $electionLabel . ' ' . $postLabel . ' is not published.';
+        $reasons[] = 'election_post_not_published';
       }
 
       if (!$election->isPublished()) {
         $eligible = FALSE;
-        $reasons[] = $electionLabel . 'is not published.';
+        $reasons[] = 'election_not_published';
       }
 
       $electionPhases = $election->getEnabledPhases();
       if (!in_array($phase, array_keys($electionPhases))) {
         $eligible = FALSE;
-        $reasons[] = $phase . ' not enabled for this ' . $electionLabel . '.';
+        $reasons[] = $phase . '_not_enabled';
       }
 
       if ($includePhaseStatus) {
         $electionStatus = $election->getPhaseStatuses();
         if ($electionStatus[$phase] != 'open') {
           $eligible = FALSE;
-          $reasons[] = $electionLabel . ' ' . $phase . ' not open.';
+          $reasons[] = $phase . '_not_open_election';
         }
 
         $postStatus = $election_post->getPhaseStatuses($phase);
         if ($postStatus[$phase] != 'open') {
           $eligible = FALSE;
-          $reasons[] = $postLabel . ' ' . $phase . ' not open.';
+          $reasons[] = $phase . '_not_open_election_post';
         }
       }
 
@@ -82,18 +80,22 @@ class ElectionPostEligibilityChecker {
 
       if ($phase == 'voting' && !$account->hasPermission('add election ballot entities')) {
         $eligible = FALSE;
-        $reasons[] = 'Your user type does not have permission to vote.';
+        $reasons[] = 'no_permission_voting';
       }
 
       // Check if logged in:
       // @TODO is there a use case for anonymous users voting?
       if (\Drupal::currentUser()->isAnonymous()) {
         $eligible = FALSE;
-        $reasons[] = 'You need to log in to see if you can ' . $phase . '.';
+        $reasons[] = 'not_logged_in';
       } else {
         if ($phase == 'voting' && static::ballotExists($account, $election_post)) {
           $eligible = FALSE;
-          $reasons[] = 'You have already voted.';
+          $reasons[] = 'already_' . $phase;
+        }
+        if ($phase == 'nominations' && $election_post->get('limit_to_one_nomination_per_user')->value && static::nominationExists($account, $election_post)) {
+          $eligible = FALSE;
+          $reasons[] = 'already_' . $phase;
         }
 
         if (\Drupal::moduleHandler()->moduleExists('election_conditions')) {
@@ -133,20 +135,19 @@ class ElectionPostEligibilityChecker {
     return count($ballots) > 0;
   }
 
+  public static function nominationExists($account, $election_post) {
+    $nominations = ElectionCandidate::loadByUserAndPost($account, $election_post);
+    return count($nominations) > 0;
+  }
+
   /**
    * For all posts currently open or soon to be open, refresh the user's eligibility
    *
-   * This should be called for open or soon-to-be-open elections:
-   * - When the user data changes
-   * - When a user's profile changes
-   * - When group membership changes
-   * - When a user's role changes
-   *
    * @param [type] $account
    */
-  public static function recalculateEligibilityForUser($account) {
+  public static function recalculateEligibilityForUser($account, $election = NULL) {
     // Get all open or soon to be open elections
-    $elections = []; // TODO
+    $elections = [$election]; // TODO
 
     foreach ($elections as $election) {
       $posts = []; // TODO

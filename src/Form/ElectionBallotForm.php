@@ -4,9 +4,11 @@ namespace Drupal\election\Form;
 
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Routing\TrustedRedirectResponse;
 use Drupal\election\Entity\ElectionBallotInterface;
 use Drupal\election\Entity\ElectionBallotVote;
 use Drupal\election\Entity\ElectionPost;
+use Drupal\election\Service\ElectionPostEligibilityChecker;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -51,6 +53,17 @@ class ElectionBallotForm extends ContentEntityForm {
       return $form;
     }
 
+    $election = $election_post->getElection();
+
+    $eligible = ElectionPostEligibilityChecker::checkEligibility(\Drupal::currentUser(), $election_post, 'voting', TRUE, FALSE, TRUE);
+    if (!$eligible) {
+      \Drupal::messenger()->addMessage(t('Not eligible for %position.', [
+        '%position' => $election_post->label(),
+      ]));
+      $url = $election->toUrl()->toString();
+      return new TrustedRedirectResponse($url);
+    }
+
     $form['info']['#markup'] = $election_post->description->value;
 
     $form['#attached']['library'][] = 'election/ballot';
@@ -58,9 +71,7 @@ class ElectionBallotForm extends ContentEntityForm {
     $form['election_post']['widget'][0]['target_id']['#default_value'] = $election_post;
     $form['election_post']['#disabled'] = TRUE;
 
-    $election = $election_post->getElection();
-
-    if ($election_post->allow_equal_ranking->value) {
+    if ($election_post->allow_equal_ranking && $election_post->allow_equal_ranking->value) {
       $form['#attributes']['class'][] = 'allow-equal';
     }
 
@@ -276,7 +287,7 @@ class ElectionBallotForm extends ContentEntityForm {
     $entity = $this->entity;
 
     $election_post = ElectionPost::load($form_state->get('election_post'));
-    $form_state->setValue('election_post_id', $election_post->id());
+    $this->entity->election_post->entity = $election_post;
 
     $messageParams = [
       '%position_label' => $election_post->label(),
@@ -300,7 +311,7 @@ class ElectionBallotForm extends ContentEntityForm {
             $messageParams
           )
         );
-        $form_state->setValue('abstained', TRUE);
+        $this->entity->set('abstained', TRUE);
         $status = parent::save($form, $form_state);
         static::addDonePost($election_post);
         break;
@@ -327,17 +338,12 @@ class ElectionBallotForm extends ContentEntityForm {
     if ($ballotBehaviour == 'one_by_one') {
       $form_state->setRedirect('entity.election_post.canonical', ['election_post' => $election_post->id()]);
     } else {
-      $nextPostId = $election->getNextPostId(\Drupal::currentUser(), $election_post, static::getDoneOrSkippedPosts($election));
-      if ($nextPostId) {
-        $form_state->setRedirect('entity.election_post.voting', ['election_post' => $nextPostId]);
-      } else {
-        $this->messenger()->addMessage(
-          $this->t(
-            'All positions voted, abstained or skipped.',
-          )
-        );
-        $_SESSION[$election->id() . '_skipped'] = [];
-        $form_state->setRedirect('entity.election.canonical', ['election' => $election->id()]);
+      $redirect = $election->getRedirectToNextPost();
+      if ($redirect) {
+        if ($redirect['message']) {
+          \Drupal::messenger()->addMessage($redirect['message']);
+        }
+        return $this->redirect($redirect['route_name'], $redirect['route_parameters']);
       }
     }
   }

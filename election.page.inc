@@ -8,6 +8,7 @@
  */
 
 use Drupal\Core\Render\Element;
+use Drupal\user\Entity\User;
 
 /**
  * Prepares variables for Election templates.
@@ -25,14 +26,22 @@ function template_preprocess_election(array &$variables) {
 
   $variables['election'] = $variables['elements']['#election'];
 
+  $cache = [
+    'max-age' => 100,
+    'contexts' => ['user'],
+    'tags' => User::load(\Drupal::currentUser()->id())->getCacheTags(),
+  ];
+
   $variables['actions'] = [
     '#theme' => 'election_actions',
     '#actions' => $election->getActionLinks(\Drupal::currentUser()),
+    '#cache' => $cache,
   ];
 
   $variables['status_summary'] = [
     '#theme' => 'election_status_summary',
     '#phases' => $election->getUserEligibility(\Drupal::currentUser()),
+    '#cache' => $cache,
   ];
 
   $variables['posts_name'] = $election->getPostTypesAsLabel();

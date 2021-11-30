@@ -100,6 +100,19 @@ class Election extends EditorialContentEntityBase implements ElectionInterface {
     'close' => 'Closed',
   ];
 
+  public static function getPhaseAction($phase) {
+    switch ($phase) {
+      case 'interest':
+        return t('Express interest');
+
+      case 'nominations':
+        return t('Nominate');
+
+      case 'voting':
+        return t('Vote now');
+    }
+  }
+
   /**
    * {@inheritdoc}
    */
@@ -407,19 +420,19 @@ class Election extends EditorialContentEntityBase implements ElectionInterface {
     return ElectionType::load($type);
   }
 
-  public function getPostTypesAsLabel() {
+  public function getPostTypesAsLabel($capital = TRUE, $plural = TRUE) {
     $types = [];
     $posts = $this->getPosts();
     if (count($posts) > 0) {
       foreach ($posts as $post) {
         if (!isset($types[$post->bundle()])) {
-          $types[$post->bundle()] = ElectionPostType::load($post->bundle())->getNaming(TRUE, TRUE);
+          $types[$post->bundle()] = ElectionPostType::load($post->bundle())->getNaming($capital, $plural);
         }
       }
     } else {
       $election_type = ElectionType::load($this->bundle());
       foreach ($election_type->getAllowedPostTypes() as $post_type) {
-        $types[$post_type->id()] = $post_type->getNaming(TRUE, TRUE);
+        $types[$post_type->id()] = $post_type->getNaming($capital, $plural);
       }
     }
 
@@ -460,7 +473,7 @@ class Election extends EditorialContentEntityBase implements ElectionInterface {
 
     $currentId = $current ? [$current->id()] : [];
 
-    $alreadyDoneOrSkippedIds = $alreadyDoneOrSkippedIds ?? [];
+    $alreadyDoneOrSkippedIds = $alreadyDoneOrSkippedIds ?? ($_SESSION[$this->id() . '_done'] ?? []);
 
     $postIds = array_diff($postIds, $alreadyDoneOrSkippedIds, $currentId);
 
@@ -502,5 +515,36 @@ class Election extends EditorialContentEntityBase implements ElectionInterface {
     }
 
     return $actions;
+  }
+
+  public function getRedirectToNextPost() {
+    $account = \Drupal::currentUser();
+    $alreadyDoneOrSkippedIds = $_SESSION[$election->id() . '_done'] ?? [];
+    $_SESSION[$this->id() . '_skipped'] = [];
+    $postID = $this->getNextPostId($account, NULL, $alreadyDoneOrSkippedIds);
+    if ($postID) {
+      return [
+        'route_name' => 'entity.election_post.voting',
+        'route_parameters' => [
+          'election_post' => $postID,
+        ],
+        'message' => NULL,
+      ];
+    } else {
+      return [
+        'route_name' => 'entity.election.canonical',
+        'route_parameters' => [
+          'election' => $election->id(),
+        ],
+
+        // @todo more informative, i.e. say how many voted for, how many ineligible for, how many closed
+        'message' =>  $this->t(
+          'No %positions available to vote for.',
+          [
+            '%positions' => 'posts',
+          ]
+        )
+      ];
+    }
   }
 }

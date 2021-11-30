@@ -9,6 +9,7 @@ use Drupal\Core\Entity\RevisionableInterface;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityPublishedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\user\UserInterface;
 
 /**
@@ -393,5 +394,13 @@ class ElectionCandidate extends EditorialContentEntityBase implements ElectionCa
 
   public function getElectionCandidateType() {
     return ElectionCandidateType::load($this->bundle());
+  }
+
+  public static function loadByUserAndPost(AccountInterface $account, ElectionPostInterface $election_post) {
+    $ids = \Drupal::entityQuery('election_candidate')
+      ->condition('user_id', $account->id())
+      ->condition('election_post', $election_post->id())
+      ->execute();
+    return ElectionCandidate::loadMultiple($ids);
   }
 }

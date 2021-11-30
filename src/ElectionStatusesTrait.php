@@ -6,6 +6,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
 use Drupal\election\Entity\Election;
+use Drupal\election\Entity\ElectionPost;
 
 trait ElectionStatusesTrait {
 
@@ -226,10 +227,10 @@ trait ElectionStatusesTrait {
       $phases = $electionPhases;
     }
 
-    foreach ($phases as $phase => $full) {
+    foreach ($phases as $phase => $phase_label) {
       $result[$phase] = [
         'status' => $phaseStatuses[$phase],
-        'name' => $full,
+        'name' => $phase_label,
       ];
 
       if ($phaseStatuses[$phase] == 'inherit') {
@@ -257,17 +258,25 @@ trait ElectionStatusesTrait {
 
       foreach ($posts as $post) {
         $ineligibility_reasons = $eligibilityService->checkEligibility($account, $post, $phase, FALSE, TRUE, $debug);
+        $result[$phase]['ineligibility_reasons'] =  [];
+        $result[$phase]['already_' . $phase] = FALSE;
+
         if (count($ineligibility_reasons) > 0) {
           $result[$phase]['eligible'] = FALSE;
-          $result[$phase]['eligibility_label'] = t('Not eligible to @action', ['@action' => $full]);
-          $result[$phase]['ineligibility_reasons'] = $ineligibility_reasons;
+          $result[$phase]['eligibility_label'] = t('Not eligible to @action', ['@action' => strtolower(Election::getPhaseAction($phase))]);
+          $result[$phase]['ineligibility_reasons'] = $post->formatEligibilityReasons($ineligibility_reasons);
+          $result[$phase]['already_' . $phase] = in_array('already_' . $phase, $ineligibility_reasons);
         } else {
           $result[$phase]['eligible'] = TRUE;
           $result[$phase]['eligibility_link'] = Url::fromRoute('entity.election_post.' . $phase, ['election_post' => $this->id()])->toString();
-          $result[$phase]['eligibility_label'] = t('Click here to @action', ['@action' => $full]);
+          $result[$phase]['eligibility_label'] = t('@action', ['@action' => strtolower(Election::getPhaseAction($phase))]);
         }
       }
 
+      // @todo flag if abstained
+      // if ($result[$phase]['already_' . $phase]) {
+      //   $eligibleText = ' and you have already done so';
+      // } else
       if ($phaseStatuses[$phase] == 'open') {
         $eligibleText = $result[$phase]['eligible'] ? ' and you are eligible' : ' but you are not eligible';
       } else {
@@ -276,8 +285,9 @@ trait ElectionStatusesTrait {
       }
 
       $result[$phase]['status_full'] = t($status_full . '@eligible', [
-        '@phase' => $full,
+        '@phase' => $phase_label,
         '@eligible' => $eligibleText,
+        '@reasons' => '(' . implode(', ', $result[$phase]['ineligibility_reasons']) . ')',
       ]);
     }
 

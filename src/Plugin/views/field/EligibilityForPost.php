@@ -55,7 +55,7 @@ class EligibilityForPost extends FieldPluginBase {
         'full' => 'Full explanation',
         'links_only' => 'No explanation (just action link or empty)',
       ],
-      '#default_value' => $this->options['phases_to_show'],
+      '#default_value' => $this->options['format'],
     ];
 
     $form['link_to_action'] = [
