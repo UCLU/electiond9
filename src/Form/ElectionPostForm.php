@@ -63,7 +63,7 @@ class ElectionPostForm extends ContentEntityForm {
 
       $phasesToShow = $election->getEnabledPhases();
       if (count($phasesToShow) != count(Election::ELECTION_PHASES)) {
-        foreach (Election::ELECTION_PHASES as $key => $name) {
+        foreach (Election::ELECTION_PHASES as $key) {
           if (!isset($phasesToShow[$key])) {
             unset($form['conditions_' . $key]);
           }
@@ -72,7 +72,7 @@ class ElectionPostForm extends ContentEntityForm {
     }
 
     // Hide and show voting conditions:
-    foreach (Election::ELECTION_PHASES as $key => $name) {
+    foreach (Election::ELECTION_PHASES as $key) {
       $form['conditions_' . $key]['#states'] = [
         'visible' => [
           ':input[name="conditions_' . $key . '_same_as"]' => ['value' => $key],

@@ -14,7 +14,9 @@ trait ElectionStatusesTrait {
     // Create nominations and voting status and opening and closing times
     $statuses = Election::ELECTION_PHASES;
     $weightCounter = 0;
-    foreach ($statuses as $key => $name) {
+    foreach ($statuses as $key) {
+      $name = Election::getPhaseName($key);
+
       $weightCounter++;
 
       $defaultValue = 'closed';
@@ -166,10 +168,10 @@ trait ElectionStatusesTrait {
   public function getEnabledPhases() {
     $election = $this->getEntityTypeId() == 'election_post' ? $this->getElection() : $this;
     $finalPhases = [];
-    foreach (Election::ELECTION_PHASES as $phase => $full) {
+    foreach (Election::ELECTION_PHASES as $phase) {
       $field = 'status_' . $phase;
       if ($election->$field != 'disabled') {
-        $finalPhases[$phase] = $full;
+        $finalPhases[] = $phase;
       }
     }
     return $finalPhases;
@@ -179,7 +181,7 @@ trait ElectionStatusesTrait {
     $results = [];
 
     $phases = $this->getEnabledPhases();
-    foreach ($phases as $phase_key => $phase_name) {
+    foreach ($phases as $phase_key) {
       if ($this->getEntityTypeId() == 'election_post' && $this->get('status_' . $phase_key)->value == 'inherit') {
         $electionResults = $this->getElection()->getPhaseStatuses();
         $results[$phase_key] = $electionResults[$phase_key];
@@ -219,15 +221,19 @@ trait ElectionStatusesTrait {
     } else {
       $election = $this->getElection();
     }
+
     $phaseStatuses = $this->getPhaseStatuses();
     $electionPhases = $election->getEnabledPhases();
+
     if ($phases) {
       $phases = array_intersect($electionPhases, $phases);
     } else {
       $phases = $electionPhases;
     }
 
-    foreach ($phases as $phase => $phase_label) {
+    foreach ($phases as $phase) {
+      $phase_label = Election::getPhaseName($phase);
+
       $result[$phase] = [
         'status' => $phaseStatuses[$phase],
         'name' => $phase_label,
@@ -269,15 +275,16 @@ trait ElectionStatusesTrait {
         } else {
           $result[$phase]['eligible'] = TRUE;
           $result[$phase]['eligibility_link'] = Url::fromRoute('entity.election_post.' . $phase, ['election_post' => $this->id()])->toString();
-          $result[$phase]['eligibility_label'] = t('@action', ['@action' => strtolower(Election::getPhaseAction($phase))]);
+          $result[$phase]['eligibility_label'] = t('@action', ['@action' => Election::getPhaseAction($phase)]);
         }
       }
 
-      // @todo flag if abstained
-      // if ($result[$phase]['already_' . $phase]) {
-      //   $eligibleText = ' and you have already done so';
-      // } else
-      if ($phaseStatuses[$phase] == 'open') {
+      $eligibleText = '';
+      // @todo inform if abstained
+      if (count($result[$phase]['ineligibility_reasons']) == 1) {
+        $status_full = $status_full . ' - ' . $result[$phase]['ineligibility_reasons'][0];
+        $result[$phase]['ineligibility_reasons'] = [];
+      } elseif ($phaseStatuses[$phase] == 'open') {
         $eligibleText = $result[$phase]['eligible'] ? ' and you are eligible' : ' but you are not eligible';
       } else {
         // $eligibleText = isset($result[$phase]['eligible']) && $result[$phase]['eligible'] ? ' though you are eligible' : ' and you are not eligible';
@@ -302,7 +309,15 @@ trait ElectionStatusesTrait {
    * @return [type]
    */
   public function getUserEligibilityFormatted(AccountInterface $account, array $phases = NULL, $separator = ', ', $format = 'simple', $includeLinks = FALSE) {
+    if (count($phases) == 0) {
+      $phases = NULL;
+    }
+
     $eligibility = $this->getUserEligibility($account, $phases);
+
+    if ($format == 'links_only') {
+      $includeLinks = TRUE;
+    }
 
     $groupedPhases = [];
     $orderOfPhases = ['open', 'scheduled', 'closed'];
@@ -319,7 +334,7 @@ trait ElectionStatusesTrait {
     }
 
     // For simple, only show the primary phase you care about:
-    if ($format = 'simple') {
+    if ($format == 'simple') {
       foreach ($orderOfPhases as $phase) {
         if (!isset($groupedPhases[$phase])) {
           continue;
@@ -342,11 +357,12 @@ trait ElectionStatusesTrait {
           $string = $groupedPhase['status_full'];
         }
         if ($includeLinks && $groupedPhase['eligible'] && $groupedPhase['status'] == 'open' && isset($groupedPhase['eligibility_link'])) {
-          $string .= ' <a href="' . $groupedPhase['eligibility_link'] . '">' . $groupedPhase['eligibility_label'] . '</a>';
+          $string .= ' <a class="btn button" href="' . $groupedPhase['eligibility_link'] . '">' . $groupedPhase['eligibility_label'] . '</a>';
         }
         $results[] = $string;
       }
     }
+    $results = array_filter($results);
     return implode($separator, $results);
   }
 }

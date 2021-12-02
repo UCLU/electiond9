@@ -198,7 +198,7 @@ class ElectionPostEligibilityChecker {
    * @return void
    */
   public static function recalculateEligibility($account, $post) {
-    foreach (Election::ELECTION_PHASES as $phase => $full_name) {
+    foreach (Election::ELECTION_PHASES as $phase) {
       $boolean = ElectionPostEligibilityChecker::checkEligibility($account, $post, $phase, TRUE, FALSE, TRUE);
       $reasons = ElectionPostEligibilityChecker::checkEligibility($account, $post, $phase, TRUE, TRUE, TRUE);
     }

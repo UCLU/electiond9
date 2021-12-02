@@ -3,6 +3,7 @@
 namespace Drupal\election\Plugin\views\field;
 
 use DateTime;
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\election\Entity\Election;
@@ -65,11 +66,15 @@ class EligibilityForPost extends FieldPluginBase {
       '#default_value' => $this->options['link_to_action'],
     ];
 
+    $phases = [];
+    foreach (Election::ELECTION_PHASES as $phase) {
+      $phases[$phase] = Election::getPhaseName($phase);
+    }
     $form['phases_to_show'] = [
       '#type' => 'checkboxes',
       '#title' => $this->t('Election phases to include'),
       '#description' => $this->t('Selecting none shows all.'),
-      '#options' => Election::ELECTION_PHASES,
+      '#options' => $phases,
       '#default_value' => $this->options['phases_to_show'],
     ];
   }
@@ -78,8 +83,6 @@ class EligibilityForPost extends FieldPluginBase {
    * {@inheritdoc}
    */
   public function render(ResultRow $values) {
-    $alias = $this->field_alias;
-
     $election_post = $values->_entity;
 
     $phases = [];
@@ -88,11 +91,9 @@ class EligibilityForPost extends FieldPluginBase {
         $phases[] = $show;
       }
     }
-    if (count($phases) == 0) {
-      $phases = NULL;
-    }
-    $values->$alias = $election_post->getUserEligibilityFormatted(\Drupal::currentUser(), $phases, ', ', $this->options['format'], $this->options['link_to_action']);
 
-    return parent::render($values);
+    $formatted = $election_post->getUserEligibilityFormatted(\Drupal::currentUser(), $phases, ', ', $this->options['format'], $this->options['link_to_action']);
+
+    return new FormattableMarkup($formatted, []);
   }
 }

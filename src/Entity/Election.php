@@ -90,15 +90,28 @@ class Election extends EditorialContentEntityBase implements ElectionInterface {
   use ElectionConditionsTrait;
 
   const ELECTION_PHASES = [
-    'interest' => 'Expressions of interest',
-    'nominations' => 'Nominations',
-    'voting' => 'Voting',
+    'interest',
+    'nominations',
+    'voting',
   ];
 
   const SCHEDULING_STATES = [
     'open' => 'Open',
     'close' => 'Closed',
   ];
+
+  public static function getPhaseName($phase) {
+    switch ($phase) {
+      case 'interest':
+        return t('Expressions of interest');
+
+      case 'nominations':
+        return t('Nominations');
+
+      case 'voting':
+        return t('Voting');
+    }
+  }
 
   public static function getPhaseAction($phase) {
     switch ($phase) {

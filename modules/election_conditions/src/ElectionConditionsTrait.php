@@ -40,16 +40,18 @@ trait ElectionConditionsTrait {
     }
 
     $condition_categories = Election::ELECTION_PHASES;
-    foreach ($condition_categories as $key => $name) {
+    foreach ($condition_categories as $key) {
+      $name = Election::getPhaseName($key);
+
       $defaultValue = 'none';
       $allowedValues = [
         'none' => 'No conditions for ' . $name,
         $key => 'Unique set of conditions for ' . $name,
       ];
-      foreach (Election::ELECTION_PHASES as $phaseKey => $fullName) {
+      foreach (Election::ELECTION_PHASES as $phaseKey) {
         $defaultValue = !$defaultValue ? $phaseKey : $defaultValue;
         if ($key != $phaseKey) {
-          $allowedValues[$phaseKey] = 'Same as ' . $fullName;
+          $allowedValues[$phaseKey] = 'Same as ' . Election::getPhaseName($phaseKey);
         }
       };
 
