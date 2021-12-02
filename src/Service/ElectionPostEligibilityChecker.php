@@ -56,7 +56,7 @@ class ElectionPostEligibilityChecker {
       }
 
       $electionPhases = $election->getEnabledPhases();
-      if (!in_array($phase, array_keys($electionPhases))) {
+      if (!in_array($phase, $electionPhases)) {
         $eligible = FALSE;
         $reasons[] = $phase . '_not_enabled';
       }

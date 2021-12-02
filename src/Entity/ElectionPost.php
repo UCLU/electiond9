@@ -558,18 +558,18 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
     $actions = [];
 
     $phases = $this->getElection()->getEnabledPhases();
-    foreach ($phases as $key => $name) {
-      if ($eligibilityService->checkEligibility($account, $this, $key, TRUE, FALSE)) {
-        $url = Url::fromRoute('entity.election_post.' . $key, ['election_post' => $this->id()]);
+    foreach ($phases as $phase) {
+      if ($eligibilityService->checkEligibility($account, $this, $phase, TRUE, FALSE)) {
+        $url = Url::fromRoute('entity.election_post.' . $phase, ['election_post' => $this->id()]);
         if ($url) {
           $actions[] = [
-            'title' => t('@label', ['@label' => Election::getPhaseAction($key)]),
+            'title' => t('@label', ['@label' => Election::getPhaseAction($phase)]),
             'link' => $url->toString(),
             'button_type' => 'primary',
           ];
         }
 
-        if ($key == 'nominations') {
+        if ($phase == 'nominations') {
           foreach ($this->getElectionPostType()->getAllowedCandidateTypes() as $election_candidate_type) {
             $url = Url::fromRoute('entity.election_candidate.add_to_election_post', [
               'election_post' => $this->id(),
