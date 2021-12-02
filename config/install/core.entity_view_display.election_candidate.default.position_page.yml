@@ -1,0 +1,44 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.election_candidate.position_page
+    - election.election_candidate_type.default
+    - image.style.thumbnail
+  module:
+    - image
+    - text
+id: election_candidate.default.position_page
+targetEntityType: election_candidate
+bundle: default
+mode: position_page
+content:
+  image:
+    type: image
+    weight: 5
+    label: hidden
+    settings:
+      image_style: thumbnail
+      image_link: ''
+    region: content
+    third_party_settings: {}
+  name:
+    label: hidden
+    type: string
+    weight: -4
+    region: content
+    settings:
+      link_to_entity: false
+    third_party_settings: {}
+  statement:
+    label: visible
+    type: text_default
+    weight: 6
+    region: content
+    settings: {}
+    third_party_settings: {}
+hidden:
+  candidate_status: true
+  election_post: true
+  status: true
+  user_id: true

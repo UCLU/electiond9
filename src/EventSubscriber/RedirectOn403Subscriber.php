@@ -34,8 +34,8 @@ class RedirectOn403Subscriber extends HttpExceptionSubscriberBase {
       'entity.election_ballot.add_form',
     ];
     $phases = Election::ELECTION_PHASES;
-    foreach ($phases as $key => $name) {
-      $routesToControl[] = "entity.election_post." . $key;
+    foreach ($phases as $phase) {
+      $routesToControl[] = "entity.election_post." . $phase;
     }
 
     $election_post_route = in_array($route_name, $routesToControl);

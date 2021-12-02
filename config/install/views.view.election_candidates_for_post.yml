@@ -2,6 +2,7 @@ langcode: en
 status: true
 dependencies:
   config:
+    - core.entity_view_mode.election_candidate.ballot_full
     - core.entity_view_mode.election_candidate.position_page
   module:
     - election
@@ -55,7 +56,7 @@ display:
         type: 'entity:election_candidate'
         options:
           relationship: none
-          view_mode: position_page
+          view_mode: ballot_full
       fields:
         name:
           table: election_candidate_field_data
@@ -138,19 +139,21 @@ display:
           operator: '='
           value: '1'
           group: 1
-          exposed: true
+          exposed: false
           expose:
+            operator_id: ''
+            label: Published
+            description: null
             use_operator: false
             operator: status_op
             operator_limit_selection: false
             operator_list: {}
             identifier: status
-            label: Published
-            description: null
+            required: true
             remember: false
             multiple: false
-            required: true
-            operator_id: ''
+            remember_roles:
+              authenticated: authenticated
           is_grouped: false
           group_info:
             label: ''
@@ -236,11 +239,40 @@ display:
   embed:
     display_plugin: embed
     id: embed
-    display_title: Embed
+    display_title: 'Embed post page'
+    position: 1
+    display_options:
+      display_extenders:
+        views_ef_fieldset: {}
+      style:
+        type: default
+        options: {}
+      defaults:
+        style: false
+        row: false
+      row:
+        type: 'entity:election_candidate'
+        options:
+          relationship: none
+          view_mode: position_page
+      display_description: ''
+    cache_metadata:
+      max-age: -1
+      contexts:
+        - 'languages:language_content'
+        - 'languages:language_interface'
+        - url
+        - user.permissions
+      tags: {}
+  embed_ballot_full:
+    display_plugin: embed
+    id: embed_ballot_full
+    display_title: 'Embed ballot'
     position: 2
     display_options:
       display_extenders:
         views_ef_fieldset: {}
+      display_description: ''
     cache_metadata:
       max-age: -1
       contexts:
@@ -253,7 +285,7 @@ display:
     display_plugin: page
     id: page_1
     display_title: Admin
-    position: 2
+    position: 3
     display_options:
       display_extenders: {}
       display_description: ''
@@ -316,6 +348,7 @@ display:
         style: false
         row: false
         fields: false
+        access: false
       filter_groups:
         operator: AND
         groups:
@@ -464,6 +497,10 @@ display:
           destination: false
           entity_type: election_candidate
           plugin_id: entity_operations
+      access:
+        type: perm
+        options:
+          perm: 'view unpublished election candidate entities'
     cache_metadata:
       max-age: -1
       contexts:

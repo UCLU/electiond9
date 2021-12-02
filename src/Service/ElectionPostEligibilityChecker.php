@@ -32,14 +32,22 @@ class ElectionPostEligibilityChecker {
    * @return boolean|array
    */
   public static function checkEligibility(AccountInterface $account, ElectionPostInterface $election_post, string $phase, $includePhaseStatus = FALSE, $return_reasons = FALSE, $refresh = FALSE) {
-    $data = &drupal_static(__METHOD__);
-    $cid = 'election:election_post:' . $election_post->id() . ':' . $account->id() . ':' . $phase . ':' . ($includePhaseStatus ? 'with_phase_status' : 'no_phase_status') . ':' . ($return_reasons ? 'reasons' : 'boolean');
+    // Sort out caching
+    $cid_components = [
+      'election_post',
+      $election_post->id(),
+      $account->id(),
+      $phase,
+      ($includePhaseStatus ? 'ps' : ''),
+      ($return_reasons ? 'r' : 'b'),
+    ];
+    $cid = implode(':', $cid_components);
 
-    if (!$refresh && $cache = \Drupal::cache('election_bin')->get($cid)) {
+    // Return cache data if we have it and we're not refreshing:
+    if (!$refresh && $cache = \Drupal::cache('election')->get($cid)) {
       $data = $cache->data;
     } else {
       $account = User::load($account->id());
-
       $election = $election_post->getElection();
 
       $reasons = [];
@@ -53,6 +61,14 @@ class ElectionPostEligibilityChecker {
       if (!$election->isPublished()) {
         $eligible = FALSE;
         $reasons[] = 'election_not_published';
+      }
+
+      // Check if have 'create nominations' or equivalent permission, and allow access to nomination (but not voting) if so
+      // TODO
+
+      if ($phase == 'voting' && !$account->hasPermission('add election ballot entities')) {
+        $eligible = FALSE;
+        $reasons[] = 'no_permission_voting';
       }
 
       $electionPhases = $election->getEnabledPhases();
@@ -75,12 +91,10 @@ class ElectionPostEligibilityChecker {
         }
       }
 
-      // Check if have 'create nominations' or equivalent permission, and allow access to nomination (but not voting) if so
-      // TODO
-
-      if ($phase == 'voting' && !$account->hasPermission('add election ballot entities')) {
-        $eligible = FALSE;
-        $reasons[] = 'no_permission_voting';
+      // @todo check number of candidates
+      $candidates = $election_post->getCandidatesForVoting();
+      if (count($candidates) == 0) {
+        $reasons[] = 'not_enough_candidates';
       }
 
       // Check if logged in:
@@ -91,24 +105,24 @@ class ElectionPostEligibilityChecker {
       } else {
         if ($phase == 'voting' && static::ballotExists($account, $election_post)) {
           $eligible = FALSE;
-          $reasons[] = 'already_' . $phase;
+          $reasons[] = 'already_voting';
         }
         if ($phase == 'nominations' && $election_post->get('limit_to_one_nomination_per_user')->value && static::nominationExists($account, $election_post)) {
           $eligible = FALSE;
-          $reasons[] = 'already_' . $phase;
+          $reasons[] = 'already_nominations';
         }
+      }
 
-        if (\Drupal::moduleHandler()->moduleExists('election_conditions')) {
-          $conditions = $election_post->getConditions($phase);
+      if (\Drupal::moduleHandler()->moduleExists('election_conditions')) {
+        $conditions = $election_post->getConditions($phase);
 
-          // Check all  conditions:
-          if (count($conditions) > 0) {
-            foreach ($conditions as $condition) {
-              $conditionReason = $condition->evaluate($election_post, $account, $phase);
-              if ($conditionReason && count($conditionReason) > 0) {
-                $reasons = array_merge($reasons, $conditionReason);
-                $eligible = FALSE;
-              }
+        // Check all  conditions:
+        if (count($conditions) > 0) {
+          foreach ($conditions as $condition) {
+            $conditionReason = $condition->evaluate($election_post, $account, $phase);
+            if ($conditionReason && count($conditionReason) > 0) {
+              $reasons = array_merge($reasons, $conditionReason);
+              $eligible = FALSE;
             }
           }
         }
@@ -125,7 +139,7 @@ class ElectionPostEligibilityChecker {
       // For now this. We want this to be more intelligent.
       $tags = $election_post->getUserEligibilityCacheTags($account, $phase);
 
-      \Drupal::cache('election_bin')->set($cid, $data, Cache::PERMANENT, $tags);
+      \Drupal::cache('election')->set($cid, $data, Cache::PERMANENT, $tags);
     }
     return $data;
   }

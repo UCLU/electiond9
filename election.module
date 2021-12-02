@@ -12,6 +12,8 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\SubformState;
 use Drupal\Core\Plugin\PluginWithFormsInterface;
 use Drupal\election\Annotation\ElectionVotingMethodPlugin;
+use Drupal\views\Plugin\views\query\QueryPluginBase;
+use Drupal\views\ViewExecutable;
 
 /** @file modules/custom/artwork_provider/artwork_provider.module
  *
@@ -94,6 +96,24 @@ function election_get_route_entity() {
       }
     }
   }
+}
+
+function election_views_query_alter(ViewExecutable $view, QueryPluginBase $query) {
+  // @todo allow user to order the positions list based on eligibility
+  // @todo allow user to order the positions list based on category order
+
+  return;
+
+  // $positionView = $view->id() == 'election_posts_for_election_page' && $view->getDisplay()->display['id'] == 'embed';
+  // if ($positionView) {
+  //   $orderby = "
+  //   CASE
+  //     WHEN node.type = 'page' THEN 1
+  //     WHEN node.type = 'article' THEN 2
+  //   END ASC
+  // ";
+  //   $query->orderby = array($orderby);
+  // }
 }
 
 function election_form_alter($form) {

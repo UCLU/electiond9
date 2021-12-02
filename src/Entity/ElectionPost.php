@@ -24,6 +24,13 @@ use Drupal\user\UserInterface;
  * @ContentEntityType(
  *   id = "election_post",
  *   label = @Translation("Election post"),
+ *   label_collection = @Translation("Election posts"),
+ *   label_singular = @Translation("election post"),
+ *   label_plural = @Translation("election posts"),
+ *   label_count = @PluralTranslation(
+ *     singular = "@count election post",
+ *     plural = "@count election posts"
+ *   ),
  *   bundle_label = @Translation("Election post type"),
  *   handlers = {
  *     "storage" = "Drupal\election\ElectionPostStorage",
@@ -76,7 +83,7 @@ use Drupal\user\UserInterface;
  *     "revision_revert" = "/election/post/{election_post}/revisions/{election_post_revision}/revert",
  *     "revision_delete" = "/election/post/{election_post}/revisions/{election_post_revision}/delete",
  *     "translation_revert" = "/election/post/{election_post}/revisions/{election_post_revision}/revert/{langcode}",
- *     "collection" = "/admin/election/election_post",
+ *     "collection" = "/election",
  *   },
  *   field_ui_base_route = "entity.election_post_type.edit_form"
  * )
@@ -559,7 +566,8 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
 
     $phases = $this->getElection()->getEnabledPhases();
     foreach ($phases as $phase) {
-      if ($eligibilityService->checkEligibility($account, $this, $phase, TRUE, FALSE)) {
+      $eligibleForPhase = $eligibilityService->checkEligibility($account, $this, $phase, TRUE, FALSE);
+      if ($eligibleForPhase) {
         $url = Url::fromRoute('entity.election_post.' . $phase, ['election_post' => $this->id()]);
         if ($url) {
           $actions[] = [
@@ -568,25 +576,26 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
             'button_type' => 'primary',
           ];
         }
+      }
 
-        if ($phase == 'nominations') {
-          foreach ($this->getElectionPostType()->getAllowedCandidateTypes() as $election_candidate_type) {
-            $url = Url::fromRoute('entity.election_candidate.add_to_election_post', [
-              'election_post' => $this->id(),
-              'election_candidate_type' => $election_candidate_type->id(),
-            ]);
-            if ($url) {
-              $actions[] = [
-                'title' => t(
-                  '@label',
-                  [
-                    '@label' => $election_candidate_type->getActionNaming(),
-                  ]
-                ),
-                'link' => $url->toString(),
-                'button_type' => 'secondary',
-              ];
-            }
+      if ($phase == 'nominations' && ($eligibleForPhase || $account->hasPermission('add election candidate entities without eligibility'))) {
+        foreach ($this->getElectionPostType()->getAllowedCandidateTypes() as $election_candidate_type) {
+          $url = Url::fromRoute('entity.election_candidate.add_to_election_post', [
+            'election_post' => $this->id(),
+            'election_candidate_type' => $election_candidate_type->id(),
+          ]);
+          if ($url) {
+            $label = $eligibleForPhase ? $election_candidate_type->getActionNaming() : 'Create ' . $election_candidate_type->getNaming();
+            $actions[] = [
+              'title' => t(
+                '@label',
+                [
+                  '@label' => $label,
+                ]
+              ),
+              'link' => $url->toString(),
+              'button_type' => 'secondary',
+            ];
           }
         }
       }
@@ -671,6 +680,7 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
       'already_nominations' => ['Already nominated', $params],
       'already_interest' => ['Already expressed interest', $params],
       'not_logged_in' => ['Not logged in', $params],
+      'not_enough_candidates' => ['Not enough candidates', $params],
       'no_permission_voting' => ['No permission to vote', $params],
       'election_post_not_published' => ['%positionTypeName not published', $params],
       'election_not_published' => ['%electionName not published', $params],

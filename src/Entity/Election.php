@@ -24,6 +24,13 @@ use Drupal\user\UserInterface;
  * @ContentEntityType(
  *   id = "election",
  *   label = @Translation("Election"),
+ *   label_collection = @Translation("Elections"),
+ *   label_singular = @Translation("election"),
+ *   label_plural = @Translation("elections"),
+ *   label_count = @PluralTranslation(
+ *     singular = "@count election",
+ *     plural = "@count elections"
+ *   ),
  *   bundle_label = @Translation("Election type"),
  *   handlers = {
  *     "storage" = "Drupal\election\ElectionStorage",
@@ -76,7 +83,7 @@ use Drupal\user\UserInterface;
  *     "revision_revert" = "/election/{election}/revisions/{election_revision}/revert",
  *     "revision_delete" = "/election/{election}/revisions/{election_revision}/delete",
  *     "translation_revert" = "/election/{election}/revisions/{election_revision}/revert/{langcode}",
- *     "collection" = "/election/list-all",
+ *     "collection" = "/election/list",
  *   },
  *   field_ui_base_route = "entity.election_type.edit_form",
  *   permission_granularity = "bundle",
@@ -89,6 +96,7 @@ class Election extends EditorialContentEntityBase implements ElectionInterface {
   use ElectionStatusesTrait;
   use ElectionConditionsTrait;
 
+  // @todo move to YML files for configuration maybe
   const ELECTION_PHASES = [
     'interest',
     'nominations',
@@ -96,8 +104,8 @@ class Election extends EditorialContentEntityBase implements ElectionInterface {
   ];
 
   const SCHEDULING_STATES = [
-    'open' => 'Open',
-    'close' => 'Closed',
+    'open',
+    'close',
   ];
 
   public static function getPhaseName($phase) {
@@ -123,6 +131,16 @@ class Election extends EditorialContentEntityBase implements ElectionInterface {
 
       case 'voting':
         return t('Vote now');
+    }
+  }
+
+  public static function getStatusName($status) {
+    switch ($status) {
+      case 'open':
+        return t('Open');
+
+      case 'close':
+        return t('Closed');
     }
   }
 
@@ -386,6 +404,26 @@ class Election extends EditorialContentEntityBase implements ElectionInterface {
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
+
+    $fields['ballot_confirmation'] = BaseFieldDefinition::create('list_string')
+      ->setLabel('Ballot confirmation')
+      ->setDescription(t(''))
+      ->setSettings([
+        'allowed_values' => [
+          'none' => 'None (ballot is confirmed by submitting)',
+          'after_post' => 'Users must confirm when submitting ballot',
+          'after_election' => 'Users must confirm all votes at end of voting process for them to count',
+        ],
+      ])
+      ->setRequired(TRUE)
+      ->setDefaultValue('none')
+      ->setDisplayOptions('form', [
+        'type' => 'options_select',
+        'weight' => -15,
+      ])
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE);
+
     $fields['ballot_candidate_sort'] = BaseFieldDefinition::create('list_string')
       ->setLabel(t('Ballot candidate sort'))
       ->setSettings([
@@ -532,7 +570,7 @@ class Election extends EditorialContentEntityBase implements ElectionInterface {
 
   public function getRedirectToNextPost() {
     $account = \Drupal::currentUser();
-    $alreadyDoneOrSkippedIds = $_SESSION[$election->id() . '_done'] ?? [];
+    $alreadyDoneOrSkippedIds = $_SESSION[$this->id() . '_done'] ?? [];
     $_SESSION[$this->id() . '_skipped'] = [];
     $postID = $this->getNextPostId($account, NULL, $alreadyDoneOrSkippedIds);
     if ($postID) {
@@ -547,7 +585,7 @@ class Election extends EditorialContentEntityBase implements ElectionInterface {
       return [
         'route_name' => 'entity.election.canonical',
         'route_parameters' => [
-          'election' => $election->id(),
+          'election' => $this->id(),
         ],
 
         // @todo more informative, i.e. say how many voted for, how many ineligible for, how many closed

@@ -1,7 +1,8 @@
+langcode: en
 status: true
 dependencies: {}
 id: default
 label: 'Default candidate type'
 naming_candidate_singular: candidate
 naming_candidate_plural: candidates
-naming_candidate_action: Add @label
+naming_candidate_action: 'Nominate for @post_type'

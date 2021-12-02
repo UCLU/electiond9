@@ -4,7 +4,6 @@ namespace Drupal\election\Form;
 
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\election_conditions\ElectionConditionsTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\election\Entity\Election;
 use Drupal\election\ElectionStatusesTrait;
@@ -53,7 +52,6 @@ class ElectionPostForm extends ContentEntityForm {
     }
 
     if (!is_null($election)) {
-
       if (isset($form['election'])) {
         if ($election->access('update')) {
           $form['election']['widget'][0]['target_id']['#default_value'] = $election;
@@ -63,19 +61,19 @@ class ElectionPostForm extends ContentEntityForm {
 
       $phasesToShow = $election->getEnabledPhases();
       if (count($phasesToShow) != count(Election::ELECTION_PHASES)) {
-        foreach (Election::ELECTION_PHASES as $key) {
-          if (!isset($phasesToShow[$key])) {
-            unset($form['conditions_' . $key]);
+        foreach (Election::ELECTION_PHASES as $phase) {
+          if (!isset($phasesToShow[$phase])) {
+            unset($form['conditions_' . $phase]);
           }
         }
       }
     }
 
     // Hide and show voting conditions:
-    foreach (Election::ELECTION_PHASES as $key) {
-      $form['conditions_' . $key]['#states'] = [
+    foreach (Election::ELECTION_PHASES as $phase) {
+      $form['conditions_' . $phase]['#states'] = [
         'visible' => [
-          ':input[name="conditions_' . $key . '_same_as"]' => ['value' => $key],
+          ':input[name="conditions_' . $phase . '_same_as"]' => ['value' => $phase],
         ],
       ];
     }

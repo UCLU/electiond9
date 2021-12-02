@@ -10,6 +10,9 @@ view full nomination form:
 add election ballot entities:
   title: "Vote in elections (create ballots)"
 
+add election candidate entities without eligibility:
+  title: "Create new election candidates without being eligible (e.g. for admin)"
+
 # Below are automatically generated
 
 add elections:

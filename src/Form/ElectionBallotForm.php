@@ -210,11 +210,13 @@ class ElectionBallotForm extends ContentEntityForm {
     }
 
     $candidatesList = views_embed_view('election_candidates_for_post', 'embed_ballot_full');
-    $form['candidates_full'] = [
-      '#weight' => 30,
-      '#prefix' => '<h2>' . $election_post->getCandidateTypesAsLabel() . '</h2>',
-      '#markup' => render($candidatesList),
-    ];
+    if ($candidatesList) {
+      $form['candidates_full'] = [
+        '#weight' => 30,
+        '#prefix' => '<h2>' . $election_post->getCandidateTypesAsLabel() . '</h2>',
+        '#markup' => render($candidatesList),
+      ];
+    }
 
     return $form;
   }
@@ -226,6 +228,10 @@ class ElectionBallotForm extends ContentEntityForm {
     $action = $triggering_element['#id'];
 
     $election_post = ElectionPost::load($form_state->get('election_post'));
+
+    if (ElectionPostEligibilityChecker::ballotExists(\Drupal::currentUser(), $election_post)) {
+      $form_state->setErrorByName('rankings', $this->t('You appear to have already voted for this position since opening the ballot form.'));
+    }
 
     $rankings = $form_state->getValue('rankings');
     $rankingsUsed = [];
@@ -289,9 +295,19 @@ class ElectionBallotForm extends ContentEntityForm {
     $election_post = ElectionPost::load($form_state->get('election_post'));
     $this->entity->election_post->entity = $election_post;
 
+    if ($election_post->getElection()->ballot_confirmation->value == 'none') {
+      $this->entity->confirmed->value = TRUE;
+    }
+
     $messageParams = [
       '%position_label' => $election_post->label(),
     ];
+
+    // Check again if already voted
+    if (ElectionPostEligibilityChecker::ballotExists(\Drupal::currentUser(), $election_post)) {
+      \Drupal::messenger()->addError(t('You appear to have already voted for %position_label since opening the ballot form.'), $messageParams);
+      $this->goNext($election_post, $form_state);
+    }
 
     switch ($action) {
       case 'submit-skip':
@@ -329,6 +345,7 @@ class ElectionBallotForm extends ContentEntityForm {
         break;
     }
 
+    // @todo deal with confirmation if required for post
     $this->goNext($election_post, $form_state);
   }
 

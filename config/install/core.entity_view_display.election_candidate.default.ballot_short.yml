@@ -1,0 +1,26 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.election_candidate.ballot_short
+    - election.election_candidate_type.default
+id: election_candidate.default.ballot_short
+targetEntityType: election_candidate
+bundle: default
+mode: ballot_short
+content:
+  name:
+    label: hidden
+    type: string
+    weight: 0
+    region: content
+    settings:
+      link_to_entity: false
+    third_party_settings: {}
+hidden:
+  candidate_status: true
+  election_post: true
+  image: true
+  statement: true
+  status: true
+  user_id: true

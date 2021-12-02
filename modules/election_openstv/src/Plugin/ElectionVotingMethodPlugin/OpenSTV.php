@@ -93,6 +93,7 @@ class OpenSTV extends PluginElectionVotingMethodPluginBase {
       $candidate_lines .= ' # ' . t('Candidate keyed by @i', ['@i' => $i]) . "\n";
       $i++;
     }
+
     if (count($candidates) && $electionPost->include_reopen_nominations->value == 1) {
       $candidate_map['ron'] = $i;
       $total_candidates++;
@@ -102,6 +103,8 @@ class OpenSTV extends PluginElectionVotingMethodPluginBase {
 
     $votes_fields = ['ballot_id', 'candidate_id', 'ron', 'rank'];
 
+    // @todo how does this filter by the post?
+    // @todo restrict to confirmed ballots only
     $votes_query = \Drupal::database()->select('election_ballot_vote', 'ev');
     $votes_query->join('election_ballot', 'eb', 'eb.id = ev.ballot_id');
     $votes_query->fields('ev', $votes_fields)

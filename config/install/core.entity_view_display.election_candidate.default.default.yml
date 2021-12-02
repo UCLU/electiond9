@@ -1,0 +1,25 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - election.election_candidate_type.default
+id: election_candidate.default.default
+targetEntityType: election_candidate
+bundle: default
+mode: default
+content:
+  name:
+    label: hidden
+    type: string
+    weight: 0
+    region: content
+    settings:
+      link_to_entity: false
+    third_party_settings: {}
+hidden:
+  candidate_status: true
+  election_post: true
+  image: true
+  statement: true
+  status: true
+  user_id: true

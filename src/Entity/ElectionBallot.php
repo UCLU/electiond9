@@ -206,6 +206,13 @@ class ElectionBallot extends ContentEntityBase implements ElectionBallotInterfac
         'region' => 'hidden',
       ]);
 
+    $fields['confirmed'] = BaseFieldDefinition::create('boolean')
+      ->setLabel(t('Ballot confirmed by the user'))
+      ->setDescription(t('Election settings can require the ballot be confirmed after each post or after voting for all posts in the election.'))
+      ->setDisplayOptions('form', [
+        'region' => 'hidden',
+      ]);
+
     $fields['user_agent'] = BaseFieldDefinition::create('string')
       ->setLabel(t('User agent'));
 

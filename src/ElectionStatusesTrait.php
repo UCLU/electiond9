@@ -12,10 +12,9 @@ trait ElectionStatusesTrait {
 
   public static function addElectionStatusesFields(&$fields, string $entity_type) {
     // Create nominations and voting status and opening and closing times
-    $statuses = Election::ELECTION_PHASES;
     $weightCounter = 0;
-    foreach ($statuses as $key) {
-      $name = Election::getPhaseName($key);
+    foreach (Election::ELECTION_PHASES as $phase) {
+      $name = Election::getPhaseName($phase);
 
       $weightCounter++;
 
@@ -35,11 +34,11 @@ trait ElectionStatusesTrait {
         $defaultValue = 'inherit';
       }
 
-      if ($key == 'voting') {
+      if ($phase == 'voting') {
         unset($allowedValues['disabled']);
       }
 
-      $fields['status_' . $key] = BaseFieldDefinition::create('list_string')
+      $fields['status_' . $phase] = BaseFieldDefinition::create('list_string')
         ->setLabel(t($name . ' status'))
         ->setDescription(t('Whether @name is open, closed or scheduled.', ['@name' => strtolower($name)]))
         ->setSettings([
@@ -60,8 +59,8 @@ trait ElectionStatusesTrait {
         ->setDisplayConfigurable('view', TRUE);
 
       $scheduling_statuses = Election::SCHEDULING_STATES;
-      foreach ($scheduling_statuses as $scheduling_status => $scheduling_status_name) {
-        $fields['status_' . $key . '_' . $scheduling_status] = BaseFieldDefinition::create('datetime')
+      foreach ($scheduling_statuses as $scheduling_status) {
+        $fields['status_' . $phase . '_' . $scheduling_status] = BaseFieldDefinition::create('datetime')
           ->setLabel(t($name . ' ' . $scheduling_status . ' time'))
           ->setDescription(t(
             'Date and time to @status @name (if scheduled)',
@@ -93,13 +92,13 @@ trait ElectionStatusesTrait {
   }
 
   public static function addStatusesStatesToForm(&$form) {
-    $statuses = Election::ELECTION_PHASES;
+    $phases = Election::ELECTION_PHASES;
     $scheduling_statuses = Election::SCHEDULING_STATES;
-    foreach ($statuses as $key => $name) {
-      foreach ($scheduling_statuses as $scheduling_status => $status_name) {
-        $form['status_' . $key . '_' . $scheduling_status]['#states'] = [
+    foreach ($phases as $phase) {
+      foreach ($scheduling_statuses as $scheduling_status) {
+        $form['status_' . $phase . '_' . $scheduling_status]['#states'] = [
           'visible' => [
-            ':input[name="status_' . $key . '"]' => ['value' => 'scheduled'],
+            ':input[name="status_' . $phase . '"]' => ['value' => 'scheduled'],
           ],
         ];
       }
@@ -282,7 +281,7 @@ trait ElectionStatusesTrait {
       $eligibleText = '';
       // @todo inform if abstained
       if (count($result[$phase]['ineligibility_reasons']) == 1) {
-        $status_full = $status_full . ' - ' . $result[$phase]['ineligibility_reasons'][0];
+        $status_full = $result[$phase]['ineligibility_reasons'][0];
         $result[$phase]['ineligibility_reasons'] = [];
       } elseif ($phaseStatuses[$phase] == 'open') {
         $eligibleText = $result[$phase]['eligible'] ? ' and you are eligible' : ' but you are not eligible';
