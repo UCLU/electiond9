@@ -2,10 +2,10 @@
 
 namespace Drupal\conditions_plugin_reference;
 
-use Drupal\conditions_plugin_reference\Annotation\ConditionsInlineForm;
-use Drupal\commerce\Plugin\Commerce\InlineForm\EntityInlineFormInterface;
-use Drupal\commerce\Plugin\Commerce\InlineForm\InlineFormInterface;
+use Drupal\conditions_plugin_reference\Plugin\ConditionsPluginReference\InlineForm\EntityInlineFormInterface;
+use Drupal\conditions_plugin_reference\Plugin\ConditionsPluginReference\InlineForm\InlineFormInterface;
 use Drupal\Component\Plugin\Exception\PluginException;
+use Drupal\conditions_plugin_reference\Annotation\ConditionsInlineForm;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
@@ -31,7 +31,13 @@ class InlineFormManager extends DefaultPluginManager {
    *   The module handler.
    */
   public function __construct(\Traversable $namespaces, CacheBackendInterface $cache_backend, ModuleHandlerInterface $module_handler) {
-    parent::__construct('Plugin/ConditionsPluginReference/InlineForm', $namespaces, $module_handler, InlineFormInterface::class, CommerceInlineForm::class);
+    parent::__construct(
+      'Plugin/ConditionsPluginReference/InlineForm',
+      $namespaces,
+      $module_handler,
+      InlineFormInterface::class,
+      ConditionsInlineForm::class
+    );
 
     $this->alterInfo('conditions_plugin_reference_inline_form_info');
     $this->setCacheBackend($cache_backend, 'conditions_plugin_reference_inline_form_plugins');
@@ -40,7 +46,7 @@ class InlineFormManager extends DefaultPluginManager {
   /**
    * {@inheritdoc}
    *
-   * @return \Drupal\commerce\Plugin\Commerce\InlineForm\InlineFormInterface
+   * @return \Drupal\conditions_plugin_reference\Plugin\ConditionsPluginReference\InlineForm\InlineFormInterface
    *   The inline form plugin.
    */
   public function createInstance($plugin_id, array $configuration = [], EntityInterface $entity = NULL) {

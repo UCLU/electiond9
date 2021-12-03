@@ -59,7 +59,7 @@ class PluginConfiguration extends InlineFormBase {
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('plugin.manager.' . $configuration['plugin_type'])
+      $container->get('plugin.manager.conditions_plugin_reference') // . $configuration['plugin_type'])
     );
   }
 

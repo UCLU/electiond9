@@ -658,7 +658,7 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
     // @todo generic functionality in a service for managing conditions?
     $phaseToGet = $this->get('conditions_' . $phase . '_same_as')->value;
     if ($phaseToGet != 'none') {
-      $postConditions = array_merge($postConditions, $this->get('conditions_' . $phaseToGet));
+      // $postConditions = array_merge($postConditions, $this->get('conditions_' . $phaseToGet));
     }
 
     return $postConditions;

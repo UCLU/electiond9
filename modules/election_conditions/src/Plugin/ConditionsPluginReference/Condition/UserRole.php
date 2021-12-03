@@ -4,6 +4,7 @@ namespace Drupal\election_conditions\Plugin\ConditionsPluginReference\Condition;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\election_conditions\Plugin\ElectionConditionBase;
+use Drupal\user\Entity\Role;
 
 /**
  * Condition.
@@ -36,18 +37,17 @@ class UserRole extends ElectionConditionBase {
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
     $form = parent::buildConfigurationForm($form, $form_state);
 
-    $roles = NULL;
-    $role_ids = $this->configuration['user_roles'];
-    if (!empty($role_ids)) {
-      $roles = $this->productStorage->loadMultiple($role_ids);
+    $roles = Role::loadMultiple();
+    $roleOptions = [];
+    foreach ($roles as $role) {
+      $roleOptions[$role->id()] = $role->label();
     }
     $form['user_roles'] = [
       '#type' => 'select',
       '#multiple' => TRUE,
       '#title' => $this->t('Roles'),
-      '#default_value' => $roles,
-      '#required' => TRUE,
-      '#maxlength' => NULL,
+      '#options' => $roleOptions,
+      '#default_value' => $this->configuration['user_roles'],
     ];
 
     return $form;
@@ -60,7 +60,7 @@ class UserRole extends ElectionConditionBase {
     parent::submitConfigurationForm($form, $form_state);
 
     $values = $form_state->getValue($form['#parents']);
-    $role_ids = array_column($values['user_roles'], 'target_id');
-    $this->configuration['user_roles'] = $role_ids;
+    // $role_ids = array_column($values['user_roles'], 'target_id');
+    $this->configuration['user_roles'] = $values['user_roles'];
   }
 }

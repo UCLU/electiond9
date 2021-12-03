@@ -2,7 +2,7 @@
 
 namespace Drupal\conditions_plugin_reference\Plugin\ConditionsPluginReference\Condition;
 
-use Drupal\conditions_plugin_reference\Plugin\Condition\ConditionBase;
+use Drupal\conditions_plugin_reference\Plugin\ConditionsPluginReference\Condition\ConditionBase;
 
 /**
  * Provides the weight condition for shipments.

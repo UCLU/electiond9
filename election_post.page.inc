@@ -27,7 +27,10 @@ function template_preprocess_election_post(array &$variables) {
   $election_post = $variables['elements']['#election_post'];
 
   // $variables['#cache']['max-age'] = 0;
-  $variables['#cache']['tags'][] = $election_post->getElection()->getCacheTags();
+  if (!isset($variables['#cache']['tags'])) {
+    $variables['#cache']['tags'] = [];
+  }
+  $variables['#cache']['tags'] = array_merge($variables['#cache']['tags'], $election_post->getElection()->getCacheTags());
 
   $cache = [
     'max-age' => 100,

@@ -55,7 +55,7 @@ class ConditionManager extends DefaultPluginManager implements ConditionManagerI
       'Plugin/ConditionsPluginReference/Condition',
       $namespaces,
       $module_handler,
-      'Drupal\conditions_plugin_reference\Plugin\Condition\ConditionInterface',
+      'Drupal\conditions_plugin_reference\Plugin\ConditionsPluginReference\Condition\ConditionInterface',
       'Drupal\conditions_plugin_reference\Annotation\ConditionsPluginReference'
     );
 

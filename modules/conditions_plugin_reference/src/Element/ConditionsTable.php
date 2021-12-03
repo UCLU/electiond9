@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\conditions_plugin_reference\Element;
 
-use Drupal\conditions_plugin_reference\Plugin\Commerce\Condition\ConditionInterface;
+use Drupal\conditions_plugin_reference\Plugin\ConditionsPluginReference\Condition\ConditionInterface;
 use Drupal\conditions_plugin_reference\Plugin\ConditionsPluginReference\InlineForm\PluginConfiguration;
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\NestedArray;
@@ -141,8 +141,9 @@ class ConditionsTable extends FormElement {
       // The tabledrag element is always added to the first cell in the row,
       // so we add an empty cell to guide it there, for better styling.
       $condition_form['#attributes']['class'][] = 'draggable';
+      // dd($condition);
       $inline_form = $inline_form_manager->createInstance('plugin_configuration', [
-        'plugin_type' => $condition['plugin_type'],
+        'plugin_type' => 'conditions_plugin_reference',
         'plugin_id' => $condition['plugin'],
         'plugin_configuration' => $condition['configuration'],
         'enforce_unique_parents' => FALSE,
@@ -239,7 +240,7 @@ class ConditionsTable extends FormElement {
     ];
 
     $element['add_new']['conditions_id'] = [
-      '#title' => 'Select a condition',
+      '#title' => 'Select a condition type',
       '#title_display' => 'invisible',
       '#type' => 'select',
       '#default_value' => '',
@@ -252,6 +253,7 @@ class ConditionsTable extends FormElement {
     $element['add_new']['add_condition'] = [
       '#type' => 'submit',
       '#value' => 'Add',
+      '#name' => 'add_new_condition_' . $ajax_wrapper_id,
       '#ajax' => [
         'callback' => [static::class, 'ajaxRefresh'],
         'wrapper' => $ajax_wrapper_id,
@@ -297,8 +299,10 @@ class ConditionsTable extends FormElement {
   }
 
   public static function addNewCondition(&$form, FormStateInterface $form_state) {
+    // print_r($form_state->getTriggeringElement());
     $element_parents = array_slice($form_state->getTriggeringElement()['#parents'], 0, -1);
     $values = $form_state->getValue($element_parents);
+    // print_r($values);
 
     $conditions = $form_state->get('condition_plugins');
 
