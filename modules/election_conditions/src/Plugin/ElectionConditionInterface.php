@@ -9,7 +9,7 @@ use Drupal\election\Entity\ElectionPost;
 /**
  * Defines an interface for Election post condition plugin plugins.
  */
-interface ElectionPostConditionPluginInterface extends ConditionInterface {
+interface ElectionConditionInterface extends ConditionInterface {
 
   public function getCacheTagsForEligibility(ElectionPost $post, AccountInterface $account);
 

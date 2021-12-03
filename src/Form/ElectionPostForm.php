@@ -45,6 +45,7 @@ class ElectionPostForm extends ContentEntityForm {
 
     // Hide and show fields:
     static::addStatusesStatesToForm($form);
+    static::addConditionStatesToForm($form);
 
     $election_post = $this->entity;
     if ($election_post) {
@@ -67,15 +68,6 @@ class ElectionPostForm extends ContentEntityForm {
           }
         }
       }
-    }
-
-    // Hide and show voting conditions:
-    foreach (Election::ELECTION_PHASES as $phase) {
-      $form['conditions_' . $phase]['#states'] = [
-        'visible' => [
-          ':input[name="conditions_' . $phase . '_same_as"]' => ['value' => $phase],
-        ],
-      ];
     }
 
     if ($this->entity->isNew()) {

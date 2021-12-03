@@ -1,9 +1,9 @@
 <?php
 
-namespace Drupal\election_conditions\EventSubscriber;
+namespace Drupal\conditions_plugin_reference\EventSubscriber;
 
-use Drupal\commerce\Event\ReferenceablePluginTypesEvent;
 use Drupal\conditions_plugin_reference\Event\ConditionsEvents;
+use Drupal\conditions_plugin_reference\Event\ReferenceablePluginTypesEvent;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -27,7 +27,7 @@ class ReferenceablePluginTypesSubscriber implements EventSubscriberInterface {
    */
   public function onPluginTypes(ReferenceablePluginTypesEvent $event) {
     $types = $event->getPluginTypes();
-    $types['election_post_condition'] = $this->t('Election post condition');
+    $types['conditions_plugin_reference'] = $this->t('Condition');
     $event->setPluginTypes($types);
   }
 }

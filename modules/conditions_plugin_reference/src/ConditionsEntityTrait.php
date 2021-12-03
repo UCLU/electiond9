@@ -2,7 +2,7 @@
 
 namespace Drupal\conditions_plugin_reference;
 
-use Drupal\conditions_plugin_reference\Plugin\Commerce\Condition\ConditionInterface;
+use Drupal\conditions_plugin_reference\Plugin\Condition\ConditionInterface;
 
 trait ConditionsEntityTrait {
   /**
@@ -11,7 +11,7 @@ trait ConditionsEntityTrait {
   public function getConditions() {
     $conditions = [];
     foreach ($this->get('conditions') as $field_item) {
-      /** @var \Drupal\commerce\Plugin\Field\FieldType\PluginItemInterface $field_item */
+      /** @var \Drupal\conditions_plugin_reference\Plugin\Field\FieldType\PluginItemInterface $field_item */
       $condition = $field_item->getTargetInstance();
       $conditions[] = $condition;
     }

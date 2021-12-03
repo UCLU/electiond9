@@ -45,8 +45,8 @@ trait ElectionConditionsTrait {
 
       $defaultValue = 'none';
       $allowedValues = [
-        'none' => 'No conditions for ' . $name,
-        $key => 'Unique set of conditions for ' . $name,
+        'none' => $entity_type == 'election_post' ? 'No post-specific conditions for ' . $name : 'No conditions for ' . $name,
+        $key => 'Unique set of ' . ($entity_type == 'election_post' ? 'post ' : '') . ' conditions for ' . $name,
       ];
       foreach (Election::ELECTION_PHASES as $phaseKey) {
         $defaultValue = !$defaultValue ? $phaseKey : $defaultValue;
@@ -70,14 +70,14 @@ trait ElectionConditionsTrait {
         ->setDisplayConfigurable('form', TRUE)
         ->setDisplayConfigurable('view', TRUE);
 
-      $fields['conditions_' . $key] = BaseFieldDefinition::create('conditions_plugin_item:election_post_condition')
+      $fields['conditions_' . $key] = BaseFieldDefinition::create('conditions_plugin_item:conditions_plugin_reference')
         ->setLabel(t('@name conditions', [
           '@name' => $name,
         ]))
         ->setDescription($typeNotice)
         ->setCardinality(BaseFieldDefinition::CARDINALITY_UNLIMITED)
         ->setDisplayOptions('form', [
-          'type' => 'conditions_plugin_reference_conditions_table',
+          'type' => 'conditions_plugin_reference_conditions_table_election',
         ])
         ->setDisplayConfigurable('form', TRUE)
         ->setDisplayConfigurable('view', TRUE);

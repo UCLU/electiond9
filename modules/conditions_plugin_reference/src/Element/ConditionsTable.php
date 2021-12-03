@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\conditions_plugin_reference\Element;
 
-use Drupal\commerce\Element\CommerceElementTrait;
-use Drupal\commerce\Plugin\Commerce\Condition\ConditionInterface;
-use Drupal\commerce\Plugin\Commerce\InlineForm\PluginConfiguration;
+use Drupal\conditions_plugin_reference\Plugin\Commerce\Condition\ConditionInterface;
+use Drupal\conditions_plugin_reference\Plugin\ConditionsPluginReference\InlineForm\PluginConfiguration;
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Form\FormStateInterface;
@@ -67,21 +66,12 @@ class ConditionsTable extends FormElement {
    *   #default_value properties.
    */
   public static function processConditions(array &$element, FormStateInterface $form_state, array &$complete_form) {
-    if (empty($element['#parent_entity_type'])) {
-      throw new \InvalidArgumentException('The commerce_conditions_table element requires the #parent_entity_type property.');
-    }
-    if (empty($element['#entity_types'])) {
-      throw new \InvalidArgumentException('The commerce_conditions_table element requires the #entity_types property.');
-    }
-    if (!is_array($element['#entity_types'])) {
-      throw new \InvalidArgumentException('The commerce_conditions_table #entity_types property must be an array.');
-    }
     if (!is_array($element['#default_value'])) {
       throw new \InvalidArgumentException('The commerce_conditions_table #default_value property must be an array.');
     }
-    /** @var \Drupal\commerce\ConditionManagerInterface $plugin_manager */
-    $plugin_manager = \Drupal::service('plugin.manager.commerce_condition');
-    $definitions = $plugin_manager->getFilteredDefinitions($element['#parent_entity_type'], $element['#entity_types']);
+    /** @var \Drupal\conditions_plugin_reference\ConditionManagerInterface $plugin_manager */
+    $plugin_manager = \Drupal::service('plugin.manager.conditions_plugin_reference');
+    $definitions = $plugin_manager->getFilteredDefinitions($element['#condition_types'] ?? []);
     $grouped_definitions = [];
     foreach ($definitions as $plugin_id => $definition) {
       $category = (string) $definition['category'];
@@ -132,6 +122,7 @@ class ConditionsTable extends FormElement {
         ],
       ],
       '#rows' => [],
+      // @todo differentiate elections and posts, and phases
       '#empty' => 'No conditions will be applied',
       // #input defaults to TRUE, which breaks file fields on the value form.
       // This table is used for visual grouping only, the element itself
@@ -139,7 +130,7 @@ class ConditionsTable extends FormElement {
       '#input' => FALSE,
     ];
 
-    $inline_form_manager = \Drupal::service('plugin.manager.commerce_inline_form');
+    $inline_form_manager = \Drupal::service('plugin.manager.conditions_inline_form');
 
     $max_weight = count($conditions);
     $renderer = \Drupal::getContainer()->get('renderer');
@@ -151,7 +142,7 @@ class ConditionsTable extends FormElement {
       // so we add an empty cell to guide it there, for better styling.
       $condition_form['#attributes']['class'][] = 'draggable';
       $inline_form = $inline_form_manager->createInstance('plugin_configuration', [
-        'plugin_type' => 'commerce_condition',
+        'plugin_type' => $condition['plugin_type'],
         'plugin_id' => $condition['plugin'],
         'plugin_configuration' => $condition['configuration'],
         'enforce_unique_parents' => FALSE,
@@ -246,6 +237,7 @@ class ConditionsTable extends FormElement {
         'class' => ['container-inline'],
       ],
     ];
+
     $element['add_new']['conditions_id'] = [
       '#title' => 'Select a condition',
       '#title_display' => 'invisible',
@@ -310,8 +302,8 @@ class ConditionsTable extends FormElement {
 
     $conditions = $form_state->get('condition_plugins');
 
-    /** @var \Drupal\commerce\ConditionManagerInterface $plugin_manager */
-    $plugin_manager = \Drupal::service('plugin.manager.commerce_condition');
+    /** @var \Drupal\conditions_plugin_reference\ConditionManagerInterface $plugin_manager */
+    $plugin_manager = \Drupal::service('plugin.manager.conditions_plugin_reference');
     $instance = $plugin_manager->createInstance($values['conditions_id']);
     assert($instance instanceof ConditionInterface);
 

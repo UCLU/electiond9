@@ -9,6 +9,13 @@ services:
         '@entity_type.manager',
         '@event_dispatcher',
       ]
+  conditions_plugin_reference.referenceable_plugin_types_subscriber:
+    class: \Drupal\conditions_plugin_reference\EventSubscriber\ReferenceablePluginTypesSubscriber
+    tags:
+      - { name: event_subscriber }
+  plugin.manager.conditions_inline_form:
+    class: Drupal\conditions_plugin_reference\InlineFormManager
+    arguments: ['@container.namespaces', '@cache.discovery', '@module_handler']
   conditions_plugin_reference.conditions_evaluator:
     class: Drupal\conditions_plugin_reference\ConditionsEvaluator
     arguments: ['@plugin.manager.conditions_plugin_reference']

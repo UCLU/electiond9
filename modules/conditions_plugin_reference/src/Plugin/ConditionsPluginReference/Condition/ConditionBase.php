@@ -31,14 +31,17 @@ abstract class ConditionBase extends PluginBase implements ConditionInterface {
   }
 
   /**
-   * Return true or false if access.
+   * Return true or false if condition is passed.
    *
    * @param string $phase
    *
    * @return boolean
    */
-  public function evaluate(EntityInterface $entity, $parameters = [], $return_reasons = FALSE) {
+  public function evaluate(EntityInterface $entity, $parameters = []) {
     $this->assertParameters($parameters);
+  }
+
+  public function getReasons(EntityInterface $entity, $parameters = []) {
   }
 
   /**
@@ -107,22 +110,8 @@ abstract class ConditionBase extends PluginBase implements ConditionInterface {
   /**
    * {@inheritdoc}
    */
-  public function getEntityTypeId() {
-    return $this->pluginDefinition['entity_type'];
-  }
-
-  /**
-   * Asserts that the given entity is of the expected type.
-   *
-   * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The entity.
-   */
-  protected function assertEntity(EntityInterface $entity) {
-    $entity_type_id = $entity->getEntityTypeId();
-    $condition_entity_type_id = $this->getEntityTypeId();
-    if ($entity_type_id != $condition_entity_type_id) {
-      throw new \InvalidArgumentException(sprintf('The condition requires a "%s" entity, but a "%s" entity was given.', $condition_entity_type_id, $entity_type_id));
-    }
+  public function getConditionSummary() {
+    // including config
   }
 
   /**

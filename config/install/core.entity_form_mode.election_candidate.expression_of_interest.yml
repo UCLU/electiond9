@@ -1,0 +1,9 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - election
+id: election_candidate.expression_of_interest
+label: 'Expression of interest'
+targetEntityType: election_candidate
+cache: true

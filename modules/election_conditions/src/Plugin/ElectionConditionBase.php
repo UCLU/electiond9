@@ -2,7 +2,6 @@
 
 namespace Drupal\election_conditions\Plugin;
 
-use Drupal\Component\Plugin\PluginBase;
 use Drupal\conditions_plugin_reference\Plugin\ConditionsPluginReference\Condition\ConditionBase;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
@@ -11,7 +10,7 @@ use Drupal\election\Entity\ElectionPost;
 /**
  * Base class for Election post condition plugin plugins.
  */
-abstract class ElectionPostConditionPluginBase extends ConditionBase implements ElectionPostConditionPluginInterface {
+abstract class ElectionConditionBase extends ConditionBase implements ElectionConditionInterface {
 
   public function requiredParameters(): array {
     return [

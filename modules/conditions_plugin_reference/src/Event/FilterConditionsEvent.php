@@ -17,23 +17,22 @@ class FilterConditionsEvent extends EventBase {
   protected $definitions;
 
   /**
-   * The parent entity type ID.
+   * The condition types..
    *
    * @var string
    */
-  protected $parentEntityTypeId;
+  protected $conditionTypes;
 
   /**
    * Constructs a new FilterConditionsEvent object.
    *
    * @param array $definitions
    *   The condition definitions.
-   * @param string $parent_entity_type_id
-   *   The parent entity type ID.
+   * @param array $field_types
    */
-  public function __construct(array $definitions, $parent_entity_type_id) {
+  public function __construct(array $definitions, array $condition_types) {
     $this->definitions = $definitions;
-    $this->parentEntityTypeId = $parent_entity_type_id;
+    $this->conditionTypes = $condition_types;
   }
 
   /**
@@ -65,7 +64,7 @@ class FilterConditionsEvent extends EventBase {
    * @return string
    *   The parent entity type ID.
    */
-  public function getParentEntityTypeId() {
-    return $this->parentEntityTypeId;
+  public function getConditionTypes() {
+    return $this->conditionTypes;
   }
 }

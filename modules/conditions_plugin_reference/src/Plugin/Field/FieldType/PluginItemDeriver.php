@@ -2,10 +2,9 @@
 
 namespace Drupal\conditions_plugin_reference\Plugin\Field\FieldType;
 
-use Drupal\commerce\Event\CommerceEvents;
-use Drupal\commerce\Event\ReferenceablePluginTypesEvent;
 use Drupal\Component\Plugin\Derivative\DeriverBase;
 use Drupal\conditions_plugin_reference\Event\ConditionsEvents;
+use Drupal\conditions_plugin_reference\Event\ReferenceablePluginTypesEvent;
 use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;

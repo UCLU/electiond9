@@ -46,6 +46,7 @@ class ElectionForm extends ContentEntityForm {
 
     // Hide and show fields:
     static::addStatusesStatesToForm($form);
+    static::addConditionStatesToForm($form);
 
     // Revisions handling:
     if (!$this->entity->isNew()) {

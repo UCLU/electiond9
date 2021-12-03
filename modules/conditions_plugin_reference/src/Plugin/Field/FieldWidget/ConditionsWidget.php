@@ -18,7 +18,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   id = "conditions_plugin_reference",
  *   label = @Translation("Conditions"),
  *   field_types = {
- *     "conditions_plugin_item:condition_plugin_reference"
+ *     "conditions_plugin_item"
  *   },
  *   multiple_values = TRUE
  * )
@@ -105,14 +105,6 @@ class ConditionsWidget extends WidgetBase implements ContainerFactoryPluginInter
     }, $entity_types);
 
     $element = [];
-    $element['entity_types'] = [
-      '#type' => 'checkboxes',
-      '#title' => $this->t('Entity types'),
-      '#options' => $entity_types,
-      '#default_value' => $this->getSetting('entity_types'),
-      '#description' => $this->t('Only conditions matching the specified entity types will be displayed.'),
-      '#required' => TRUE,
-    ];
 
     return $element;
   }
@@ -122,21 +114,6 @@ class ConditionsWidget extends WidgetBase implements ContainerFactoryPluginInter
    */
   public function settingsSummary() {
     $summary = [];
-    $selected_entity_types = array_filter($this->getSetting('entity_types'));
-    if (!empty($selected_entity_types)) {
-      $entity_types = $this->entityTypeManager->getDefinitions();
-      $entity_types = array_filter($entity_types, function ($entity_type) use ($selected_entity_types) {
-        /** @var \Drupal\Core\Entity\EntityType $entity_type */
-        return in_array($entity_type->id(), $selected_entity_types);
-      });
-      $entity_types = array_map(function ($entity_type) {
-        /** @var \Drupal\Core\Entity\EntityType $entity_type */
-        return $entity_type->getLabel();
-      }, $entity_types);
-
-      $summary[] = $this->t('Entity types: @entity_types', ['@entity_types' => implode(', ', $entity_types)]);
-    }
-
     return $summary;
   }
 
@@ -153,7 +130,7 @@ class ConditionsWidget extends WidgetBase implements ContainerFactoryPluginInter
     }
 
     $element['form'] = [
-      '#type' => 'commerce_conditions',
+      '#type' => 'conditions_plugin_reference',
       '#title' => $this->fieldDefinition->getLabel(),
       '#default_value' => $values,
       '#parent_entity_type' => $this->fieldDefinition->getTargetEntityTypeId(),

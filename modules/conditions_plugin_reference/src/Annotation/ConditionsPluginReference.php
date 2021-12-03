@@ -8,7 +8,7 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
 /**
  * Defines the condition plugin annotation object.
  *
- * Plugin namespace: Plugin\ConditionsPluginReference\Condition.
+ * Plugin namespace: Plugin\Condition.
  *
  * @Annotation
  */
@@ -54,26 +54,11 @@ class ConditionsPluginReference extends Plugin {
   public $category;
 
   /**
-   * The condition entity type ID.
+   * Condition types the plugin represents.
    *
-   * This is the entity type ID of the entity passed to the plugin during
-   * evaluation. For example: 'commerce_order'.
-   *
-   * @var string
+   * @var array
    */
-  public $entity_type;
-
-  /**
-   * The parent entity type ID.
-   *
-   * This is the entity type ID of the entity that embeds the conditions.
-   * For example: 'commerce_promotion'.
-   *
-   * When specified, a condition will only be available on that entity type.
-   *
-   * @var string
-   */
-  public $parent_entity_type;
+  public $condition_types;
 
   /**
    * The condition weight.

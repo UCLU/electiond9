@@ -1,21 +1,25 @@
 <?php
 
-namespace Drupal\election_conditions\Plugin;
+namespace Drupal\election_conditions\Plugin\ConditionsPluginReference\Condition;
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\election_conditions\Plugin\ElectionConditionBase;
 
 /**
  * Condition.
  *
  * @ConditionsPluginReference(
  *   id = "election_user_role",
+ *   condition_types = {
+ *     "election",
+ *   },
  *   label = @Translation("User role(s)"),
  *   display_label = @Translation("User has specific user role(s)"),
  *   category = @Translation("Users"),
  *   weight = 0,
  * )
  */
-class UserRole extends ElectionPostConditionPluginBase {
+class UserRole extends ElectionConditionBase {
 
   /**
    * {@inheritdoc}

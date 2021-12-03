@@ -17,12 +17,14 @@ use Drupal\Core\Form\FormStateInterface;
  *   id = "conditions_plugin_reference_conditions_table",
  *   label = @Translation("Conditions Table"),
  *   field_types = {
- *     "conditions_plugin_item:condition_plugin_reference"
+ *     "conditions_plugin_item"
  *   },
  *   multiple_values = TRUE
  * )
  */
 class ConditionsTable extends ConditionsWidget {
+
+  const CONDITION_TYPES = [];
 
   /**
    * {@inheritdoc}
@@ -30,6 +32,7 @@ class ConditionsTable extends ConditionsWidget {
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
     $element = parent::formElement($items, $delta, $element, $form, $form_state);
     $element['form']['#type'] = 'conditions_plugin_reference_table';
+    $element['form']['#condition_types'] = static::CONDITION_TYPES;
     return $element;
   }
 

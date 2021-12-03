@@ -31,15 +31,7 @@ interface ConditionInterface extends ConfigurableInterface, DependentPluginInter
    */
   public function getDisplayLabel();
 
-  /**
-   * Gets the condition entity type ID.
-   *
-   * This is the entity type ID of the entity passed to evaluate().
-   *
-   * @return string
-   *   The condition's entity type ID.
-   */
-  public function getEntityTypeId();
+  public function getConditionSummary();
 
   /**
    * Evaluates the condition.
@@ -50,7 +42,9 @@ interface ConditionInterface extends ConfigurableInterface, DependentPluginInter
    * @return bool
    *   TRUE if the condition has been met, FALSE otherwise.
    */
-  public function evaluate(EntityInterface $entity, $parameters = [], $return_reasons = FALSE);
+  public function evaluate(EntityInterface $entity, $parameters = []);
+
+  public function getReasons(EntityInterface $entity, $parameters = []);
 
   public function requiredParameters();
 

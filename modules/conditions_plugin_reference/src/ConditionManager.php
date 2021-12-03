@@ -15,7 +15,6 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 /**
  * Manages discovery and instantiation of condition plugins.
  *
- * @see \Drupal\commerce\Annotation\CommerceCondition
  * @see plugin_api
  */
 class ConditionManager extends DefaultPluginManager implements ConditionManagerInterface {
@@ -52,10 +51,16 @@ class ConditionManager extends DefaultPluginManager implements ConditionManagerI
    *   The event dispatcher.
    */
   public function __construct(\Traversable $namespaces, CacheBackendInterface $cache_backend, ModuleHandlerInterface $module_handler, EntityTypeManagerInterface $entity_type_manager, EventDispatcherInterface $event_dispatcher) {
-    parent::__construct('Plugin/Commerce/Condition', $namespaces, $module_handler, 'Drupal\commerce\Plugin\Commerce\Condition\ConditionInterface', 'Drupal\commerce\Annotation\CommerceCondition');
+    parent::__construct(
+      'Plugin/ConditionsPluginReference/Condition',
+      $namespaces,
+      $module_handler,
+      'Drupal\conditions_plugin_reference\Plugin\Condition\ConditionInterface',
+      'Drupal\conditions_plugin_reference\Annotation\ConditionsPluginReference'
+    );
 
-    $this->alterInfo('commerce_condition_info');
-    $this->setCacheBackend($cache_backend, 'commerce_condition_plugins');
+    $this->alterInfo('conditions_plugin_reference_info');
+    $this->setCacheBackend($cache_backend, 'conditions_plugin_reference_plugins');
     $this->entityTypeManager = $entity_type_manager;
     $this->eventDispatcher = $event_dispatcher;
   }
@@ -66,40 +71,30 @@ class ConditionManager extends DefaultPluginManager implements ConditionManagerI
   public function processDefinition(&$definition, $plugin_id) {
     parent::processDefinition($definition, $plugin_id);
 
-    foreach (['id', 'label', 'entity_type'] as $required_property) {
+    foreach (['id', 'label'] as $required_property) {
       if (empty($definition[$required_property])) {
         throw new PluginException(sprintf('The condition "%s" must define the "%s" property.', $plugin_id, $required_property));
       }
-    }
-
-    $entity_type_id = $definition['entity_type'];
-    if (!$this->entityTypeManager->getDefinition($entity_type_id)) {
-      throw new PluginException(sprintf('The condition "%s" must specify a valid entity type, "%s" given.', $plugin_id, $entity_type_id));
     }
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getFilteredDefinitions($parent_entity_type_id, array $entity_type_ids) {
+  public function getFilteredDefinitions(array $condition_types = []) {
     $definitions = $this->getDefinitions();
     foreach ($definitions as $plugin_id => $definition) {
       // Filter by entity type.
-      if (!in_array($definition['entity_type'], $entity_type_ids)) {
+      if (count($condition_types) > 0 && count(array_intersect($definition['condition_types'], $condition_types)) == 0) {
         unset($definitions[$plugin_id]);
         continue;
       }
-      // Filter by parent_entity_type, if specified by the plugin.
-      if (!empty($definition['parent_entity_type'])) {
-        if ($definition['parent_entity_type'] != $parent_entity_type_id) {
-          unset($definitions[$plugin_id]);
-        }
-      }
     }
+
     // Allow modules to filter the condition list.
-    $event = new FilterConditionsEvent($definitions, $parent_entity_type_id);
+    $event = new FilterConditionsEvent($definitions, $condition_types);
     $this->eventDispatcher->dispatch(ConditionsEvents::FILTER_CONDITIONS, $event);
-    $definitions = $event->getDefinitions();
+
     // Sort by weigh and display label.
     uasort($definitions, function ($a, $b) {
       if ($a['weight'] == $b['weight']) {

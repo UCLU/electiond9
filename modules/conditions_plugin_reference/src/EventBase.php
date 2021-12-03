@@ -13,7 +13,7 @@ if (!class_exists('Drupal\Component\EventDispatcher\Event')) {
 use Drupal\Component\EventDispatcher\Event;
 
 /**
- * Provides a base event class for Commerce events.
+ * Provides a base event class for Conditions events.
  */
 class EventBase extends Event {
 }
