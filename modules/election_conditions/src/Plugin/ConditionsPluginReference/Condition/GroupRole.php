@@ -13,8 +13,8 @@ use Drupal\election_conditions\Plugin\ElectionConditionBase;
  *   condition_types = {
  *     "election",
  *   },
- *   label = @Translation("User has role in group"),
- *   display_label = @Translation("User has role in group "),
+ *   label = @Translation("User has role(s) in group(s)"),
+ *   display_label = @Translation("User has role(s) in group(s)"),
  *   category = @Translation("Group memberships"),
  *   weight = 0,
  * )
@@ -40,10 +40,14 @@ class GroupRole extends ElectionConditionBase {
 
     $groupOptions = [];
     $form['groups'] = [
-      '#type' => 'select',
       '#title' => $this->t('Groups'),
-      '#options' => $groupOptions,
+      '#type' => 'entity_autocomplete',
+      '#target_type' => 'group',
+      '#tags' => TRUE,
       '#default_value' => $this->configuration['groups'],
+      '#attributes' => [
+        'class' => ['container-inline'],
+      ],
     ];
     $form['groups_any_or_all'] = [
       '#type' => 'select',
@@ -55,16 +59,15 @@ class GroupRole extends ElectionConditionBase {
       '#default_value' => $this->configuration['groups_any_or_all'],
     ];
 
-    $roles = [];
-    $roleOptions = [];
-    foreach ($roles as $role) {
-      $roleOptions[$role->id()] = $role->label();
-    }
     $form['group_roles'] = [
-      '#type' => 'select',
       '#title' => $this->t('Group roles'),
-      '#options' => $roleOptions,
+      '#type' => 'entity_autocomplete',
+      '#target_type' => 'group_role',
+      '#tags' => TRUE,
       '#default_value' => $this->configuration['group_roles'],
+      '#attributes' => [
+        'class' => ['container-inline'],
+      ],
     ];
 
     $form['group_roles_any_or_all'] = [

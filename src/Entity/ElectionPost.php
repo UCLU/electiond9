@@ -566,7 +566,7 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
 
     $phases = $this->getElection()->getEnabledPhases();
     foreach ($phases as $phase) {
-      $eligibleForPhase = $eligibilityService->checkEligibility($account, $this, $phase, TRUE, FALSE);
+      $eligibleForPhase = $eligibilityService->evaluateEligibility($account, $this, $phase, TRUE);
       if ($eligibleForPhase) {
         $url = Url::fromRoute('entity.election_post.' . $phase, ['election_post' => $this->id()]);
         if ($url) {
@@ -600,6 +600,16 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
         }
       }
     }
+
+    // Eligibility button:
+    $url = Url::fromRoute('entity.election_post.eligibility', [
+      'election_post' => $this->id(),
+    ]);
+    $actions[] = [
+      'title' => t('Your eligibility'),
+      'link' => $url->toString(),
+      'button_type' => 'secondary',
+    ];
 
     return $actions;
   }
@@ -664,8 +674,8 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
     return $postConditions;
   }
 
-  public function formatEligibilityReasons(array $reasons) {
-    $formattedReasons = [];
+  public function formatEligibilityRequirements(array $requirements, $onlyFailedRequirements = FALSE) {
+    $formattedRequirements = [];
 
     $election = $this->getElection();
 
@@ -675,35 +685,49 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
       '%electionName' => $election->label(),
     ];
 
-    $reasonDefinitions = [
-      'already_voting' => ['Already voted', $params],
-      'already_nominations' => ['Already nominated', $params],
-      'already_interest' => ['Already expressed interest', $params],
-      'not_logged_in' => ['Not logged in', $params],
-      'not_enough_candidates' => ['Not enough candidates', $params],
-      'no_permission_voting' => ['No permission to vote', $params],
-      'election_post_not_published' => ['%positionTypeName not published', $params],
-      'election_not_published' => ['%electionName not published', $params],
-      'interest_not_enabled' => ['Expressions of interest not enabled', $params],
-      'interest_not_open_election' => ['Expressions of interest not open for election %electionName', $params],
-      'interest_not_open_election_post' => ['Expressions of interest not open for %positionTypeName %positionName', $params],
-      'nominations_not_enabled' => ['Nominations not enabled', $params],
-      'nominations_not_open_election' => ['Nominations not open for election %electionName', $params],
-      'nominations_not_open_election_post' => ['Nominations not open for %positionTypeName %positionName', $params],
-      'voting_not_enabled' => ['Voting not enabled', $params],
-      'voting_not_open_election' => ['Voting not open for election %electionName', $params],
-      'voting_not_open_election_post' => ['Voting not open for %positionTypeName %positionName', $params],
+    $requirementDefinitions = [
+      'logged_in' => ['Logged in', $params],
+      'enough_candidates' => ['Enough candidates', $params],
+      'election_post_published' => ['%positionName %positionTypeName published', $params],
+      'election_published' => ['%electionName election published', $params],
     ];
 
+    $phases = Election::ELECTION_PHASES;
+    foreach ($phases as $phase) {
+      $params['@phaseName'] = Election::getPhaseName($phase);
+      $params['@phaseAction'] = strtolower(Election::getPhaseAction($phase));
+      $params['@phasePastTense'] = strtolower(Election::getPhaseActionPastTense($phase));
+      $requirementDefinitions += [
+        'not_already_' . $phase => ['Not already @phasePastTense', $params],
+        'permission_' . $phase => ['User has general permission to @phaseAction in elections', $params],
+        $phase . '_enabled' => ['@phaseName enabled', $params],
+        $phase . '_open_election' => ['@phaseName open for election %electionName', $params],
+        $phase . '_open_election_post' => ['@phaseName open for %positionTypeName %positionName', $params],
+      ];
+    }
+
     // @todo translate nicely
-    foreach ($reasons as $reason) {
-      if (isset($reasonDefinitions[$reason])) {
-        $formattedReasons[] = t(
-          $reasonDefinitions[$reason][0],
-          $reasonDefinitions[$reason][1],
-        );
+    foreach ($requirements as $requirement => $pass) {
+      if ($onlyFailedRequirements && $pass) {
+        continue;
+      }
+      if (isset($requirementDefinitions[$requirement])) {
+        $formattedRequirements[$requirement] =
+          [
+            'title' => t(
+              $requirementDefinitions[$requirement][0],
+              $requirementDefinitions[$requirement][1],
+            ),
+            'pass' => $pass
+          ];
       }
     }
-    return $formattedReasons;
+
+    // sort by pass
+    usort($formattedRequirements, function ($a, $b) {
+      return $a['pass'] - $b['pass'];
+    });
+
+    return $formattedRequirements;
   }
 }

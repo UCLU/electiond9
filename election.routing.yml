@@ -72,3 +72,17 @@ entity.election_post.interest:
       election_post:
         type: entity:election_post
     _admin_route: FALSE
+
+entity.election_post.eligibility:
+  path: '/election/post/{election_post}/eligibility'
+  defaults:
+    _controller: '\Drupal\election\Controller\ElectionPostController::getEligibilitySummary'
+    _title: 'Your eligibility'
+  requirements:
+    _entity_access: 'election_post.view'
+  options:
+    parameters:
+      election_post:
+        type: entity:election_post
+    _admin_route: FALSE
+    no_cache: 'TRUE'

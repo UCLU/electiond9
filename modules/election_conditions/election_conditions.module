@@ -1,3 +1,15 @@
 <?php
 
 use Drupal\Core\Form\FormStateInterface;
+
+function election_conditions_election_postform_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  if (isset($form['conditions_inherit_election'])) {
+    $election_post = $form_state->getFormObject()->getEntity();
+    $election = $election_post->getElection();
+    // @todo get conditions for each phase
+    $conditions = '';
+    $form['conditions_inherit_election']['#suffix'] = t('Current conditions for the election are: @conditions', [
+      '@conditions' => $conditions,
+    ]);
+  }
+}

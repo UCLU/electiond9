@@ -59,7 +59,7 @@ class ElectionBallotAccessControlHandler extends EntityAccessControlHandler {
     }
     $election_post = ElectionPost::load($contexts['election_post']->getContextValue());
 
-    $ineligibility_reasons = $eligibilityService->checkEligibility($account, $election_post, 'voting', TRUE, TRUE);
+    $ineligibility_reasons = $eligibilityService->evaluateEligibilityRequirements($account, $election_post, 'voting', TRUE, TRUE);
     return AccessResult::allowedIf(count($ineligibility_reasons) == 0);
   }
 }

@@ -61,11 +61,13 @@ class RedirectOn403Subscriber extends HttpExceptionSubscriberBase {
       } else {
         $phase = substr($route_name, strrpos($route_name, '.') + 1);
       }
-      $reasons = ElectionPostEligibilityChecker::checkEligibility($this->currentUser, $election_post, $phase, TRUE, TRUE, TRUE);
 
-      if (count($reasons) > 0) {
-        $message = t('You cannot currently access this post due to the following conditions: @reasons', [
-          '@reasons' => implode(', ', $reasons),
+      $requirements = ElectionPostEligibilityChecker::evaluateEligibilityRequirements($this->currentUser, $election_post, $phase, TRUE, TRUE);
+      $formattedFailedRequirements = $election_post->formatEligibilityRequirements($requirements, TRUE);
+
+      if (!ElectionPostEligibilityChecker::checkRequirementsForEligibility($requirements)) {
+        $message = t('You cannot currently access this post due to not meeting the following requirements: @requirements', [
+          '@requirements' => implode(', ', array_column($formattedFailedRequirements, 'title')),
         ]);
         \Drupal::messenger()->addError($message);
         $uri = Url::fromRoute(

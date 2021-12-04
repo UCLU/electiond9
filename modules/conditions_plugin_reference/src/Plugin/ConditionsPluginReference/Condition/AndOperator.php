@@ -11,7 +11,7 @@ use Drupal\Core\Session\AccountInterface;
  *
  * @ConditionsPluginReference(
  *   id = "conditions_plugin_reference_and_operator",
- *   label = @Translation("And Operator"),
+ *   label = @Translation("And group (all conditions must be true)"),
  *   category = @Translation("Conditions"),
  * )
  */

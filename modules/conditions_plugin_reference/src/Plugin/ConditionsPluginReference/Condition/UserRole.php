@@ -4,7 +4,9 @@ namespace Drupal\conditions_plugin_reference\Plugin\ConditionsPluginReference\Co
 
 use Drupal\conditions_plugin_reference\Annotation\ConditionsPluginReference;
 use Drupal\conditions_plugin_reference\Plugin\ConditionsPluginReference\Condition\ConditionBase;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\user\Entity\Role;
 
 /**
@@ -26,6 +28,7 @@ class UserRole extends ConditionBase {
   public function defaultConfiguration() {
     return [
       'user_roles' => [],
+      'user_roles_any_all' => '',
     ] + parent::defaultConfiguration();
   }
 
@@ -47,6 +50,15 @@ class UserRole extends ConditionBase {
       '#options' => $roleOptions,
       '#default_value' => $this->configuration['user_roles'],
     ];
+    $form['user_roles_any_all'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Require any or all of these roles'),
+      '#options' => [
+        'any' => 'Any of these role(s)',
+        'all' => 'All of these role(s)',
+      ],
+      '#default_value' => $this->configuration['user_roles_any_all'],
+    ];
 
     return $form;
   }
@@ -60,5 +72,36 @@ class UserRole extends ConditionBase {
     $values = $form_state->getValue($form['#parents']);
     // $role_ids = array_column($values['user_roles'], 'target_id');
     $this->configuration['user_roles'] = $values['user_roles'];
+    $this->configuration['user_roles_any_all'] = $values['user_roles_any_all'];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function evaluateRequirements(EntityInterface $entity, AccountInterface $account, $parameters = []) {
+    $requirements = parent::evaluateRequirements($entity, $account, $parameters);
+
+    $rolesToCheck = $this->configuration['user_roles'];
+    $userRoles = $account->getRoles();
+
+    if ($this->configuration['user_roles_any_all'] == 'any') {
+      // Any:
+      $requirements['has_any_roles'] = [
+        'title' => t('User has any of the following roles: @roles', [
+          '@roles' => implode(', ', $rolesToCheck),
+        ]),
+        'pass' => count(array_intersect($rolesToCheck, $userRoles)) > 0,
+      ];
+    } else {
+      // All:
+      $requirements['has_all_roles'] = [
+        'title' => t('User has all the following roles: @roles', [
+          '@roles' => implode(', ', $rolesToCheck),
+        ]),
+        'pass' => count(array_intersect($rolesToCheck, $userRoles)) == count($rolesToCheck),
+      ];
+    }
+
+    return $requirements;
   }
 }

@@ -117,5 +117,4 @@ function election_views_query_alter(ViewExecutable $view, QueryPluginBase $query
 }
 
 function election_form_alter($form) {
-  // dd($form['field_a']);
 }

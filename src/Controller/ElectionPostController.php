@@ -6,7 +6,9 @@ use Drupal\Component\Utility\Xss;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Url;
+use Drupal\election\Entity\Election;
 use Drupal\election\Entity\ElectionPostInterface;
+use Drupal\election\Service\ElectionPostEligibilityChecker;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -200,6 +202,42 @@ class ElectionPostController extends ControllerBase implements ContainerInjectio
       '#rows' => $rows,
       '#header' => $header,
     ];
+
+    return $build;
+  }
+
+  /**
+   * Generates an overview table of older revisions of a Election post.
+   *
+   * @param \Drupal\election\Entity\ElectionPostInterface $election_post
+   *   A Election post object.
+   *
+   * @return array
+   *   An array as expected by drupal_render().
+   */
+  public function getEligibilitySummary(ElectionPostInterface $election_post) {
+    $account = $this->currentUser();
+
+    $phases = $election_post->getElection()->getEnabledPhases();
+    foreach ($phases as $phase) {
+      $requirements = ElectionPostEligibilityChecker::evaluateEligibilityRequirements($account, $election_post, $phase, TRUE, TRUE);
+      $formattedRequirements = $election_post->formatEligibilityRequirements($requirements);
+
+      $rows = [];
+      foreach ($formattedRequirements as $formattedRequirement) {
+        $rows[] = [
+          'Pass' => $formattedRequirement['pass'] ? '✔️' : '❌',
+          'Requirement' => $formattedRequirement['title'],
+        ];
+      }
+
+      $build['requirements_table_' . $phase] = [
+        '#theme' => 'table',
+        '#caption' => Election::getPhaseName($phase),
+        '#rows' => $rows,
+        '#header' => count($rows) > 0 ? array_keys($rows[0]) : [],
+      ];
+    }
 
     return $build;
   }

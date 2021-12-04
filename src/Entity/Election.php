@@ -131,7 +131,20 @@ class Election extends EditorialContentEntityBase implements ElectionInterface {
         return t('Nominate');
 
       case 'voting':
-        return t('Vote now');
+        return t('Vote');
+    }
+  }
+
+  public static function getPhaseActionPastTense($phase) {
+    switch ($phase) {
+      case 'interest':
+        return t('Expressed interest');
+
+      case 'nominations':
+        return t('Nominated');
+
+      case 'voting':
+        return t('Voted');
     }
   }
 
@@ -502,7 +515,7 @@ class Election extends EditorialContentEntityBase implements ElectionInterface {
       foreach ($postIds as $postId) {
         // @todo this should be cached within the service,
         // but we could also cache it in getNextPostId.
-        if ($eligibilityService->checkEligibility($account, ElectionPost::load($postId), 'voting', TRUE, FALSE)) {
+        if ($eligibilityService->evaluateEligibility($account, ElectionPost::load($postId), 'voting', TRUE)) {
           $eligiblePostIds[] = $postId;
         }
       }

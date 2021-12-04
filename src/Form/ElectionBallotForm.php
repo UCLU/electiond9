@@ -55,7 +55,7 @@ class ElectionBallotForm extends ContentEntityForm {
 
     $election = $election_post->getElection();
 
-    $eligible = ElectionPostEligibilityChecker::checkEligibility(\Drupal::currentUser(), $election_post, 'voting', TRUE, FALSE, TRUE);
+    $eligible = ElectionPostEligibilityChecker::evaluateEligibility(\Drupal::currentUser(), $election_post, 'voting', TRUE);
     if (!$eligible) {
       \Drupal::messenger()->addMessage(t('Not eligible for %position.', [
         '%position' => $election_post->label(),

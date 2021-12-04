@@ -45,7 +45,7 @@ interface ConditionInterface extends ConfigurableInterface, DependentPluginInter
    */
   public function evaluate(EntityInterface $entity, AccountInterface $account, $parameters = []);
 
-  public function getReasons(EntityInterface $entity, AccountInterface $account, $parameters = []);
+  public function evaluateRequirements(EntityInterface $entity, AccountInterface $account, $parameters = []);
 
   public function requiredParameters();
 

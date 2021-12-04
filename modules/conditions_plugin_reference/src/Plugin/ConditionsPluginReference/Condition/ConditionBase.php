@@ -41,11 +41,34 @@ abstract class ConditionBase extends PluginBase implements ConditionInterface {
    * @return boolean
    */
   public function evaluate(EntityInterface $entity, AccountInterface $account, $parameters = []) {
-    // dd($parameters);
     $this->assertParameters($parameters);
+    $requirements = $this->evaluateRequirements($entity, $account, $parameters);
+    $hasFailingRequirement = in_array(FALSE, array_column($requirements, 'pass'));
+    return !$hasFailingRequirement;
   }
 
-  public function getReasons(EntityInterface $entity, AccountInterface $account, $parameters = []) {
+  /**
+   * Returns an array with key being requirements and value beeing a boolean if they have been met.
+   *
+   * e.g. [
+   *   'requirement_id' => [
+   *     'title' => t('Example'),
+   *     'pass' => FALSE,
+   *   ],
+   * ];
+   *
+   * @param EntityInterface $entity
+   * @param AccountInterface $account
+   * @param array $parameters
+   *
+   * @return array
+   */
+  public function evaluateRequirements(EntityInterface $entity, AccountInterface $account, $parameters = []) {
+    $this->assertParameters($parameters);
+
+
+
+    return [];
   }
 
   /**

@@ -16,6 +16,15 @@ use \Drupal\user\Entity\User;
  */
 class ElectionPostEligibilityChecker {
 
+  public static function evaluateEligibility(AccountInterface $account, ElectionPostInterface $election_post, string $phase, $includePhaseStatus = FALSE, $refresh = FALSE) {
+    $requirements = static::evaluateEligibilityRequirements($account, $election_post, $phase, $includePhaseStatus, $refresh);
+    return static::checkRequirementsForEligibility($requirements);
+  }
+
+  public static function checkRequirementsForEligibility($requirements) {
+    return !in_array(FALSE, array_values($requirements));
+  }
+
   /**
    * Return either TRUE, or FALSE or an array of reasons why a user cannot vote
    *
@@ -28,89 +37,81 @@ class ElectionPostEligibilityChecker {
    *   Whether to include the phase being opened or closed as an elibility criteria.
    *   Set TRUE for hard checks like access,
    *   FALSE for soft checks where you need to differentiate.
-   * @param boolean $return_reasons
    * @return boolean|array
    */
-  public static function checkEligibility(AccountInterface $account, ElectionPostInterface $election_post, string $phase, $includePhaseStatus = FALSE, $return_reasons = FALSE, $refresh = FALSE) {
+  public static function evaluateEligibilityRequirements(AccountInterface $account, ElectionPostInterface $election_post, string $phase, $includePhaseStatus = FALSE, $refresh = FALSE) {
     // Sort out caching
     $cid_components = [
-      'election_post',
+      'evaluateEligibilityRequirements',
       $election_post->id(),
       $account->id(),
       $phase,
       ($includePhaseStatus ? 'ps' : ''),
-      ($return_reasons ? 'r' : 'b'),
     ];
     $cid = implode(':', $cid_components);
 
     // Return cache data if we have it and we're not refreshing:
     if (!$refresh && $cache = \Drupal::cache('election')->get($cid)) {
-      $data = $cache->data;
+      $requirements = $cache->data;
     } else {
       $account = User::load($account->id());
       $election = $election_post->getElection();
 
-      $reasons = [];
-      $eligible = TRUE;
+      $requirements = [];
 
-      if (!$election_post->isPublished()) {
-        $eligible = FALSE;
-        $reasons[] = 'election_post_not_published';
-      }
-
-      if (!$election->isPublished()) {
-        $eligible = FALSE;
-        $reasons[] = 'election_not_published';
+      $requirements['election_published'] = $election->isPublished();
+      if ($requirements['election_published']) {
+        $requirements['election_post_published'] = $election_post->isPublished();
       }
 
       // Check if have 'create nominations' or equivalent permission, and allow access to nomination (but not voting) if so
       // TODO
 
-      if ($phase == 'voting' && !$account->hasPermission('add election ballot entities')) {
-        $eligible = FALSE;
-        $reasons[] = 'no_permission_voting';
-      }
-
       $electionPhases = $election->getEnabledPhases();
-      if (!in_array($phase, $electionPhases)) {
-        $eligible = FALSE;
-        $reasons[] = $phase . '_not_enabled';
-      }
+      $requirements[$phase . '_enabled'] = in_array($phase, $electionPhases);
 
       if ($includePhaseStatus) {
         $electionStatus = $election->getPhaseStatuses();
-        if ($electionStatus[$phase] != 'open') {
-          $eligible = FALSE;
-          $reasons[] = $phase . '_not_open_election';
-        }
+        $requirements[$phase . '_open_election'] = $electionStatus[$phase] == 'open';
 
-        $postStatus = $election_post->getPhaseStatuses($phase);
-        if ($postStatus[$phase] != 'open') {
-          $eligible = FALSE;
-          $reasons[] = $phase . '_not_open_election_post';
+        if ($requirements[$phase . '_open_election']) {
+          $postStatus = $election_post->getPhaseStatuses($phase);
+          $requirements[$phase . '_open_election_post'] = $postStatus[$phase] == 'open';
         }
-      }
-
-      // @todo check number of candidates
-      $candidates = $election_post->getCandidatesForVoting();
-      if (count($candidates) == 0) {
-        $reasons[] = 'not_enough_candidates';
       }
 
       // Check if logged in:
       // @TODO is there a use case for anonymous users voting?
-      if (\Drupal::currentUser()->isAnonymous()) {
-        $eligible = FALSE;
-        $reasons[] = 'not_logged_in';
-      } else {
-        if ($phase == 'voting' && static::ballotExists($account, $election_post)) {
-          $eligible = FALSE;
-          $reasons[] = 'already_voting';
+      $requirements['logged_in'] = !\Drupal::currentUser()->isAnonymous();
+
+      if ($phase == 'interest') {
+        $requirements['permission_interest'] = $account->hasPermission('express interest in posts');
+        if ($requirements['logged_in']) {
+          if ($election_post->get('limit_to_one_nomination_per_user')->value && static::interestExists($account, $election_post)) {
+            $requirements['not_already_interest'] = static::ballotExists($account, $election_post);
+          }
         }
-        if ($phase == 'nominations' && $election_post->get('limit_to_one_nomination_per_user')->value && static::nominationExists($account, $election_post)) {
-          $eligible = FALSE;
-          $reasons[] = 'already_nominations';
+      }
+
+      if ($phase == 'nominations') {
+        $requirements['permission_nominations'] = $account->hasPermission('nominate for posts');
+        if ($requirements['logged_in']) {
+          if ($election_post->get('limit_to_one_nomination_per_user')->value && static::nominationExists($account, $election_post)) {
+            $requirements['not_already_nominations'] = static::ballotExists($account, $election_post);
+          }
         }
+      }
+
+      if ($phase == 'voting') {
+        $requirements['permission_voting'] = $account->hasPermission('vote');
+
+        if ($requirements['logged_in']) {
+          $requirements['not_already_voting'] = static::ballotExists($account, $election_post);
+        }
+
+        // @todo check number of candidates
+        $candidates = $election_post->getCandidatesForVoting();
+        $requirements['enough_candidates'] = count($candidates) > 0;
       }
 
       if (\Drupal::moduleHandler()->moduleExists('election_conditions')) {
@@ -119,19 +120,12 @@ class ElectionPostEligibilityChecker {
         // Check all  conditions:
         if (count($conditions) > 0) {
           foreach ($conditions as $condition) {
-            $conditionReason = $condition->evaluate($election_post, $account, ['phase' => $phase]);
-            if ($conditionReason && count($conditionReason) > 0) {
-              $reasons = array_merge($reasons, $conditionReason);
-              $eligible = FALSE;
+            $conditionRequirements = $condition->evaluateRequirements($election_post, $account, ['phase' => $phase]);
+            if ($conditionRequirements && count($conditionRequirements) > 0) {
+              $requirements = array_merge($requirements, $conditionRequirements);
             }
           }
         }
-      }
-
-      if ($return_reasons) {
-        $data = $reasons;
-      } else {
-        $data = $eligible;
       }
 
       // @todo $tags = get cache tags for conditions
@@ -139,9 +133,9 @@ class ElectionPostEligibilityChecker {
       // For now this. We want this to be more intelligent.
       $tags = $election_post->getUserEligibilityCacheTags($account, $phase);
 
-      \Drupal::cache('election')->set($cid, $data, Cache::PERMANENT, $tags);
+      \Drupal::cache('election')->set($cid, $requirements, Cache::PERMANENT, $tags);
     }
-    return $data;
+    return $requirements;
   }
 
   public static function ballotExists($account, $election_post) {
@@ -150,9 +144,15 @@ class ElectionPostEligibilityChecker {
   }
 
   public static function nominationExists($account, $election_post) {
-    $nominations = ElectionCandidate::loadByUserAndPost($account, $election_post);
+    $nominations = ElectionCandidate::loadByUserAndPost($account, $election_post, ['hopeful']);
     return count($nominations) > 0;
   }
+
+  public static function interestExists($account, $election_post) {
+    $nominations = ElectionCandidate::loadByUserAndPost($account, $election_post, ['interest']);
+    return count($nominations) > 0;
+  }
+
 
   /**
    * For all posts currently open or soon to be open, refresh the user's eligibility
@@ -213,8 +213,7 @@ class ElectionPostEligibilityChecker {
    */
   public static function recalculateEligibility($account, $post) {
     foreach (Election::ELECTION_PHASES as $phase) {
-      $boolean = ElectionPostEligibilityChecker::checkEligibility($account, $post, $phase, TRUE, FALSE, TRUE);
-      $reasons = ElectionPostEligibilityChecker::checkEligibility($account, $post, $phase, TRUE, TRUE, TRUE);
+      ElectionPostEligibilityChecker::evaluateEligibility($account, $post, $phase, TRUE, TRUE);
     }
     return TRUE;
   }

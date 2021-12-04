@@ -266,15 +266,18 @@ trait ElectionStatusesTrait {
       }
 
       foreach ($posts as $post) {
-        $ineligibility_reasons = $eligibilityService->checkEligibility($account, $post, $phase, FALSE, TRUE, $debug);
+        $requirements = $eligibilityService->evaluateEligibilityRequirements($account, $post, $phase, FALSE, $debug);
         $result[$phase]['ineligibility_reasons'] =  [];
         $result[$phase]['already_' . $phase] = FALSE;
 
-        if (count($ineligibility_reasons) > 0) {
+        if (!$eligibilityService->checkRequirementsForEligibility($requirements)) {
           $result[$phase]['eligible'] = FALSE;
           $result[$phase]['eligibility_label'] = t('Not eligible to @action', ['@action' => strtolower(Election::getPhaseAction($phase))]);
-          $result[$phase]['ineligibility_reasons'] = $post->formatEligibilityReasons($ineligibility_reasons);
-          $result[$phase]['already_' . $phase] = in_array('already_' . $phase, $ineligibility_reasons);
+
+          $result[$phase]['already_' . $phase] = in_array('already_' . $phase, $requirements);
+
+          $formattedFailedRequirements = $post->formatEligibilityRequirements($requirements, TRUE);
+          $result[$phase]['ineligibility_reasons'] = array_column($formattedFailedRequirements, 'title');
         } else {
           $result[$phase]['eligible'] = TRUE;
           $result[$phase]['eligibility_link'] = Url::fromRoute('entity.election_post.' . $phase, ['election_post' => $this->id()])->toString();
@@ -294,10 +297,10 @@ trait ElectionStatusesTrait {
         $eligibleText = '';
       }
 
-      $result[$phase]['status_full'] = t($status_full . '@eligible', [
+      $result[$phase]['status_full'] = t($status_full . '@eligible @reasons', [
         '@phase' => $phase_label,
         '@eligible' => $eligibleText,
-        '@reasons' => '(' . implode(', ', $result[$phase]['ineligibility_reasons']) . ')',
+        '@reasons' => $result[$phase]['eligible'] ? '' : '(' . implode(', ', $result[$phase]['ineligibility_reasons']) . ')',
       ]);
     }
 

@@ -125,7 +125,6 @@ class ConditionsTable extends FormElement {
         ],
       ],
       '#rows' => [],
-      // @todo differentiate elections and posts, and phases
       '#empty' => 'No conditions will be applied',
       // #input defaults to TRUE, which breaks file fields on the value form.
       // This table is used for visual grouping only, the element itself
@@ -144,7 +143,7 @@ class ConditionsTable extends FormElement {
       // The tabledrag element is always added to the first cell in the row,
       // so we add an empty cell to guide it there, for better styling.
       $condition_form['#attributes']['class'][] = 'draggable';
-      // dd($condition);
+
       $inline_form = $inline_form_manager->createInstance('plugin_configuration', [
         'plugin_type' => 'conditions_plugin_reference',
         'plugin_id' => $condition['plugin'],

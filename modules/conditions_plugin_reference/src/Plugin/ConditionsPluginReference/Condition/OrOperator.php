@@ -11,7 +11,7 @@ use Drupal\Core\Session\AccountInterface;
  *
  * @ConditionsPluginReference(
  *   id = "conditions_plugin_reference_or_operator",
- *   label = @Translation("Or Operator"),
+ *   label = @Translation("Or group (any condition must be true)"),
  *   category = @Translation("Conditions"),
  * )
  */

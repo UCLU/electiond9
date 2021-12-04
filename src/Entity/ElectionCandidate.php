@@ -396,11 +396,16 @@ class ElectionCandidate extends EditorialContentEntityBase implements ElectionCa
     return ElectionCandidateType::load($this->bundle());
   }
 
-  public static function loadByUserAndPost(AccountInterface $account, ElectionPostInterface $election_post) {
-    $ids = \Drupal::entityQuery('election_candidate')
+  public static function loadByUserAndPost(AccountInterface $account, ElectionPostInterface $election_post, $statuses = []) {
+    $query = \Drupal::entityQuery('election_candidate')
       ->condition('user_id', $account->id())
-      ->condition('election_post', $election_post->id())
-      ->execute();
+      ->condition('election_post', $election_post->id());
+
+    if (count($statuses) > 0) {
+      $query->condition('candidate_status', $statuses, 'IN');
+    }
+
+    $ids = $query->execute();
     return ElectionCandidate::loadMultiple($ids);
   }
 }
