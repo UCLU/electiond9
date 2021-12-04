@@ -68,7 +68,7 @@ class ConditionsTable extends FormElement {
       throw new \InvalidArgumentException('The conditions_table #default_value property must be an array.');
     }
 
-    $field_name = '';
+    $condition_plugins_field_name = str_replace('[form]', '', $element['#name']);
 
     /** @var \Drupal\conditions_plugin_reference\ConditionManagerInterface $plugin_manager */
     $plugin_manager = \Drupal::service('plugin.manager.conditions_plugin_reference');
@@ -86,14 +86,14 @@ class ConditionsTable extends FormElement {
 
     // $element['#type'] = 'item';
 
-    $conditions = $form_state->get('condition_plugins');
+    $conditions = $form_state->get($condition_plugins_field_name);
     // On first load, make sure we have the default value respected and stored
     // in the form state for further AJAX operations.
     if ($conditions === NULL) {
       $conditions = $element['#default_value'];
-      $form_state->set('condition_plugins', $conditions);
+      $form_state->set($condition_plugins_field_name, $conditions);
     }
-    $element['condition_plugins'] = [
+    $element[$condition_plugins_field_name] = [
       '#type' => 'table',
       '#header' => [
         t('Condition'),
@@ -138,8 +138,8 @@ class ConditionsTable extends FormElement {
     $max_weight = count($conditions);
     $renderer = \Drupal::getContainer()->get('renderer');
     foreach ($conditions as $index => $condition) {
-      $element['condition_plugins'][$index] = [];
-      $condition_form = &$element['condition_plugins'][$index];
+      $element[$condition_plugins_field_name][$index] = [];
+      $condition_form = &$element[$condition_plugins_field_name][$index];
 
       // The tabledrag element is always added to the first cell in the row,
       // so we add an empty cell to guide it there, for better styling.
@@ -208,7 +208,7 @@ class ConditionsTable extends FormElement {
 
       $condition_form['operations'] = [
         '#type' => 'submit',
-        '#name' => 'remove_value' . $index . $ajax_wrapper_id,
+        '#name' => 'remove_value' . $index . $condition_plugins_field_name,
         '#value' => t('Remove'),
         '#limit_validation_errors' => [],
         '#submit' => [
@@ -257,7 +257,7 @@ class ConditionsTable extends FormElement {
     $element['add_new']['add_condition'] = [
       '#type' => 'submit',
       '#value' => 'Add',
-      '#name' => 'add_new_condition_' . $ajax_wrapper_id,
+      '#name' => 'add_new_condition_' . $condition_plugins_field_name,
       '#ajax' => [
         'callback' => [static::class, 'ajaxRefresh'],
         'wrapper' => $ajax_wrapper_id,
@@ -303,12 +303,12 @@ class ConditionsTable extends FormElement {
   }
 
   public static function addNewCondition(&$form, FormStateInterface $form_state) {
-    // print_r($form_state->getTriggeringElement());
     $element_parents = array_slice($form_state->getTriggeringElement()['#parents'], 0, -1);
     $values = $form_state->getValue($element_parents);
-    // print_r($values);
 
-    $conditions = $form_state->get('condition_plugins');
+    $condition_plugins_field_name = $form_state->getTriggeringElement()['#parents'][0];
+
+    $conditions = $form_state->get($condition_plugins_field_name);
 
     /** @var \Drupal\conditions_plugin_reference\ConditionManagerInterface $plugin_manager */
     $plugin_manager = \Drupal::service('plugin.manager.conditions_plugin_reference');
@@ -319,15 +319,17 @@ class ConditionsTable extends FormElement {
       'plugin' => $instance->getPluginId(),
       'configuration' => $instance->getConfiguration(),
     ];
-    $form_state->set('condition_plugins', $conditions);
+    $form_state->set($condition_plugins_field_name, $conditions);
     $form_state->setRebuild();
   }
 
   public static function removeConditionSubmit(&$form, FormStateInterface $form_state) {
+    $condition_plugins_field_name = $form_state->getTriggeringElement()['#parents'][0];
+
     $value_index = $form_state->getTriggeringElement()['#value_index'];
-    $conditions = $form_state->get('condition_plugins');
+    $conditions = $form_state->get($condition_plugins_field_name);
     unset($conditions[$value_index]);
-    $form_state->set('condition_plugins', $conditions);
+    $form_state->set($condition_plugins_field_name, $conditions);
     $form_state->setRebuild();
   }
 
