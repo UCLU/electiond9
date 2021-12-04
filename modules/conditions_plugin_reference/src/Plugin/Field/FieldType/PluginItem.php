@@ -112,7 +112,6 @@ class PluginItem extends FieldItemBase implements PluginItemInterface {
    *   The plugin manager.
    */
   protected function getPluginManager() {
-    print_r($this->getPluginDefinition());
     return \Drupal::service('plugin.manager.conditions_plugin_reference'); // . $this->getPluginDefinition()['plugin_type']);
   }
 }

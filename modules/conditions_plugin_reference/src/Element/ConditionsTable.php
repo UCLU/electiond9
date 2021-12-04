@@ -28,8 +28,6 @@ class ConditionsTable extends FormElement {
     return [
       '#input' => TRUE,
       '#tree' => TRUE,
-      '#parent_entity_type' => NULL,
-      '#entity_types' => [],
       '#default_value' => [],
       '#title' => '',
 
@@ -41,7 +39,7 @@ class ConditionsTable extends FormElement {
       '#element_validate' => [
         [$class, 'validateElementSubmit'],
       ],
-      '#commerce_element_submit' => [
+      '#conditions_element_submit' => [
         [$class, 'submitConditions'],
       ],
       '#theme_wrappers' => ['container'],
@@ -67,8 +65,11 @@ class ConditionsTable extends FormElement {
    */
   public static function processConditions(array &$element, FormStateInterface $form_state, array &$complete_form) {
     if (!is_array($element['#default_value'])) {
-      throw new \InvalidArgumentException('The commerce_conditions_table #default_value property must be an array.');
+      throw new \InvalidArgumentException('The conditions_table #default_value property must be an array.');
     }
+
+    $field_name = '';
+
     /** @var \Drupal\conditions_plugin_reference\ConditionManagerInterface $plugin_manager */
     $plugin_manager = \Drupal::service('plugin.manager.conditions_plugin_reference');
     $definitions = $plugin_manager->getFilteredDefinitions($element['#condition_types'] ?? []);
@@ -82,6 +83,8 @@ class ConditionsTable extends FormElement {
     $ajax_wrapper_id = Html::getUniqueId('ajax-wrapper-conditions-table');
     $element['#prefix'] = '<div id="' . $ajax_wrapper_id . '">';
     $element['#suffix'] = '</div>';
+
+    // $element['#type'] = 'item';
 
     $conditions = $form_state->get('condition_plugins');
     // On first load, make sure we have the default value respected and stored
@@ -195,14 +198,17 @@ class ConditionsTable extends FormElement {
       $condition_form['negate_condition'] = [
         '#type' => 'checkbox',
         '#title' => t('Negate'),
-        '#parents' => array_merge($element['#parents'], [$index, 'negate_condition']),
+        '#parents' => array_merge($element['#parents'], [
+          $index,
+          'negate_condition',
+        ]),
         '#default_value' => $condition['configuration']['negate_condition'] ?? $index,
         '#access' => !isset($condition_form['configuration']['form']['negate']),
       ];
 
       $condition_form['operations'] = [
         '#type' => 'submit',
-        '#name' => 'remove_value' . $index,
+        '#name' => 'remove_value' . $index . $ajax_wrapper_id,
         '#value' => t('Remove'),
         '#limit_validation_errors' => [],
         '#submit' => [
@@ -248,8 +254,6 @@ class ConditionsTable extends FormElement {
       '#options' => $grouped_definitions,
     ];
 
-    // @todo if there are multiple of this element, we need a unique name.
-    //    The form state can pick the wrong button, as they are all [name=op].
     $element['add_new']['add_condition'] = [
       '#type' => 'submit',
       '#value' => 'Add',
@@ -266,7 +270,7 @@ class ConditionsTable extends FormElement {
       ],
       '#states' => [
         'disabled' => [
-          'select[name="conditions[form][add_new][conditions_id]"]' => ['value' => ''],
+          'select[name="' . $element['#name'] . '[add_new][conditions_id]"]' => ['value' => ''],
         ],
       ],
     ];

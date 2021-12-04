@@ -7,7 +7,7 @@ use Drupal\conditions_plugin_reference\EventBase;
 /**
  * Defines the referenceable plugin types event.
  *
- * @see \Drupal\commerce\Event\CommerceEvents
+ * @see \Drupal\conditions_plugin_reference\Event\ConditionsEvents
  */
 class ReferenceablePluginTypesEvent extends EventBase {
 

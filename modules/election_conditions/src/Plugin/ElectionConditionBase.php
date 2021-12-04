@@ -10,11 +10,10 @@ use Drupal\election\Entity\ElectionPost;
 /**
  * Base class for Election post condition plugin plugins.
  */
-abstract class ElectionConditionBase extends ConditionBase implements ElectionConditionInterface {
+abstract class ElectionConditionBase extends ConditionBase {
 
   public function requiredParameters(): array {
     return [
-      'account' => AccountInterface::class,
       'phase' => 'string',
     ];
   }
@@ -26,29 +25,8 @@ abstract class ElectionConditionBase extends ConditionBase implements ElectionCo
    *
    * @return boolean
    */
-  public function evaluate(EntityInterface $entity, $parameters = [], $return_reasons = FALSE) {
+  public function evaluate(EntityInterface $entity, AccountInterface $account, $parameters = []) {
     $this->assertParameters($parameters);
-  }
-
-  /**
-   * Get cache tags that should lead to re-calculating this condition result.
-   *
-   * E.g. by default it should be re-calculated only if the post or account data changes.
-   *
-   * @param Drupal\election\Entity\ElectionPost $post
-   *   Post being checked.
-   * @param Drupal\Core\Session\AccountInterface $account
-   *   User account being checked.
-   *
-   * @return array
-   *   Array of cache tags.
-   */
-  public function getCacheTagsForEligibility(ElectionPost $post, AccountInterface $account) {
-    $tags = [];
-
-    // Could e.g. get profile tags, or not get election and user
-
-    return $tags;
   }
 
   public function getCacheContextsForEligibility(ElectionPost $post, AccountInterface $account) {

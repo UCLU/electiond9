@@ -6,6 +6,7 @@ use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Session\AccountInterface;
 
 /**
  * Provides the base class for conditions.
@@ -26,8 +27,10 @@ abstract class ConditionBase extends PluginBase implements ConditionInterface {
   }
 
   public function assertParameters(array $parameters) {
-    $contained = !array_diff(array_keys($this->requiredParameters()), $parameters);
-    assert($contained);
+    if (count($this->requiredParameters()) > 0) {
+      $contained = !array_diff(array_keys($this->requiredParameters()), $parameters);
+      assert($contained);
+    }
   }
 
   /**
@@ -37,11 +40,12 @@ abstract class ConditionBase extends PluginBase implements ConditionInterface {
    *
    * @return boolean
    */
-  public function evaluate(EntityInterface $entity, $parameters = []) {
+  public function evaluate(EntityInterface $entity, AccountInterface $account, $parameters = []) {
+    // dd($parameters);
     $this->assertParameters($parameters);
   }
 
-  public function getReasons(EntityInterface $entity, $parameters = []) {
+  public function getReasons(EntityInterface $entity, AccountInterface $account, $parameters = []) {
   }
 
   /**
@@ -112,6 +116,22 @@ abstract class ConditionBase extends PluginBase implements ConditionInterface {
    */
   public function getConditionSummary() {
     // including config
+  }
+
+  /**
+   * Get cache tags that should lead to re-calculating this condition result.
+   *
+   * E.g. by default it should be re-calculated only if the post or account data changes.
+   *
+   * @return array
+   *   Array of cache tags.
+   */
+  public function getCacheTags(EntityInterface $entity, AccountInterface $account) {
+    $tags = [];
+
+    // Could e.g. get profile tags, or user
+
+    return $tags;
   }
 
   /**

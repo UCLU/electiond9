@@ -1,9 +1,10 @@
 <?php
 
-namespace Drupal\election_conditions\Plugin\ConditionsPluginReference\Condition;
+namespace Drupal\conditions_plugin_reference\Plugin\ConditionsPluginReference\Condition;
 
+use Drupal\conditions_plugin_reference\Annotation\ConditionsPluginReference;
+use Drupal\conditions_plugin_reference\Plugin\ConditionsPluginReference\Condition\ConditionBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\election_conditions\Plugin\ElectionConditionBase;
 use Drupal\user\Entity\Role;
 
 /**
@@ -11,16 +12,13 @@ use Drupal\user\Entity\Role;
  *
  * @ConditionsPluginReference(
  *   id = "election_user_role",
- *   condition_types = {
- *     "election",
- *   },
  *   label = @Translation("User role(s)"),
  *   display_label = @Translation("User has specific user role(s)"),
  *   category = @Translation("Users"),
  *   weight = 0,
  * )
  */
-class UserRole extends ElectionConditionBase {
+class UserRole extends ConditionBase {
 
   /**
    * {@inheritdoc}

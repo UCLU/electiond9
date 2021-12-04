@@ -3,6 +3,7 @@
 namespace Drupal\conditions_plugin_reference;
 
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Session\AccountInterface;
 
 /**
  * Represents a condition group.
@@ -76,14 +77,14 @@ final class ConditionGroup {
    * @return bool
    *   TRUE if the condition group has passed, FALSE otherwise.
    */
-  public function evaluate(EntityInterface $entity): bool {
+  public function evaluate(EntityInterface $entity, AccountInterface $account, array $parameters = []): bool {
     if (empty($this->conditions)) {
       return TRUE;
     }
 
     $boolean = $this->operator == 'AND' ? FALSE : TRUE;
     foreach ($this->conditions as $condition) {
-      if ($condition->evaluate($entity) == $boolean) {
+      if ($condition->evaluate($entity, $account) == $boolean) {
         return $boolean;
       }
     }

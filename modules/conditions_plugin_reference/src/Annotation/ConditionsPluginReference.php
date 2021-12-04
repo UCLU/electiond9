@@ -70,7 +70,7 @@ class ConditionsPluginReference extends Plugin {
   public $weight = 0;
 
   /**
-   * Constructs a new CommerceCondition object.
+   * Constructs a new Condition object.
    *
    * @param array $values
    *   The annotation values.

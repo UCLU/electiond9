@@ -2,15 +2,15 @@
 
 namespace Drupal\conditions_plugin_reference;
 
-use Drupal\conditions_plugin_reference\Plugin\Condition\ConditionInterface;
+use Drupal\conditions_plugin_reference\Plugin\ConditionsPluginReference\Condition\ConditionInterface;
 
 trait ConditionsEntityTrait {
   /**
    * {@inheritdoc}
    */
-  public function getConditions() {
+  public function getConditionsForField($field_name) {
     $conditions = [];
-    foreach ($this->get('conditions') as $field_item) {
+    foreach ($this->get($field_name) as $field_item) {
       /** @var \Drupal\conditions_plugin_reference\Plugin\Field\FieldType\PluginItemInterface $field_item */
       $condition = $field_item->getTargetInstance();
       $conditions[] = $condition;
@@ -21,11 +21,11 @@ trait ConditionsEntityTrait {
   /**
    * {@inheritdoc}
    */
-  public function setConditions(array $conditions) {
-    $this->set('conditions', []);
+  public function setConditionsForField(array $conditions, $field_name) {
+    $this->set($field_name, []);
     foreach ($conditions as $condition) {
       if ($condition instanceof ConditionInterface) {
-        $this->get('conditions')->appendItem([
+        $this->get($field_name)->appendItem([
           'target_plugin_id' => $condition->getPluginId(),
           'target_plugin_configuration' => $condition->getConfiguration(),
         ]);
@@ -37,15 +37,15 @@ trait ConditionsEntityTrait {
   /**
    * {@inheritdoc}
    */
-  public function getConditionOperator() {
-    return $this->get('condition_operator')->value;
+  public function getConditionOperator($conditions_field_name) {
+    return $this->get($conditions_field_name . '_operator')->value;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function setConditionOperator($condition_operator) {
-    $this->set('condition_operator', $condition_operator);
+  public function setConditionOperator($condition_operator, $conditions_field_name) {
+    $this->set($conditions_field_name . '_operator', $condition_operator);
     return $this;
   }
 }

@@ -25,3 +25,45 @@
 //     ],
 //   ];
 // }
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Element;
+
+
+/**
+ * Implements hook_form_alter().
+ */
+function conditions_plugin_reference_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if ($form_state->get('has_conditions_inline_forms')) {
+    conditions_plugin_reference_alter_inline_forms($form, $form_state, $form);
+  }
+}
+
+/**
+ * Invokes inline form alter hooks for the given element's inline forms.
+ *
+ * @param array $element
+ *   The form element.
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ *   The current state of the form.
+ * @param array $complete_form
+ *   The complete form structure.
+ */
+function conditions_plugin_reference_alter_inline_forms(array &$element, FormStateInterface $form_state, array &$complete_form) {
+  foreach (Element::children($element) as $key) {
+    if (isset($element[$key]['#inline_form'])) {
+      $inline_form = &$element[$key];
+      /** @var \Drupal\conditions_plugin_reference\Plugin\ConditionsPluginReference\InlineForm\InlineFormInterface $plugin */
+      $plugin = $inline_form['#inline_form'];
+      // Invoke hook_conditions_plugin_reference_inline_form_alter() and
+      // hook_conditions_plugin_reference_inline_form_PLUGIN_ID_alter() implementations.
+      $hooks = [
+        'conditions_plugin_reference_inline_form',
+        'conditions_plugin_reference_inline_form_' . $plugin->getPluginId(),
+      ];
+      \Drupal::moduleHandler()->alter($hooks, $inline_form, $form_state, $complete_form);
+    }
+
+    conditions_plugin_reference_alter_inline_forms($element[$key], $form_state, $complete_form);
+  }
+}

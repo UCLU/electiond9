@@ -4,9 +4,8 @@ namespace Drupal\election\Form;
 
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\election\Entity\Election;
 use Drupal\election\ElectionStatusesTrait;
-use Drupal\su_statistics\Plugin\StatisticsPluggedInProvider\ElectionStats;
+use Drupal\election_conditions\ElectionConditionsTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -17,6 +16,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class ElectionForm extends ContentEntityForm {
 
   use ElectionStatusesTrait;
+  use ElectionConditionsTrait;
 
   /**
    * The current user account.

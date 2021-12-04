@@ -633,7 +633,7 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
     // Get conditions and add relevant tags from there
     $conditions = $this->getConditions($phase);
     foreach ($conditions as $condition) {
-      $otherTags = array_merge($otherTags, $condition->getCacheTagsForEligibility());
+      $otherTags = array_merge($otherTags, $condition->getCacheTags($this, $account));
     }
 
     return Cache::mergeTags($eligibilityCacheTag, $otherTags);
@@ -651,14 +651,14 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
       $election = $this->getElection();
       $phaseToGet = $election->get('conditions_' . $phase . '_same_as')->value;
       if ($phaseToGet != 'none') {
-        $postConditions = $election->get('conditions_' . $phaseToGet);
+        $postConditions = $election->getConditionsForField('conditions_' . $phaseToGet);
       }
     }
 
     // @todo generic functionality in a service for managing conditions?
     $phaseToGet = $this->get('conditions_' . $phase . '_same_as')->value;
     if ($phaseToGet != 'none') {
-      // $postConditions = array_merge($postConditions, $this->get('conditions_' . $phaseToGet));
+      $postConditions = array_merge($postConditions, $this->getConditionsForField('conditions_' . $phaseToGet));
     }
 
     return $postConditions;

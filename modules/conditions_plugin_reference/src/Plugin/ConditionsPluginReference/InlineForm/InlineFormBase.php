@@ -108,14 +108,29 @@ abstract class InlineFormBase extends PluginBase implements InlineFormInterface,
     $inline_form['#id'] = Html::getId('edit-' . implode('-', $inline_form['#parents']));
     // Automatically validate and submit inline forms.
     $inline_form['#inline_form'] = $this;
-    $inline_form['#process'][] = [ConditionsElementTrait::class, 'attachElementSubmit'];
-    $inline_form['#element_validate'][] = [ConditionsElementTrait::class, 'validateElementSubmit'];
-    $inline_form['#element_validate'][] = [get_class($this), 'runValidate'];
-    $inline_form['#commerce_element_submit'][] = [get_class($this), 'runSubmit'];
+    $inline_form['#process'][] = [
+      ConditionsElementTrait::class,
+      'attachElementSubmit',
+    ];
+    $inline_form['#element_validate'][] = [
+      ConditionsElementTrait::class,
+      'validateElementSubmit',
+    ];
+    $inline_form['#element_validate'][] = [
+      get_class($this),
+      'runValidate',
+    ];
+    $inline_form['#conditions_element_submit'][] = [
+      get_class($this),
+      'runSubmit',
+    ];
     // Allow inline forms to modify the page title.
-    $inline_form['#process'][] = [get_class($this), 'updatePageTitle'];
+    $inline_form['#process'][] = [
+      get_class($this),
+      'updatePageTitle',
+    ];
     // Tell commerce_form_alter() to fire inline form alter hooks.
-    $form_state->set('has_commerce_inline_forms', TRUE);
+    $form_state->set('has_conditions_inline_forms', TRUE);
 
     return $inline_form;
   }

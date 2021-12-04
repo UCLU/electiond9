@@ -7,6 +7,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\election\Entity\Election;
 use Drupal\election\ElectionStatusesTrait;
+use Drupal\election_conditions\ElectionConditionsTrait;
 
 /**
  * Form controller for Election post edit forms.
@@ -16,6 +17,7 @@ use Drupal\election\ElectionStatusesTrait;
 class ElectionPostForm extends ContentEntityForm {
 
   use ElectionStatusesTrait;
+  use ElectionConditionsTrait;
 
   /**
    * The current user account.

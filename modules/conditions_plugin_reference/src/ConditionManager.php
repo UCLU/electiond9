@@ -85,7 +85,7 @@ class ConditionManager extends DefaultPluginManager implements ConditionManagerI
     $definitions = $this->getDefinitions();
     foreach ($definitions as $plugin_id => $definition) {
       // Filter by entity type.
-      if (count($condition_types) > 0 && count(array_intersect($definition['condition_types'], $condition_types)) == 0) {
+      if (count($condition_types) > 0 && isset($definition['condition_types']) && count(array_intersect($definition['condition_types'], $condition_types)) == 0) {
         unset($definitions[$plugin_id]);
         continue;
       }

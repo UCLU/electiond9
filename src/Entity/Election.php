@@ -93,6 +93,7 @@ class Election extends EditorialContentEntityBase implements ElectionInterface {
 
   use EntityChangedTrait;
   use EntityPublishedTrait;
+
   use ElectionStatusesTrait;
   use ElectionConditionsTrait;
 

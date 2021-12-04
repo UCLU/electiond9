@@ -83,4 +83,14 @@ trait ElectionConditionsTrait {
         ->setDisplayConfigurable('view', TRUE);
     }
   }
+
+  public static function addConditionStatesToForm(&$form) {
+    foreach (Election::ELECTION_PHASES as $phase) {
+      $form['conditions_' . $phase]['#states'] = [
+        'visible' => [
+          ':input[name="conditions_' . $phase . '_same_as"]' => ['value' => $phase],
+        ],
+      ];
+    }
+  }
 }

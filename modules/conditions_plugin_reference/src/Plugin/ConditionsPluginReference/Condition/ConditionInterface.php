@@ -7,6 +7,7 @@ use Drupal\Component\Plugin\DependentPluginInterface;
 use Drupal\Component\Plugin\PluginInspectionInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
+use Drupal\Core\Session\AccountInterface;
 
 /**
  * Defines the interface for conditions.
@@ -42,9 +43,9 @@ interface ConditionInterface extends ConfigurableInterface, DependentPluginInter
    * @return bool
    *   TRUE if the condition has been met, FALSE otherwise.
    */
-  public function evaluate(EntityInterface $entity, $parameters = []);
+  public function evaluate(EntityInterface $entity, AccountInterface $account, $parameters = []);
 
-  public function getReasons(EntityInterface $entity, $parameters = []);
+  public function getReasons(EntityInterface $entity, AccountInterface $account, $parameters = []);
 
   public function requiredParameters();
 

@@ -9,7 +9,7 @@ use Drupal\conditions_plugin_reference\Plugin\Field\FieldWidget\ConditionsTable 
  *   id = "conditions_plugin_reference_conditions_table_election",
  *   label = @Translation("Election Conditions Table"),
  *   field_types = {
- *     "conditions_plugin_item:election_condition"
+ *     "conditions_plugin_item:conditions_plugin_reference"
  *   },
  *   multiple_values = TRUE
  * )

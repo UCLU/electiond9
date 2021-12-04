@@ -119,7 +119,7 @@ class ElectionPostEligibilityChecker {
         // Check all  conditions:
         if (count($conditions) > 0) {
           foreach ($conditions as $condition) {
-            $conditionReason = $condition->evaluate($election_post, $account, $phase);
+            $conditionReason = $condition->evaluate($election_post, $account, ['phase' => $phase]);
             if ($conditionReason && count($conditionReason) > 0) {
               $reasons = array_merge($reasons, $conditionReason);
               $eligible = FALSE;
