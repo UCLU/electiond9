@@ -221,22 +221,7 @@ class ElectionPostController extends ControllerBase implements ContainerInjectio
     $phases = $election_post->getElection()->getEnabledPhases();
     foreach ($phases as $phase) {
       $requirements = ElectionPostEligibilityChecker::evaluateEligibilityRequirements($account, $election_post, $phase, TRUE, TRUE);
-      $formattedRequirements = $election_post->formatEligibilityRequirements($requirements);
-
-      $rows = [];
-      foreach ($formattedRequirements as $formattedRequirement) {
-        $rows[] = [
-          'Pass' => $formattedRequirement['pass'] ? '✔️' : '❌',
-          'Requirement' => $formattedRequirement['title'],
-        ];
-      }
-
-      $build['requirements_table_' . $phase] = [
-        '#theme' => 'table',
-        '#caption' => Election::getPhaseName($phase),
-        '#rows' => $rows,
-        '#header' => count($rows) > 0 ? array_keys($rows[0]) : [],
-      ];
+      $build['requirements_table_' . $phase] = $election_post->formatEligibilityRequirementsTable($requirements, $phase);
     }
 
     return $build;

@@ -22,7 +22,8 @@ class ElectionPostEligibilityChecker {
   }
 
   public static function checkRequirementsForEligibility($requirements) {
-    return !in_array(FALSE, array_values($requirements));
+    $passValues = array_column($requirements, 'pass');
+    return !in_array(FALSE, $passValues);
   }
 
   /**
@@ -57,61 +58,104 @@ class ElectionPostEligibilityChecker {
       $account = User::load($account->id());
       $election = $election_post->getElection();
 
+      $titleParams = [
+        '%positionName' => $election_post->label(),
+        '%positionTypeName' => $election_post->getTypeNaming(),
+        '%electionName' => $election->label(),
+      ];
+      $titleParams['@phaseName'] = Election::getPhaseName($phase);
+      $titleParams['@phaseAction'] = strtolower(Election::getPhaseAction($phase));
+      $titleParams['@phasePastTense'] = strtolower(Election::getPhaseActionPastTense($phase));
+
       $requirements = [];
 
-      $requirements['election_published'] = $election->isPublished();
+      // Publishing
+      $requirements['election_published'] =  [
+        'title' => ['@electionName election published', $titleParams],
+        'pass' => $election->isPublished()
+      ];
+
       if ($requirements['election_published']) {
-        $requirements['election_post_published'] = $election_post->isPublished();
+        $requirements['election_post_published'] =  [
+          'title' => ['%positionName %positionTypeName published', $titleParams],
+          'pass' => $election_post->isPublished()
+        ];
       }
 
-      // Check if have 'create nominations' or equivalent permission, and allow access to nomination (but not voting) if so
-      // TODO
-
+      // Phase enabled
       $electionPhases = $election->getEnabledPhases();
-      $requirements[$phase . '_enabled'] = in_array($phase, $electionPhases);
+      $requirements[$phase . '_enabled'] = [
+        'title' => ['@phaseName enabled', $titleParams],
+        'pass' => in_array($phase, $electionPhases),
+      ];
 
       if ($includePhaseStatus) {
         $electionStatus = $election->getPhaseStatuses();
-        $requirements[$phase . '_open_election'] = $electionStatus[$phase] == 'open';
+        $requirements[$phase . '_open_election'] = [
+          'title' => ['@phaseName open for election %electionName', $titleParams],
+          'pass' => $electionStatus[$phase] == 'open',
+        ];
 
-        if ($requirements[$phase . '_open_election']) {
+        if ($requirements[$phase . '_open_election']['pass']) {
           $postStatus = $election_post->getPhaseStatuses($phase);
-          $requirements[$phase . '_open_election_post'] = $postStatus[$phase] == 'open';
+          $requirements[$phase . '_open_election_post'] = [
+            'title' => ['@phaseName open for %positionTypeName %positionName', $titleParams],
+            'pass' => $postStatus[$phase] == 'open',
+          ];
         }
       }
 
       // Check if logged in:
       // @TODO is there a use case for anonymous users voting?
-      $requirements['logged_in'] = !\Drupal::currentUser()->isAnonymous();
+      $requirements['logged_in'] = [
+        'title' => ['Logged in', $titleParams],
+        'pass' => !\Drupal::currentUser()->isAnonymous(),
+      ];
 
-      if ($phase == 'interest') {
-        $requirements['permission_interest'] = $account->hasPermission('express interest in posts');
-        if ($requirements['logged_in']) {
-          if ($election_post->get('limit_to_one_nomination_per_user')->value && static::interestExists($account, $election_post)) {
-            $requirements['not_already_interest'] = static::ballotExists($account, $election_post);
-          }
-        }
-      }
+      $permissions = [
+        'interest' => 'express interest in posts',
+        'nominations' => 'nominate for posts',
+        'voting' => 'vote',
+      ];
 
-      if ($phase == 'nominations') {
-        $requirements['permission_nominations'] = $account->hasPermission('nominate for posts');
-        if ($requirements['logged_in']) {
-          if ($election_post->get('limit_to_one_nomination_per_user')->value && static::nominationExists($account, $election_post)) {
-            $requirements['not_already_nominations'] = static::ballotExists($account, $election_post);
-          }
+      $requirements['permission_' . $phase] = [
+        'title' => ['User has permission to @phaseAction in elections on this website', $titleParams],
+        'pass' => $account->hasPermission($permissions[$phase])
+      ];
+
+      if ($requirements['logged_in']['pass']) {
+        switch ($phase) {
+          case 'interest':
+            if ($election_post->get('limit_to_one_nomination_per_user')->value && static::interestExists($account, $election_post)) {
+              $already = static::ballotExists($account, $election_post);
+            }
+            break;
+
+          case 'nominations':
+            if ($election_post->get('limit_to_one_nomination_per_user')->value && static::nominationExists($account, $election_post)) {
+              $already = static::ballotExists($account, $election_post);
+            }
+            break;
+
+          case 'voting':
+            $already = static::ballotExists($account, $election_post);
+            break;
         }
+
+        $requirements['already_' . $phase] = [
+          'title' => t('Not already @phasePastTense', $titleParams),
+          'pass' => $already,
+        ];
       }
 
       if ($phase == 'voting') {
-        $requirements['permission_voting'] = $account->hasPermission('vote');
-
-        if ($requirements['logged_in']) {
-          $requirements['not_already_voting'] = static::ballotExists($account, $election_post);
-        }
-
         // @todo check number of candidates
         $candidates = $election_post->getCandidatesForVoting();
-        $requirements['enough_candidates'] = count($candidates) > 0;
+
+        $requirements['enough_candidates'] = [
+          'title' => t('Enough candidates', $titleParams),
+          'pass' => count($candidates) > 0,
+        ];
       }
 
       if (\Drupal::moduleHandler()->moduleExists('election_conditions')) {

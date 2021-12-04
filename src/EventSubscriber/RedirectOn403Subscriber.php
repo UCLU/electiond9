@@ -63,9 +63,10 @@ class RedirectOn403Subscriber extends HttpExceptionSubscriberBase {
       }
 
       $requirements = ElectionPostEligibilityChecker::evaluateEligibilityRequirements($this->currentUser, $election_post, $phase, TRUE, TRUE);
-      $formattedFailedRequirements = $election_post->formatEligibilityRequirements($requirements, TRUE);
 
       if (!ElectionPostEligibilityChecker::checkRequirementsForEligibility($requirements)) {
+        $formattedFailedRequirements = $election_post->formatEligibilityRequirements($requirements, TRUE);
+
         $message = t('You cannot currently access this post due to not meeting the following requirements: @requirements', [
           '@requirements' => implode(', ', array_column($formattedFailedRequirements, 'title')),
         ]);

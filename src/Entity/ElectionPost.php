@@ -677,32 +677,20 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
   public function formatEligibilityRequirements(array $requirements, $onlyFailedRequirements = FALSE) {
     $formattedRequirements = [];
 
-    $election = $this->getElection();
-
-    $params = [
-      '%positionName' => $this->label(),
-      '%positionTypeName' => $this->getTypeNaming(),
-      '%electionName' => $election->label(),
-    ];
 
     $requirementDefinitions = [
-      'logged_in' => ['Logged in', $params],
-      'enough_candidates' => ['Enough candidates', $params],
-      'election_post_published' => ['%positionName %positionTypeName published', $params],
-      'election_published' => ['%electionName election published', $params],
+      'enough_candidates' => ['Enough candidates', $titleParams],
+      'election_post_published' => ['%positionName %positionTypeName published', $titleParams],
+      'election_published' => ['%electionName election published', $titleParams],
     ];
 
     $phases = Election::ELECTION_PHASES;
     foreach ($phases as $phase) {
-      $params['@phaseName'] = Election::getPhaseName($phase);
-      $params['@phaseAction'] = strtolower(Election::getPhaseAction($phase));
-      $params['@phasePastTense'] = strtolower(Election::getPhaseActionPastTense($phase));
+      $titleParams['@phaseName'] = Election::getPhaseName($phase);
+      $titleParams['@phaseAction'] = strtolower(Election::getPhaseAction($phase));
+      $titleParams['@phasePastTense'] = strtolower(Election::getPhaseActionPastTense($phase));
       $requirementDefinitions += [
-        'not_already_' . $phase => ['Not already @phasePastTense', $params],
-        'permission_' . $phase => ['User has general permission to @phaseAction in elections', $params],
-        $phase . '_enabled' => ['@phaseName enabled', $params],
-        $phase . '_open_election' => ['@phaseName open for election %electionName', $params],
-        $phase . '_open_election_post' => ['@phaseName open for %positionTypeName %positionName', $params],
+        'not_already_' . $phase => ['Not already @phasePastTense', $titleParams],
       ];
     }
 
@@ -729,5 +717,24 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
     });
 
     return $formattedRequirements;
+  }
+
+  public function formatEligibilityRequirementsTable(array $requirements, $phase) {
+    $formattedRequirements = $this->formatEligibilityRequirements($requirements);
+
+    $rows = [];
+    foreach ($formattedRequirements as $formattedRequirement) {
+      $rows[] = [
+        'Pass' => $formattedRequirement['pass'] ? '✔️' : '❌',
+        'Requirement' => $formattedRequirement['title'],
+      ];
+    }
+
+    return [
+      '#theme' => 'table',
+      '#caption' => Election::getPhaseName($phase),
+      '#rows' => $rows,
+      '#header' => count($rows) > 0 ? array_keys($rows[0]) : [],
+    ];
   }
 }
