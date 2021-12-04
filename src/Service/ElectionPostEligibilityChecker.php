@@ -71,81 +71,71 @@ class ElectionPostEligibilityChecker {
 
       // Publishing
       $requirements['election_published'] =  [
-        'title' => ['@electionName election published', $titleParams],
-        'pass' => $election->isPublished()
+        'title' => t('%electionName election published', $titleParams),
+        'pass' => $election->isPublished(),
       ];
 
       if ($requirements['election_published']) {
         $requirements['election_post_published'] =  [
-          'title' => ['%positionName %positionTypeName published', $titleParams],
-          'pass' => $election_post->isPublished()
+          'title' => t('%positionName %positionTypeName published', $titleParams),
+          'pass' => $election_post->isPublished(),
         ];
       }
 
-      // Phase enabled
+      // Phase enabled for election
       $electionPhases = $election->getEnabledPhases();
-      $requirements[$phase . '_enabled'] = [
-        'title' => ['@phaseName enabled', $titleParams],
-        'pass' => in_array($phase, $electionPhases),
-      ];
+      if ($phase != 'voting') {
+        $requirements[$phase . '_enabled'] = [
+          'title' => t('@phaseName enabled for the %electionName election', $titleParams),
+          'pass' => in_array($phase, $electionPhases),
+        ];
+      }
 
+      // Phase open
       if ($includePhaseStatus) {
-        $electionStatus = $election->getPhaseStatuses();
-        $requirements[$phase . '_open_election'] = [
-          'title' => ['@phaseName open for election %electionName', $titleParams],
-          'pass' => $electionStatus[$phase] == 'open',
+        $postStatus = $election_post->getPhaseStatuses($phase);
+        $requirements[$phase . '_open_election_post'] = [
+          'title' => t('@phaseName open for %positionTypeName %positionName', $titleParams),
+          'pass' => $postStatus[$phase] == 'open',
         ];
 
-        if ($requirements[$phase . '_open_election']['pass']) {
-          $postStatus = $election_post->getPhaseStatuses($phase);
-          $requirements[$phase . '_open_election_post'] = [
-            'title' => ['@phaseName open for %positionTypeName %positionName', $titleParams],
-            'pass' => $postStatus[$phase] == 'open',
+        if ($postStatus[$phase] != 'open') {
+          $electionStatus = $election->getPhaseStatuses();
+          $requirements[$phase . '_open_election'] = [
+            'title' => t('@phaseName open for election %electionName', $titleParams),
+            'pass' => $electionStatus[$phase] == 'open',
           ];
         }
       }
 
       // Check if logged in:
-      // @TODO is there a use case for anonymous users voting?
+      // @todo is there a use case for anonymous users voting?
       $requirements['logged_in'] = [
-        'title' => ['Logged in', $titleParams],
+        'title' => t('Logged in', $titleParams),
         'pass' => !\Drupal::currentUser()->isAnonymous(),
       ];
 
-      $permissions = [
-        'interest' => 'express interest in posts',
-        'nominations' => 'nominate for posts',
-        'voting' => 'vote',
-      ];
-
-      $requirements['permission_' . $phase] = [
-        'title' => ['User has permission to @phaseAction in elections on this website', $titleParams],
-        'pass' => $account->hasPermission($permissions[$phase])
-      ];
-
       if ($requirements['logged_in']['pass']) {
-        switch ($phase) {
-          case 'interest':
-            if ($election_post->get('limit_to_one_nomination_per_user')->value && static::interestExists($account, $election_post)) {
-              $already = static::ballotExists($account, $election_post);
-            }
-            break;
-
-          case 'nominations':
-            if ($election_post->get('limit_to_one_nomination_per_user')->value && static::nominationExists($account, $election_post)) {
-              $already = static::ballotExists($account, $election_post);
-            }
-            break;
-
-          case 'voting':
-            $already = static::ballotExists($account, $election_post);
-            break;
-        }
-
-        $requirements['already_' . $phase] = [
-          'title' => t('Not already @phasePastTense', $titleParams),
-          'pass' => $already,
+        // Check user permissions
+        $permissions = [
+          'interest' => 'express interest in posts',
+          'nominations' => 'nominate for posts',
+          'voting' => 'vote',
         ];
+
+        $requirements['permission_' . $phase] = [
+          'title' => t('User has permission to @phaseAction in elections on this website', $titleParams),
+          'pass' => $account->hasPermission($permissions[$phase]),
+        ];
+
+        // Check if already completed phase (e.g. voted)
+        $already = static::checkIfUserAlreadyCompletedPhase($election_post, $account, $phase);
+        if (!is_null($already)) {
+          $requirements['not_already_' . $phase] = [
+            'title' => t('Must not already have @phasePastTense', $titleParams),
+            'pass' => !$already,
+          ];
+        }
       }
 
       if ($phase == 'voting') {
@@ -260,5 +250,27 @@ class ElectionPostEligibilityChecker {
       ElectionPostEligibilityChecker::evaluateEligibility($account, $post, $phase, TRUE, TRUE);
     }
     return TRUE;
+  }
+
+  public static function checkIfUserAlreadyCompletedPhase($election_post, $account, $phase) {
+    $already = NULL;
+    switch ($phase) {
+      case 'interest':
+        if ($election_post->get('limit_to_one_nomination_per_user')->value) {
+          $already = static::interestExists($account, $election_post);
+        }
+        break;
+
+      case 'nominations':
+        if ($election_post->get('limit_to_one_nomination_per_user')->value) {
+          $already = static::nominationExists($account, $election_post);
+        }
+        break;
+
+      case 'voting':
+        $already = static::ballotExists($account, $election_post);
+        break;
+    }
+    return $already;
   }
 }

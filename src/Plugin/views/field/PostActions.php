@@ -19,9 +19,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Get whether the user has a record for a grouip
  *
- * @ViewsField("eligibility_for_post")
+ * @ViewsField("election_post_actions")
  */
-class EligibilityForPost extends FieldPluginBase {
+class PostActions extends FieldPluginBase {
   /**
    * @{inheritdoc}
    */
@@ -35,9 +35,7 @@ class EligibilityForPost extends FieldPluginBase {
   protected function defineOptions() {
     $options = parent::defineOptions();
 
-    $options['format'] = ['default' => 'simple'];
     $options['phases_to_show'] = ['default' => []];
-    $options['link_to_action'] = ['default' => TRUE];
 
     return $options;
   }
@@ -47,24 +45,6 @@ class EligibilityForPost extends FieldPluginBase {
    */
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     parent::buildOptionsForm($form, $form_state);
-
-    $form['format'] = [
-      '#type' => 'select',
-      '#title' => $this->t('Format for string'),
-      '#options' => [
-        'simple' => 'Simple',
-        'full' => 'Full explanation',
-        'links_only' => 'No explanation (just action link or empty)',
-      ],
-      '#default_value' => $this->options['format'],
-    ];
-
-    $form['link_to_action'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Link to actions'),
-      '#description' => $this->t('e.g. if eligible to nominate or vote, link to forms.'),
-      '#default_value' => $this->options['link_to_action'],
-    ];
 
     $phases = [];
     foreach (Election::ELECTION_PHASES as $phase) {
@@ -92,8 +72,13 @@ class EligibilityForPost extends FieldPluginBase {
       }
     }
 
-    $formatted = $election_post->getUserEligibilityFormatted(\Drupal::currentUser(), $phases, ', ', $this->options['format'], $this->options['link_to_action']);
+    $actions = $election_post->getActionLinks(\Drupal::currentUser(), $phases);
 
-    return new FormattableMarkup($formatted, []);
+    $summary = [
+      '#theme' => 'election_post_actions',
+      '#actions' => $actions,
+    ];
+
+    return new FormattableMarkup(render($summary), []);
   }
 }

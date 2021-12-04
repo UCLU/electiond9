@@ -1,31 +1,33 @@
-{% for phase in phases %}
-  <p class="election_phase election_phase__status_{{
-    phase.status
-    }} election_phase__eligible_{{
-    phase.eligible
-      ? 'eligible'
-      : 'ineligible'
-    }}">
-    <b>{{ phase.name }}</b>:
-    {{ phase.status_full }}
-    {% if phase.status == 'open' %}
-      {% if phase.eligible == true %}
-        - <a href="{{ phase.eligibility_link }}">{{ phase.eligibility_label }}</a>
+<div class="election__status_summary">
+  {% for phase in phases %}
+    <p class="election_phase election_phase__status_{{
+      phase.status
+      }} election_phase__eligible_{{
+      phase.eligible
+        ? 'eligible'
+        : 'ineligible'
+      }}">
+      <b>{{ phase.name }}</b>:
+      {{ phase.status_full }}
+      {% if phase.status == 'open' %}
+        {% if phase.eligible == true %}
+          - <a href="{{ phase.eligibility_link }}">{{ phase.eligibility_label }}</a>
+        {% endif %}
       {% endif %}
-    {% endif %}
-  </p>
 
-  {% if phase.status == 'open' %}
-    {% if phase.eligible == true %}
+      {% if phase.status == 'open' %}
+        {% if phase.eligible == true %}
 
-    {% else %}
-      <ul>
-        {% for listItem in phase.ineligibility_reasons %}
-          {% if listItem|length %}
-            <li>{{ listItem|trim }}</li>
-          {% endif %}
-        {% endfor %}
-      </ul>
-    {% endif %}
-  {% endif %}
-{% endfor %}
+        {% else %}
+          <ul>
+            {% for listItem in phase.ineligibility_reasons %}
+              {% if listItem|length %}
+                <li>❌ {{ listItem|trim }}</li>
+              {% endif %}
+            {% endfor %}
+          </ul>
+        {% endif %}
+      {% endif %}
+    </p>
+  {% endfor %}
+</div>

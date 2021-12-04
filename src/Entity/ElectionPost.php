@@ -303,7 +303,7 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
       ])
       ->setDisplayOptions('view', [
         'label' => 'inline',
-        'type' => 'label',
+        'type' => 'entity_reference_label',
       ])
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
@@ -559,12 +559,15 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
     return $result;
   }
 
-  public function getActionLinks(AccountInterface $account = NULL) {
+  public function getActionLinks(AccountInterface $account = NULL, $phasesToInclude = []) {
     $eligibilityService = \Drupal::service('election.post_eligibility_checker');
 
     $actions = [];
 
     $phases = $this->getElection()->getEnabledPhases();
+    if (isset($phasesToInclude) && count($phasesToInclude) > 0) {
+      $phases = array_intersect($phases, $phasesToInclude);
+    }
     foreach ($phases as $phase) {
       $eligibleForPhase = $eligibilityService->evaluateEligibility($account, $this, $phase, TRUE);
       if ($eligibleForPhase) {
@@ -677,37 +680,9 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
   public function formatEligibilityRequirements(array $requirements, $onlyFailedRequirements = FALSE) {
     $formattedRequirements = [];
 
-
-    $requirementDefinitions = [
-      'enough_candidates' => ['Enough candidates', $titleParams],
-      'election_post_published' => ['%positionName %positionTypeName published', $titleParams],
-      'election_published' => ['%electionName election published', $titleParams],
-    ];
-
-    $phases = Election::ELECTION_PHASES;
-    foreach ($phases as $phase) {
-      $titleParams['@phaseName'] = Election::getPhaseName($phase);
-      $titleParams['@phaseAction'] = strtolower(Election::getPhaseAction($phase));
-      $titleParams['@phasePastTense'] = strtolower(Election::getPhaseActionPastTense($phase));
-      $requirementDefinitions += [
-        'not_already_' . $phase => ['Not already @phasePastTense', $titleParams],
-      ];
-    }
-
-    // @todo translate nicely
-    foreach ($requirements as $requirement => $pass) {
-      if ($onlyFailedRequirements && $pass) {
-        continue;
-      }
-      if (isset($requirementDefinitions[$requirement])) {
-        $formattedRequirements[$requirement] =
-          [
-            'title' => t(
-              $requirementDefinitions[$requirement][0],
-              $requirementDefinitions[$requirement][1],
-            ),
-            'pass' => $pass
-          ];
+    foreach ($requirements as $requirement) {
+      if (!$onlyFailedRequirements || !$requirement['pass']) {
+        $formattedRequirements[] = $requirement;
       }
     }
 
@@ -724,10 +699,15 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
 
     $rows = [];
     foreach ($formattedRequirements as $formattedRequirement) {
-      $rows[] = [
+      $row = [
+        'Requirement' => ['data' => [
+          '#markup' => $formattedRequirement['title'],
+          '#suffix' => isset($formattedRequirement['description']) ? '<div class="form-item__description">' . $formattedRequirement['description'] . '</div>' : '',
+        ]],
         'Pass' => $formattedRequirement['pass'] ? '✔️' : '❌',
-        'Requirement' => $formattedRequirement['title'],
       ];
+
+      $rows[] = $row;
     }
 
     return [

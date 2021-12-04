@@ -40,7 +40,7 @@ function template_preprocess_election(array &$variables) {
 
   $variables['status_summary'] = [
     '#theme' => 'election_status_summary',
-    '#phases' => $election->getUserEligibility(\Drupal::currentUser()),
+    '#phases' => $election->getUserEligibilityInformation(\Drupal::currentUser()),
     '#cache' => $cache,
   ];
 

@@ -82,22 +82,28 @@ class UserRole extends ConditionBase {
     $requirements = parent::evaluateRequirements($entity, $account, $parameters);
 
     $rolesToCheck = $this->configuration['user_roles'];
+    $rolesNames = [];
+    foreach ($rolesToCheck as $roleId) {
+      $rolesNames[] = Role::load($roleId)->label();
+    }
     $userRoles = $account->getRoles();
 
     if ($this->configuration['user_roles_any_all'] == 'any') {
       // Any:
       $requirements['has_any_roles'] = [
         'title' => t('User has any of the following roles: @roles', [
-          '@roles' => implode(', ', $rolesToCheck),
+          '@roles' => implode(', ', $rolesNames),
         ]),
+        'description' => t('Roles are generally granted by the site administrator.'),
         'pass' => count(array_intersect($rolesToCheck, $userRoles)) > 0,
       ];
     } else {
       // All:
       $requirements['has_all_roles'] = [
         'title' => t('User has all the following roles: @roles', [
-          '@roles' => implode(', ', $rolesToCheck),
+          '@roles' => implode(', ', $rolesNames),
         ]),
+        'description' => t('Roles are generally granted by the site administrator.'),
         'pass' => count(array_intersect($rolesToCheck, $userRoles)) == count($rolesToCheck),
       ];
     }

@@ -8,10 +8,13 @@
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\SubformState;
 use Drupal\Core\Plugin\PluginWithFormsInterface;
 use Drupal\election\Annotation\ElectionVotingMethodPlugin;
+use Drupal\election\Entity\ElectionPostType;
 use Drupal\views\Plugin\views\query\QueryPluginBase;
 use Drupal\views\ViewExecutable;
 
@@ -117,4 +120,70 @@ function election_views_query_alter(ViewExecutable $view, QueryPluginBase $query
 }
 
 function election_form_alter($form) {
+}
+
+/**
+ * Implements hook_entity_extra_field_info().
+ */
+function election_entity_extra_field_info() {
+  $extra = array();
+
+  foreach (ElectionPostType::loadMultiple() as $bundle) {
+    $extra['election_post'][$bundle->id()]['display']['field_post_actions'] = array(
+      'label' => t('Action links for post'),
+      'description' => t('e.g. Vote, Nominate, check eligibility, depending on user, phases open, and eligibility'),
+      'weight' => -1,
+      'visible' => TRUE,
+    );
+    $extra['election_post'][$bundle->id()]['display']['field_status_summary'] = array(
+      'label' => t('Status and eligibility summary'),
+      'description' => t('Shows the open/close status for each phase, and the current user\'s eligibility.'),
+      'weight' => 0,
+      'visible' => TRUE,
+    );
+  }
+
+  return $extra;
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_view().
+ */
+function election_election_post_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
+  if ($display->getComponent('field_status_summary')) {
+    election_election_post_view_field_status_summary($build, $entity, $display, $view_mode);
+  }
+  if ($display->getComponent('field_post_actions')) {
+    election_election_post_view_field_post_actions($build, $entity, $display, $view_mode);
+  }
+}
+
+function election_election_post_view_field_status_summary(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
+  $summary = [
+    '#theme' => 'election_status_summary',
+    '#phases' => $entity->getUserEligibilityInformation(\Drupal::currentUser()),
+  ];
+
+  $build['field_status_summary'] = [
+    '#type' => 'markup',
+    '#markup' => render($summary),
+    '#cache' => [
+      'max-age' => 0,
+    ],
+  ];
+}
+
+function election_election_post_view_field_post_actions(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
+  $summary = [
+    '#theme' => 'election_post_actions',
+    '#actions' => $entity->getActionLinks(\Drupal::currentUser()),
+  ];
+
+  $build['field_post_actions'] = [
+    '#type' => 'markup',
+    '#markup' => render($summary),
+    '#cache' => [
+      'max-age' => 0,
+    ],
+  ];
 }

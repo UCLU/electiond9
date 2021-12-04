@@ -38,18 +38,6 @@ function template_preprocess_election_post(array &$variables) {
     'tags' => User::load(\Drupal::currentUser()->id())->getCacheTags(),
   ];
 
-  $variables['status_summary'] = [
-    '#theme' => 'election_status_summary',
-    '#phases' => $election_post->getUserEligibility(\Drupal::currentUser()),
-    '#cache' => $cache,
-  ];
-
-  $variables['actions'] = [
-    '#theme' => 'election_post_actions',
-    '#actions' => $election_post->getActionLinks(\Drupal::currentUser()),
-    '#cache' => $cache,
-  ];
-
   $variables['candidate_name'] = $election_post->getCandidateTypesAsLabel();
 
   // Helpful $content variable for templates.

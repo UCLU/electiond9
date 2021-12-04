@@ -193,14 +193,14 @@ display:
           entity_type: null
           entity_field: name
           plugin_id: field
-        eligibility_for_post_2:
-          id: eligibility_for_post_2
+        election_post_actions:
+          id: election_post_actions
           table: election_post
-          field: eligibility_for_post
+          field: election_post_actions
           relationship: none
           group_type: group
           admin_label: ''
-          label: 'Express interest'
+          label: Actions
           exclude: false
           alter:
             alter_text: false
@@ -241,126 +241,12 @@ display:
           hide_empty: false
           empty_zero: false
           hide_alter_empty: true
-          format: links_only
           phases_to_show:
-            interest: interest
-            nominations: 0
-            voting: 0
-          link_to_action: 1
-          entity_type: election_post
-          plugin_id: eligibility_for_post
-        eligibility_for_post_1:
-          id: eligibility_for_post_1
-          table: election_post
-          field: eligibility_for_post
-          relationship: none
-          group_type: group
-          admin_label: ''
-          label: Nominate
-          exclude: false
-          alter:
-            alter_text: false
-            text: ''
-            make_link: false
-            path: ''
-            absolute: false
-            external: false
-            replace_spaces: false
-            path_case: none
-            trim_whitespace: false
-            alt: ''
-            rel: ''
-            link_class: ''
-            prefix: ''
-            suffix: ''
-            target: ''
-            nl2br: false
-            max_length: 0
-            word_boundary: true
-            ellipsis: true
-            more_link: false
-            more_link_text: ''
-            more_link_path: ''
-            strip_tags: false
-            trim: false
-            preserve_tags: ''
-            html: false
-          element_type: ''
-          element_class: ''
-          element_label_type: ''
-          element_label_class: ''
-          element_label_colon: true
-          element_wrapper_type: ''
-          element_wrapper_class: ''
-          element_default_classes: true
-          empty: ''
-          hide_empty: false
-          empty_zero: false
-          hide_alter_empty: true
-          format: links_only
-          phases_to_show:
-            nominations: nominations
-            interest: 0
-            voting: 0
-          link_to_action: 1
-          entity_type: election_post
-          plugin_id: eligibility_for_post
-        eligibility_for_post:
-          id: eligibility_for_post
-          table: election_post
-          field: eligibility_for_post
-          relationship: none
-          group_type: group
-          admin_label: ''
-          label: Vote
-          exclude: false
-          alter:
-            alter_text: false
-            text: ''
-            make_link: false
-            path: ''
-            absolute: false
-            external: false
-            replace_spaces: false
-            path_case: none
-            trim_whitespace: false
-            alt: ''
-            rel: ''
-            link_class: ''
-            prefix: ''
-            suffix: ''
-            target: ''
-            nl2br: false
-            max_length: 0
-            word_boundary: true
-            ellipsis: true
-            more_link: false
-            more_link_text: ''
-            more_link_path: ''
-            strip_tags: false
-            trim: false
-            preserve_tags: ''
-            html: false
-          element_type: ''
-          element_class: ''
-          element_label_type: ''
-          element_label_class: ''
-          element_label_colon: true
-          element_wrapper_type: ''
-          element_wrapper_class: ''
-          element_default_classes: true
-          empty: ''
-          hide_empty: false
-          empty_zero: false
-          hide_alter_empty: true
-          format: links_only
-          phases_to_show:
-            voting: voting
             interest: 0
             nominations: 0
-          link_to_action: 1
+            voting: 0
           entity_type: election_post
-          plugin_id: eligibility_for_post
+          plugin_id: election_post_actions
         eligibility_for_post_3:
           id: eligibility_for_post_3
           table: election_post

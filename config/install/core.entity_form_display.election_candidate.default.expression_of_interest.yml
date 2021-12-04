@@ -1,0 +1,47 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_form_mode.election_candidate.expression_of_interest
+    - election.election_candidate_type.default
+    - image.style.thumbnail
+  module:
+    - image
+    - text
+id: election_candidate.default.expression_of_interest
+targetEntityType: election_candidate
+bundle: default
+mode: expression_of_interest
+content:
+  image:
+    label: hidden
+    type: image_image
+    weight: 1
+    region: content
+    settings:
+      progress_indicator: throbber
+      preview_image_style: thumbnail
+    third_party_settings: {}
+  name:
+    type: string_textfield
+    weight: 0
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {}
+  statement:
+    type: text_textarea
+    weight: 2
+    rows: 6
+    region: content
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {}
+hidden:
+  candidate_status: true
+  election_post: true
+  path: true
+  status: true
+  user_id: true

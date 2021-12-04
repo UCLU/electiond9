@@ -212,7 +212,7 @@ trait ElectionStatusesTrait {
     return $results;
   }
 
-  public function getUserEligibility(AccountInterface $account, array $phases = NULL) {
+  public function getUserEligibilityInformation(AccountInterface $account, array $phases = NULL) {
     $result = [];
 
     $debug = TRUE;
@@ -267,14 +267,14 @@ trait ElectionStatusesTrait {
 
       foreach ($posts as $post) {
         $requirements = $eligibilityService->evaluateEligibilityRequirements($account, $post, $phase, FALSE, $debug);
-        $result[$phase]['ineligibility_reasons'] =  [];
+        $result[$phase]['ineligibility_reasons'] = [];
         $result[$phase]['already_' . $phase] = FALSE;
 
         if (!$eligibilityService->checkRequirementsForEligibility($requirements)) {
           $result[$phase]['eligible'] = FALSE;
           $result[$phase]['eligibility_label'] = t('Not eligible to @action', ['@action' => strtolower(Election::getPhaseAction($phase))]);
 
-          $result[$phase]['already_' . $phase] = in_array('already_' . $phase, $requirements);
+          $result[$phase]['already_' . $phase] = in_array('not_already_' . $phase, array_keys($requirements)) && $requirements['not_already_' . $phase]['pass'];
 
           $formattedFailedRequirements = $post->formatEligibilityRequirements($requirements, TRUE);
           $result[$phase]['ineligibility_reasons'] = array_column($formattedFailedRequirements, 'title');
@@ -286,21 +286,19 @@ trait ElectionStatusesTrait {
       }
 
       $eligibleText = '';
-      // @todo inform if abstained
-      if (count($result[$phase]['ineligibility_reasons']) == 1) {
-        $status_full = $result[$phase]['ineligibility_reasons'][0];
+      if ($result[$phase]['already_' . $phase]) {
+        $status_full = 'You have already ' . Election::getPhaseActionPastTense($phase);
         $result[$phase]['ineligibility_reasons'] = [];
-      } elseif ($phaseStatuses[$phase] == 'open') {
+      } else if ($phaseStatuses[$phase] == 'open') {
         $eligibleText = $result[$phase]['eligible'] ? ' and you are eligible' : ' but you are not eligible';
       } else {
         // $eligibleText = isset($result[$phase]['eligible']) && $result[$phase]['eligible'] ? ' though you are eligible' : ' and you are not eligible';
         $eligibleText = '';
       }
 
-      $result[$phase]['status_full'] = t($status_full . '@eligible @reasons', [
+      $result[$phase]['status_full'] = t($status_full . '@eligible', [
         '@phase' => $phase_label,
         '@eligible' => $eligibleText,
-        '@reasons' => $result[$phase]['eligible'] ? '' : '(' . implode(', ', $result[$phase]['ineligibility_reasons']) . ')',
       ]);
     }
 
@@ -319,7 +317,7 @@ trait ElectionStatusesTrait {
       $phases = NULL;
     }
 
-    $eligibility = $this->getUserEligibility($account, $phases);
+    $eligibility = $this->getUserEligibilityInformation($account, $phases);
 
     if ($format == 'links_only') {
       $includeLinks = TRUE;
