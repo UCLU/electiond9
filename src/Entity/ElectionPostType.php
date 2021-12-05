@@ -3,8 +3,6 @@
 namespace Drupal\election\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBundleBase;
-use Drupal\Core\Plugin\PluginWithFormsInterface;
-use Drupal\election\Annotation\ElectionVotingMethodPlugin;
 
 /**
  * Defines the Election post type entity.

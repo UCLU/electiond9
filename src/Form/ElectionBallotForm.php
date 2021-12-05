@@ -248,7 +248,6 @@ class ElectionBallotForm extends ContentEntityForm {
           $form_state->setErrorByName('rankings', $this->t('This post does not allow equal rankings.'));
         }
 
-
         $rankingsUsed[] = $ranking;
 
         if ($form_state->get('ranked_voting')) {
@@ -256,6 +255,7 @@ class ElectionBallotForm extends ContentEntityForm {
         }
       }
     }
+
     // Ensure exhaustive ranking if required:
     if ($form_state->get('exhaustive_voting') && in_array('NONE', $rankingsUsed)) {
       $form_state->setErrorByName('rankings', $this->t('Must rank all options.'));
@@ -348,7 +348,7 @@ class ElectionBallotForm extends ContentEntityForm {
     }
 
     // @todo deal with confirmation if required for post
-    $this->goNext($election_post, $form_state);
+    return $this->goNext($election_post, $form_state);
   }
 
   public function goNext($election_post, &$form_state) {

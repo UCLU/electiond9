@@ -610,7 +610,7 @@ class Election extends EditorialContentEntityBase implements ElectionInterface {
         ],
 
         // @todo more informative, i.e. say how many voted for, how many ineligible for, how many closed
-        'message' =>  $this->t(
+        'message' =>  t(
           'No %positions available to vote for.',
           [
             '%positions' => 'posts',

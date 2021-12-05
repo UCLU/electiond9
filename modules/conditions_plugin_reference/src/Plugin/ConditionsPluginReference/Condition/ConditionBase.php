@@ -178,7 +178,7 @@ abstract class ConditionBase extends PluginBase implements ConditionInterface {
   public function dispatchRequirementEvents(&$requirements) {
     foreach ($requirements as $key => $requirement) {
       $event = new ConditionRequirementCheckedEvent($requirement);
-      $this->eventDispatcher->dispatch(ConditionRequirementEvents::CONDITION_REQUIREMENT_CHECKED, $event);
+      \Drupal::service('event_dispatcher')->dispatch(ConditionRequirementEvents::CONDITION_REQUIREMENT_CHECKED, $event);
       $requirements[$key] = $requirement;
     }
   }

@@ -88,10 +88,13 @@ final class ConditionsEvaluator {
     foreach ($organized_conditions as $condition_group_key => $condition_group) {
       $requirementsForGroup = $this->evaluateConditionGroupRequirements($condition_group['conditions'], $condition_group['operator']);
       foreach ($requirementsForGroup as $requirementForGroup) {
-        $requirementForGroup['condition_group'] = $condition_group_key;
+        $requirementForGroup->setGroup($condition_group['group_name']);
         $requirements[] = $requirementForGroup;
       }
     }
+
+    $requirements = ConditionRequirement::sortByGroup($requirements);
+
     return $requirements;
   }
 
@@ -100,22 +103,19 @@ final class ConditionsEvaluator {
       'ungrouped' => [
         'operator' => $base_operator,
         'conditions' => [],
+        'group_name' => '',
       ],
     ];
     foreach ($conditions as $condition) {
       $configuration = $condition->getConfiguration();
       $configuration['depth'] = (!isset($configuration['depth'])) ? 0 : (int) $configuration['depth'];
-      if ($condition instanceof AndOperator) {
+      if ($condition instanceof AndOperator || $condition instanceof OrOperator) {
         $parent_key = $condition->getPluginId() . ':' . $configuration['depth'];
+        $group_name = $condition->getDisplayLabel() . ' [group ' . ($configuration['depth'] + 1) . ']';
         $organized_conditions[$parent_key] = [
-          'operator' => 'AND',
+          'operator' => $condition instanceof OrOperator ? 'OR' : 'AND',
           'conditions' => [],
-        ];
-      } elseif ($condition instanceof OrOperator) {
-        $parent_key = $condition->getPluginId() . ':' . $configuration['depth'];
-        $organized_conditions[$parent_key] = [
-          'operator' => 'OR',
-          'conditions' => [],
+          'group_name' => $group_name,
         ];
       } elseif (!empty($configuration['parent'])) {
         $parent_key = $configuration['parent'] . ':' . ($configuration['depth'] - 1);

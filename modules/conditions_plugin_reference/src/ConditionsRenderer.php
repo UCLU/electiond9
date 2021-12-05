@@ -11,22 +11,47 @@ class ConditionsRenderer {
   public function requirementsTable(array $requirements) {
 
     $rows = [];
+    $groupingsDone = [];
+
     foreach ($requirements as $requirement) {
-      $row = [
-        'Requirement' => ['data' => [
+      $grouping = $requirement->getGroup() && $requirement->getGroup() != 'ungrouped' ? $requirement->getGroup() : '';
+      if ($grouping) {
+        if (!in_array($grouping, $groupingsDone)) {
+          $row = [];
+          $row['Requirement'] = [
+            'data' => [
+              '#markup' => '<b>' . $grouping . '</b>',
+            ],
+            'class' => []
+          ];
+          $row['Pass'] = ''; // $requirement->isPassed() ? '✔️' : '❌';
+          $rows[] = $row;
+        }
+      }
+
+      $row = [];
+      $row['Requirement'] = [
+        'data' => [
+          '#prefix' => $grouping ? '&nbsp;&nbsp;&nbsp;•&nbsp;' : '',
           '#markup' => $requirement->getLabel(),
           '#suffix' => $requirement->getDescription() ? '<div class="form-item__description">' . $requirement->getDescription() . '</div>' : '',
-        ]],
-        'Pass' => $requirement->isPassed() ? '✔️' : '❌',
+        ],
+        'class' => []
       ];
-
+      $row['Pass'] = $requirement->isPassed() ? '✔️' : '❌';
       $rows[] = $row;
     }
+
+    $headers = [];
+    $headers[] = [
+      'data' => t('Requirement'),
+    ];
+    $headers[] = t('Pass');
 
     return [
       '#theme' => 'table',
       '#rows' => $rows,
-      '#header' => count($rows) > 0 ? array_keys($rows[0]) : [],
+      '#header' => $headers,
     ];
   }
 }

@@ -3,6 +3,7 @@
 namespace Drupal\election\Service;
 
 use Drupal\conditions_plugin_reference\ConditionRequirement;
+use Drupal\conditions_plugin_reference\ConditionsEvaluator;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\election\Entity\Election;
@@ -17,13 +18,15 @@ use Drupal\user\Entity\User;
 class ElectionPostEligibilityChecker {
 
   public static function evaluateEligibility(AccountInterface $account, ElectionPostInterface $election_post, string $phase, $includePhaseStatus = FALSE, $refresh = FALSE) {
+    $evaluator = new ConditionsEvaluator($election_post, $account, [
+      'phase' => $phase,
+    ]);
     $requirements = static::evaluateEligibilityRequirements($account, $election_post, $phase, $includePhaseStatus, $refresh);
     return static::checkRequirementsForEligibility($requirements);
   }
 
   public static function checkRequirementsForEligibility($requirements) {
-    $evaluator = \Drupal::service('conditions_plugin_reference.conditions_evaluator');
-    // $evaluator->setEntity($)
+    return ConditionRequirement::allPassed($requirements);
   }
 
   /**
@@ -163,12 +166,9 @@ class ElectionPostEligibilityChecker {
 
         // Check all  conditions:
         if (count($conditions) > 0) {
-          foreach ($conditions as $condition) {
-            $conditionRequirements = $condition->evaluateRequirements($election_post, $account, ['phase' => $phase]);
-            if ($conditionRequirements && count($conditionRequirements) > 0) {
-              $requirements = array_merge($requirements, $conditionRequirements);
-            }
-          }
+          $conditionEvaluator = new ConditionsEvaluator($election_post, $account, ['phase' => $phase]);
+          $conditionRequirements = $conditionEvaluator->executeRequirements($conditions, 'AND');
+          $requirements = array_merge($requirements, $conditionRequirements);
         }
       }
 

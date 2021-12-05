@@ -16,9 +16,6 @@ services:
   plugin.manager.conditions_inline_form:
     class: Drupal\conditions_plugin_reference\InlineFormManager
     arguments: ['@container.namespaces', '@cache.discovery', '@module_handler']
-  conditions_plugin_reference.conditions_evaluator:
-    class: Drupal\conditions_plugin_reference\ConditionsEvaluator
-    arguments: []
   conditions_plugin_reference.conditions_renderer:
     class: Drupal\conditions_plugin_reference\ConditionsRenderer
     arguments: []

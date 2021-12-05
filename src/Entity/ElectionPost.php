@@ -654,7 +654,7 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
 
     $postConditions = [];
 
-    // Get election codnitions if we're inheriting
+    // Get election conditions if we're inheriting
     if ($this->conditions_inherit_election->value == 'inherit') {
       $election = $this->getElection();
       $phaseToGet = $election->get('conditions_' . $phase . '_same_as')->value;
@@ -663,7 +663,6 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
       }
     }
 
-    // @todo generic functionality in a service for managing conditions?
     $phaseToGet = $this->get('conditions_' . $phase . '_same_as')->value;
     if ($phaseToGet != 'none') {
       $postConditions = array_merge($postConditions, $this->getConditionsForField('conditions_' . $phaseToGet));

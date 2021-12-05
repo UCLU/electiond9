@@ -274,7 +274,7 @@ trait ElectionStatusesTrait {
           $result[$phase]['eligible'] = FALSE;
           $result[$phase]['eligibility_label'] = t('Not eligible to @action', ['@action' => strtolower(Election::getPhaseAction($phase))]);
 
-          $result[$phase]['already_' . $phase] = in_array('not_already_' . $phase, array_keys($requirements)) && $requirements['not_already_' . $phase]->isPassed();
+          $result[$phase]['already_' . $phase] = isset($requirements['not_already_' . $phase]) && $requirements['not_already_' . $phase]->isPassed();
 
           $formattedFailedRequirements = $post->formatEligibilityRequirements($requirements, TRUE);
           $result[$phase]['ineligibility_reasons'] = array_column($formattedFailedRequirements, 'title');

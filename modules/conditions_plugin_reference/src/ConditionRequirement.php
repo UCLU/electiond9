@@ -169,4 +169,11 @@ final class ConditionRequirement {
     $this->setLabel($negatedLabel);
     $this->setPass(!$this->isPassed());
   }
+
+  public static function sortByGroup($requirements) {
+    usort($requirements, function ($a, $b) {
+      return $a->getGroup() - $b->getGroup();
+    });
+    return $requirements;
+  }
 }
