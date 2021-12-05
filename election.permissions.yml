@@ -4,6 +4,9 @@ express interest in posts:
 nominate for posts:
   title: 'Nominate for posts (subject to eligibility)'
 
+edit election candidate entities:
+  title: 'Edit election candidates (not subject to eligibility or being owner)'
+
 vote:
   title: 'Vote for posts they are eligible to vote for'
 
@@ -16,8 +19,25 @@ add election ballot entities:
 add election candidate entities without eligibility:
   title: 'Create new election candidates without being eligible (e.g. for admin)'
 
+delete candidates without votes:
+  title: 'Delete election candidates without votes already cast for them'
+
+delete candidates with votes:
+  title: 'Delete candidates even if votes already cast for them'
+  restrict access: true
+
+delete posts without ballots:
+  title: 'Delete election posts without votes already cast for them'
+
+delete posts with ballots:
+  title: 'Delete election posts even if votes already cast for them'
+  restrict access: true
+
 # Below are automatically generated
 
+edit election post entities:
+  title: 'Edit election posts
+  '
 add elections:
   title: 'Create new elections'
 
@@ -57,12 +77,6 @@ administer election posts:
   description: 'Allow to access the administration form to configure election posts.'
   restrict access: true
 
-delete election post entities:
-  title: 'Delete election posts'
-
-edit election post entities:
-  title: 'Edit election posts'
-
 view published election post entities:
   title: 'View published election posts'
 
@@ -87,12 +101,6 @@ administer election candidate entities:
   title: 'Administer election candidates'
   description: 'Allow to access the administration form to configure election candidates.'
   restrict access: true
-
-delete election candidate entities:
-  title: 'Delete election candidates'
-
-edit election candidate entities:
-  title: 'Edit election candidates'
 
 view published election candidate entities:
   title: 'View published election candidates'

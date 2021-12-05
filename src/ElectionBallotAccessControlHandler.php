@@ -54,7 +54,7 @@ class ElectionBallotAccessControlHandler extends EntityAccessControlHandler {
 
     $contexts = $context_provider->getRuntimeContexts(['election_post']);
 
-    if (!$contexts['election_post']) {
+    if (!isset($contexts['election_post']) || !$contexts['election_post']) {
       return AccessResult::neutral();
     }
     $election_post = ElectionPost::load($contexts['election_post']->getContextValue());

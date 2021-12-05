@@ -6,6 +6,8 @@ use Drupal\Core\Entity\EntityAccessControlHandler;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\FieldItemListInterface;
 
 /**
  * Access controller for the Election post entity.
@@ -23,21 +25,25 @@ class ElectionPostAccessControlHandler extends EntityAccessControlHandler {
     switch ($operation) {
 
       case 'view':
-
         if (!$entity->isPublished()) {
           return AccessResult::allowedIfHasPermission($account, 'view unpublished election post entities');
         }
 
-
         return AccessResult::allowedIfHasPermission($account, 'view published election post entities');
 
       case 'update':
-
         return AccessResult::allowedIfHasPermission($account, 'edit election post entities');
 
       case 'delete':
-
-        return AccessResult::allowedIfHasPermission($account, 'delete election post entities');
+        $ballots = $entity->countBallots(TRUE);
+        if (count($ballots) > 0) {
+          if (!\Drupal::currentUser()->hasPermission('delete posts with ballots')) {
+            \Drupal::messenger()->addWarning(t('Cannot delete this post because votes have already been cast.'));
+          }
+          return AccessResult::allowedIfHasPermission($account, 'delete posts with ballots');
+        } else {
+          return AccessResult::allowedIfHasPermission($account, 'delete posts without ballots');
+        }
     }
 
     // Unknown operation, no opinion.
@@ -51,5 +57,15 @@ class ElectionPostAccessControlHandler extends EntityAccessControlHandler {
     return AccessResult::allowedIfHasPermission($account, 'add election post entities');
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  protected function checkFieldAccess($operation, FieldDefinitionInterface $field_definition, AccountInterface $account, FieldItemListInterface $items = NULL) {
+    switch ($field_definition->getName()) {
+      case 'status':
+        return AccessResult::allowedIfHasPermission($account, 'edit election post entities');
+    }
 
+    return parent::checkFieldAccess($operation, $field_definition, $account, $items);
+  }
 }

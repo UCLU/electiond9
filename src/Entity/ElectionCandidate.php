@@ -408,4 +408,25 @@ class ElectionCandidate extends EditorialContentEntityBase implements ElectionCa
     $ids = $query->execute();
     return ElectionCandidate::loadMultiple($ids);
   }
+
+  public function getBallotVotes($confirmedOnly = FALSE) {
+    $votes_query = \Drupal::database()->select('election_ballot_vote', 'ev');
+    $votes_query->join('election_ballot', 'eb', 'eb.id = ev.ballot_id');
+    $votes_query->fields('ev', ['id'])
+      ->condition('eb.value', 0, '>')
+      ->orderBy('eb.ballot_id')
+      ->orderBy('ev.rank');
+
+    if ($confirmedOnly) {
+      $votes_query->condition('eb.confirmed', 1);
+    }
+
+    $votes = $votes_query->execute()->fetchCol();
+
+    return ElectionBallotVote::loadMultiple($votes);
+  }
+
+  public function countBallotVotes($confirmedOnly = FALSE) {
+    return count($this->getBallotVotes($confirmedOnly));
+  }
 }

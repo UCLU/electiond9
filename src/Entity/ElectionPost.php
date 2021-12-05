@@ -694,4 +694,19 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
     $render['#caption'] = Election::getPhaseName($phase);
     return $render;
   }
+
+  public function getBallots($confirmedOnly = FALSE) {
+    $query = \Drupal::entityQuery('election_ballot');
+    $query->condition('election_post', $this->id());
+
+    if ($confirmedOnly) {
+      $query->condition('confirmed', TRUE);
+    }
+
+    return ElectionBallot::load($query->execute());
+  }
+
+  public function countBallots($confirmedOnly = FALSE) {
+    return count($this->getBallots($confirmedOnly));
+  }
 }
