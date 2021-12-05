@@ -3,6 +3,8 @@
 namespace Drupal\conditions_plugin_reference\Plugin\ConditionsPluginReference\Condition;
 
 use Drupal\conditions_plugin_reference\Annotation\ConditionsPluginReference;
+use Drupal\conditions_plugin_reference\ConditionRequirement;
+use Drupal\conditions_plugin_reference\Event\ConditionRequirementEvents;
 use Drupal\conditions_plugin_reference\Plugin\ConditionsPluginReference\Condition\ConditionBase;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -90,23 +92,27 @@ class UserRole extends ConditionBase {
 
     if ($this->configuration['user_roles_any_all'] == 'any') {
       // Any:
-      $requirements['has_any_roles'] = [
-        'title' => t('User has any of the following roles: @roles', [
+      $requirements[] = new ConditionRequirement([
+        'id' => 'has_any_roles',
+        'label' => t('User has any of the following roles: @roles', [
           '@roles' => implode(', ', $rolesNames),
         ]),
         'description' => t('Roles are generally granted by the site administrator.'),
         'pass' => count(array_intersect($rolesToCheck, $userRoles)) > 0,
-      ];
+      ]);
     } else {
       // All:
-      $requirements['has_all_roles'] = [
-        'title' => t('User has all the following roles: @roles', [
+      $requirements[] = new ConditionRequirement([
+        'id' => 'has_all_roles',
+        'label' => t('User has all the following roles: @roles', [
           '@roles' => implode(', ', $rolesNames),
         ]),
         'description' => t('Roles are generally granted by the site administrator.'),
         'pass' => count(array_intersect($rolesToCheck, $userRoles)) == count($rolesToCheck),
-      ];
+      ]);
     }
+
+    $this->dispatchRequirementEvents($requirements);
 
     return $requirements;
   }

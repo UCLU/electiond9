@@ -376,28 +376,23 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
-    $fields['category'] = BaseFieldDefinition::create('entity_reference')
-      ->setLabel((t('Categories')))
-      ->setSetting('target_type', 'taxonomy_term')
-      ->setSetting('handler', 'default:taxonomy_term')
-      ->setSetting(
-        'handler_settings',
-        array(
-          'target_bundles' => array(
-            'election_post_categories' => 'election_post_categories'
-          )
-        )
-      )
-      ->setDisplayOptions('form', array(
-        'type' => 'entity_reference_autocomplete',
-        'weight' => 13,
-        'settings' => array(
-          'match_operator' => 'CONTAINS',
-          'size' => '10',
-          'autocomplete_type' => 'tags',
-          'placeholder' => '',
-        ),
-      ))
+    $fields['exclusive'] = BaseFieldDefinition::create('boolean')
+      ->setLabel((t('Exclusive nominations')))
+      ->setDescription(t('A candidate can only stand for one exclusive position per election.'))
+      ->setDisplayOptions('form', [
+        'type' => 'boolean_checkbox',
+      ])
+      ->setDefaultValue(FALSE)
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE);
+
+    $fields['publish_candidates_automatically'] = BaseFieldDefinition::create('boolean')
+      ->setLabel((t('Publish nominations when created')))
+      ->setDescription(t('If checked, newly submitted nominations will be published automatically. Otherwise, the approval of an administrator will be expected.'))
+      ->setDisplayOptions('form', [
+        'type' => 'boolean_checkbox',
+      ])
+      ->setDefaultValue(FALSE)
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
@@ -681,14 +676,14 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
     $formattedRequirements = [];
 
     foreach ($requirements as $requirement) {
-      if (!$onlyFailedRequirements || !$requirement['pass']) {
+      if (!$onlyFailedRequirements || $requirement->isFailed()) {
         $formattedRequirements[] = $requirement;
       }
     }
 
     // sort by pass
     usort($formattedRequirements, function ($a, $b) {
-      return $a['pass'] - $b['pass'];
+      return ($a->isPassed() ? 1 : -1) - ($b->isPassed() ? 1 : -1);
     });
 
     return $formattedRequirements;
@@ -696,25 +691,8 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
 
   public function formatEligibilityRequirementsTable(array $requirements, $phase) {
     $formattedRequirements = $this->formatEligibilityRequirements($requirements);
-
-    $rows = [];
-    foreach ($formattedRequirements as $formattedRequirement) {
-      $row = [
-        'Requirement' => ['data' => [
-          '#markup' => $formattedRequirement['title'],
-          '#suffix' => isset($formattedRequirement['description']) ? '<div class="form-item__description">' . $formattedRequirement['description'] . '</div>' : '',
-        ]],
-        'Pass' => $formattedRequirement['pass'] ? '✔️' : '❌',
-      ];
-
-      $rows[] = $row;
-    }
-
-    return [
-      '#theme' => 'table',
-      '#caption' => Election::getPhaseName($phase),
-      '#rows' => $rows,
-      '#header' => count($rows) > 0 ? array_keys($rows[0]) : [],
-    ];
+    $render = \Drupal::service('conditions_plugin_reference.conditions_renderer')->requirementsTable($requirements);
+    $render['#caption'] = Election::getPhaseName($phase);
+    return $render;
   }
 }

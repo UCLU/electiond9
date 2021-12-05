@@ -24,8 +24,10 @@
     {{ content }}
   {% endif %}
 
-  <h2>
-    {{ candidate_name }}
-  </h2>
-  {{ drupal_view('election_candidates_for_post', 'embed') }}
+  <div class="candidates_list">
+    <h2>
+      {{ candidate_name }}
+    </h2>
+    {{ drupal_view('election_candidates_for_post', 'embed') }}
+  </div>
 </div>

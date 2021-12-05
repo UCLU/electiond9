@@ -3,6 +3,8 @@
 namespace Drupal\conditions_plugin_reference\Plugin\ConditionsPluginReference\Condition;
 
 use Drupal\Component\Utility\NestedArray;
+use Drupal\conditions_plugin_reference\Event\ConditionRequirementCheckedEvent;
+use Drupal\conditions_plugin_reference\Event\ConditionRequirementEvents;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -42,20 +44,18 @@ abstract class ConditionBase extends PluginBase implements ConditionInterface {
    */
   public function evaluate(EntityInterface $entity, AccountInterface $account, $parameters = []) {
     $this->assertParameters($parameters);
+
     $requirements = $this->evaluateRequirements($entity, $account, $parameters);
+
     $hasFailingRequirement = in_array(FALSE, array_column($requirements, 'pass'));
+
     return !$hasFailingRequirement;
   }
 
   /**
-   * Returns an array with key being requirements and value beeing a boolean if they have been met.
+   * Returns an array of ConditionRequirement objects.
    *
-   * e.g. [
-   *   'requirement_id' => [
-   *     'title' => t('Example'),
-   *     'pass' => FALSE,
-   *   ],
-   * ];
+   * @see Drupal/conditions_plugin_reference/ConditionRequirement
    *
    * @param EntityInterface $entity
    * @param AccountInterface $account
@@ -65,10 +65,12 @@ abstract class ConditionBase extends PluginBase implements ConditionInterface {
    */
   public function evaluateRequirements(EntityInterface $entity, AccountInterface $account, $parameters = []) {
     $this->assertParameters($parameters);
+    $requirements = [];
 
+    // This is where you would generate and evaluate your requirements.
 
-
-    return [];
+    $this->dispatchRequirementEvents($requirements);
+    return $requirements;
   }
 
   /**
@@ -171,5 +173,13 @@ abstract class ConditionBase extends PluginBase implements ConditionInterface {
       '<' => $this->t('Less than'),
       '==' => $this->t('Equals'),
     ];
+  }
+
+  public function dispatchRequirementEvents(&$requirements) {
+    foreach ($requirements as $key => $requirement) {
+      $event = new ConditionRequirementCheckedEvent($requirement);
+      $this->eventDispatcher->dispatch(ConditionRequirementEvents::CONDITION_REQUIREMENT_CHECKED, $event);
+      $requirements[$key] = $requirement;
+    }
   }
 }

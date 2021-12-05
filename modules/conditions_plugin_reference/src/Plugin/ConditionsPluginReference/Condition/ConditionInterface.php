@@ -45,6 +45,20 @@ interface ConditionInterface extends ConfigurableInterface, DependentPluginInter
    */
   public function evaluate(EntityInterface $entity, AccountInterface $account, $parameters = []);
 
+  /**
+   * Evaluates the condition's requirements and returns them as an array.
+   *
+   * Should always call $this->dispatchRequirementEvents($requirements)
+   * after pulling together the requirements.
+   *
+   * @param EntityInterface $entity
+   * @param AccountInterface $account
+   * @param array $parameters
+   *   Parameters for the condition.
+   *
+   * @return array
+   *   Array of ConditionRequirement objects.
+   */
   public function evaluateRequirements(EntityInterface $entity, AccountInterface $account, $parameters = []);
 
   public function requiredParameters();

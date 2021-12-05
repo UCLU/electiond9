@@ -378,28 +378,6 @@ class Election extends EditorialContentEntityBase implements ElectionInterface {
 
     static::addElectionStatusesFields($fields, 'election');
 
-    $fields['thankyou_for_voting_message'] = BaseFieldDefinition::create('text_long')
-      ->setLabel(t('Thankyou for voting message'))
-      ->setDescription(t('Thankyou for voting message (leave blank to not show).'))
-      ->setDisplayOptions('form', [
-        'type' => 'text_textarea',
-        'weight' => 0,
-        'rows' => 6,
-      ])
-      ->setDisplayConfigurable('view', TRUE)
-      ->setDisplayConfigurable('form', TRUE);
-
-    $fields['thankyou_for_voting_email'] = BaseFieldDefinition::create('text_long')
-      ->setLabel(t('Thankyou for voting email'))
-      ->setDescription(t('Thankyou for voting email (leave blank to not send). This will be sent once per user per election after they have voted for the first position (not skipped or abstained).'))
-      ->setDisplayOptions('form', [
-        'type' => 'text_textarea',
-        'weight' => 0,
-        'rows' => 6,
-      ])
-      ->setDisplayConfigurable('view', TRUE)
-      ->setDisplayConfigurable('form', TRUE);
-
     $fields['ballot_behaviour'] = BaseFieldDefinition::create('list_string')
       ->setLabel('Ballot behaviour')
       ->setDescription(t('What happens after voting for an individual position.'))
@@ -418,6 +396,21 @@ class Election extends EditorialContentEntityBase implements ElectionInterface {
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
+    // @todo make view respect this
+    $fields['ballot_candidate_sort'] = BaseFieldDefinition::create('list_string')
+      ->setLabel(t('Ballot candidate sort'))
+      ->setSettings([
+        'allowed_values' => [
+          'random' => 'Random',
+          'alphabetical' => 'Alphabetical by name',
+        ],
+      ])
+      ->setDefaultValue('table')
+      ->setDisplayOptions('form', [
+        'type' => 'options_select',
+      ])
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE);
 
     $fields['ballot_confirmation'] = BaseFieldDefinition::create('list_string')
       ->setLabel('Ballot confirmation')
@@ -438,22 +431,36 @@ class Election extends EditorialContentEntityBase implements ElectionInterface {
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
-    $fields['ballot_candidate_sort'] = BaseFieldDefinition::create('list_string')
-      ->setLabel(t('Ballot candidate sort'))
-      ->setSettings([
-        'allowed_values' => [
-          'random' => 'Random',
-          'alphabetical' => 'Alphabetical by name',
-        ],
-      ])
-      ->setDefaultValue('table')
-      ->setDisplayOptions('form', [
-        'type' => 'options_select',
-      ])
+    $fields['ballot_show_candidates_below'] = BaseFieldDefinition::create('boolean')
+      ->setLabel(t('Show candidates list at end of ballot'))
+      ->setDescription(t('Displayed in the "Ballot - full" display mode for the election post.'))
+      ->setDefaultValue(TRUE)
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
     static::addElectionConditionsFields($fields, 'election');
+
+    $fields['thankyou_for_voting_message'] = BaseFieldDefinition::create('text_long')
+      ->setLabel(t('Thankyou for voting message'))
+      ->setDescription(t('Thankyou for voting message (leave blank to not show).'))
+      ->setDisplayOptions('form', [
+        'type' => 'text_textarea',
+        'weight' => 0,
+        'rows' => 6,
+      ])
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
+    $fields['thankyou_for_voting_email'] = BaseFieldDefinition::create('text_long')
+      ->setLabel(t('Thankyou for voting email'))
+      ->setDescription(t('Thankyou for voting email (leave blank to not send). This will be sent once per user per election fifteen minutes after they have voted for the first position (not skipped or abstained).'))
+      ->setDisplayOptions('form', [
+        'type' => 'text_textarea',
+        'weight' => 0,
+        'rows' => 6,
+      ])
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
 
     return $fields;
   }

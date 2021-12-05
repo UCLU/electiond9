@@ -209,13 +209,15 @@ class ElectionBallotForm extends ContentEntityForm {
       );
     }
 
-    $candidatesList = views_embed_view('election_candidates_for_post', 'embed_ballot_full');
-    if ($candidatesList) {
-      $form['candidates_full'] = [
-        '#weight' => 30,
-        '#prefix' => '<h2>' . $election_post->getCandidateTypesAsLabel() . '</h2>',
-        '#markup' => render($candidatesList),
-      ];
+    if ($election_post->getElection()->ballot_show_candidates_below->value) {
+      $candidatesList = views_embed_view('election_candidates_for_post', 'embed_ballot_full');
+      if ($candidatesList) {
+        $form['candidates_full'] = [
+          '#weight' => 30,
+          '#prefix' => '<h2>' . $election_post->getCandidateTypesAsLabel() . '</h2>',
+          '#markup' => render($candidatesList),
+        ];
+      }
     }
 
     return $form;

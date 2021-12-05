@@ -89,6 +89,12 @@ class ElectionCandidateForm extends ContentEntityForm {
 
     $status = parent::save($form, $form_state);
 
+    // Set published by default (or not)
+    if ($status == SAVED_NEW) {
+      $entity->set('status', $entity->getPost()->publish_candidates_automatically->value);
+      $entity->save();
+    }
+
     switch ($status) {
       case SAVED_NEW:
         $this->messenger()->addMessage($this->t('Created the %label Election candidate.', [

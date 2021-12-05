@@ -2,14 +2,14 @@
 
 namespace Drupal\election\Service;
 
+use Drupal\conditions_plugin_reference\ConditionRequirement;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\election\ElectionPostConditionChecker;
 use Drupal\election\Entity\Election;
 use Drupal\election\Entity\ElectionBallot;
 use Drupal\election\Entity\ElectionCandidate;
 use Drupal\election\Entity\ElectionPostInterface;
-use \Drupal\user\Entity\User;
+use Drupal\user\Entity\User;
 
 /**
  * Class ElectionPostEligibilityChecker.
@@ -22,8 +22,8 @@ class ElectionPostEligibilityChecker {
   }
 
   public static function checkRequirementsForEligibility($requirements) {
-    $passValues = array_column($requirements, 'pass');
-    return !in_array(FALSE, $passValues);
+    $evaluator = \Drupal::service('conditions_plugin_reference.conditions_evaluator');
+    // $evaluator->setEntity($)
   }
 
   /**
@@ -70,52 +70,59 @@ class ElectionPostEligibilityChecker {
       $requirements = [];
 
       // Publishing
-      $requirements['election_published'] =  [
-        'title' => t('%electionName election published', $titleParams),
+      $requirements[] = new ConditionRequirement([
+        'id' => 'election_published',
+        'label' => t('%electionName election published', $titleParams),
         'pass' => $election->isPublished(),
-      ];
+      ]);
 
-      if ($requirements['election_published']) {
-        $requirements['election_post_published'] =  [
-          'title' => t('%positionName %positionTypeName published', $titleParams),
+      if ($election->isPublished()) {
+        $requirements[] = new ConditionRequirement([
+          'id' => 'election_post_published',
+          'label' => t('%positionName %positionTypeName published', $titleParams),
           'pass' => $election_post->isPublished(),
-        ];
+        ]);
       }
 
       // Phase enabled for election
       $electionPhases = $election->getEnabledPhases();
       if ($phase != 'voting') {
-        $requirements[$phase . '_enabled'] = [
-          'title' => t('@phaseName enabled for the %electionName election', $titleParams),
+        $requirements[] = new ConditionRequirement([
+          'id' => $phase . '_enabled',
+          'label' => t('@phaseName enabled for the %electionName election', $titleParams),
           'pass' => in_array($phase, $electionPhases),
-        ];
+        ]);
       }
 
       // Phase open
       if ($includePhaseStatus) {
         $postStatus = $election_post->getPhaseStatuses($phase);
-        $requirements[$phase . '_open_election_post'] = [
-          'title' => t('@phaseName open for %positionTypeName %positionName', $titleParams),
+        $requirements[] = new ConditionRequirement([
+          'id' => $phase . '_open_election_post',
+          'label' => t('@phaseName open for %positionTypeName %positionName', $titleParams),
           'pass' => $postStatus[$phase] == 'open',
-        ];
+        ]);
 
         if ($postStatus[$phase] != 'open') {
           $electionStatus = $election->getPhaseStatuses();
-          $requirements[$phase . '_open_election'] = [
-            'title' => t('@phaseName open for election %electionName', $titleParams),
+          $requirements[] = new ConditionRequirement([
+            'id' => $phase . '_open_election',
+            'label' => t('@phaseName open for election %electionName', $titleParams),
             'pass' => $electionStatus[$phase] == 'open',
-          ];
+          ]);
         }
       }
 
       // Check if logged in:
       // @todo is there a use case for anonymous users voting?
-      $requirements['logged_in'] = [
-        'title' => t('Logged in', $titleParams),
-        'pass' => !\Drupal::currentUser()->isAnonymous(),
-      ];
+      $logged_in = !\Drupal::currentUser()->isAnonymous();
+      $requirements[] = new ConditionRequirement([
+        'id' => 'logged_in',
+        'label' => t('Logged in', $titleParams),
+        'pass' => $logged_in,
+      ]);
 
-      if ($requirements['logged_in']['pass']) {
+      if ($logged_in) {
         // Check user permissions
         $permissions = [
           'interest' => 'express interest in posts',
@@ -123,18 +130,20 @@ class ElectionPostEligibilityChecker {
           'voting' => 'vote',
         ];
 
-        $requirements['permission_' . $phase] = [
-          'title' => t('User has permission to @phaseAction in elections on this website', $titleParams),
+        $requirements[] = new ConditionRequirement([
+          'id' => 'permission_' . $phase,
+          'label' => t('User has permission to @phaseAction in elections on this website', $titleParams),
           'pass' => $account->hasPermission($permissions[$phase]),
-        ];
+        ]);
 
         // Check if already completed phase (e.g. voted)
         $already = static::checkIfUserAlreadyCompletedPhase($election_post, $account, $phase);
         if (!is_null($already)) {
-          $requirements['not_already_' . $phase] = [
-            'title' => t('Must not already have @phasePastTense', $titleParams),
+          $requirements[] = new ConditionRequirement([
+            'id' => 'not_already_' . $phase,
+            'label' => t('Must not already have @phasePastTense', $titleParams),
             'pass' => !$already,
-          ];
+          ]);
         }
       }
 
@@ -142,10 +151,11 @@ class ElectionPostEligibilityChecker {
         // @todo check number of candidates
         $candidates = $election_post->getCandidatesForVoting();
 
-        $requirements['enough_candidates'] = [
-          'title' => t('Enough candidates', $titleParams),
+        $requirements[] = new ConditionRequirement([
+          'id' => 'enough_candidates',
+          'label' => t('Enough candidates', $titleParams),
           'pass' => count($candidates) > 0,
-        ];
+        ]);
       }
 
       if (\Drupal::moduleHandler()->moduleExists('election_conditions')) {
@@ -186,7 +196,6 @@ class ElectionPostEligibilityChecker {
     $nominations = ElectionCandidate::loadByUserAndPost($account, $election_post, ['interest']);
     return count($nominations) > 0;
   }
-
 
   /**
    * For all posts currently open or soon to be open, refresh the user's eligibility
