@@ -552,10 +552,14 @@ class Election extends EditorialContentEntityBase implements ElectionInterface {
     return reset($postIds);
   }
 
+  public function canVote(AccountInterface $account) {
+    return $this->checkStatusForPhase('voting', 'open') && $this->getNextPostId($account);
+  }
+
   public function getActionLinks(AccountInterface $account) {
 
     $actions = [];
-    $startVoting = $this->checkStatusForPhase('voting', 'open') && $this->getNextPostId($account);
+    $startVoting = $this->canVote($account);
 
     if ($startVoting) {
       $actions[] = [

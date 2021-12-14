@@ -108,10 +108,10 @@ class OpenSTV extends PluginElectionVotingMethodPluginBase {
     $votes_query = \Drupal::database()->select('election_ballot_vote', 'ev');
     $votes_query->join('election_ballot', 'eb', 'eb.id = ev.ballot_id');
     $votes_query->fields('ev', $votes_fields)
-      ->fields('eb', ['value', 'abstain'])
-      ->condition('eb.value', 0, '>')
-      ->orderBy('eb.ballot_id')
-      ->orderBy('ev.rank');
+      ->fields('ev', ['ranking', 'abstention'])
+      ->condition('ev.ranking', 0, '>')
+      ->orderBy('ev.ballot_id')
+      ->orderBy('ev.ranking');
 
     $votes = $votes_query->execute();
 

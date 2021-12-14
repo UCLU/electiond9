@@ -257,6 +257,14 @@ trait ElectionStatusesTrait {
         case 'scheduled':
           $status_full = '@phase scheduled (opens ...)';
           break;
+
+        case 'disabled':
+          $status_full = '@phase disabled for this election';
+          break;
+
+        default:
+          $status_full = '@phase not clear - ' . $phaseStatuses[$phase];
+          break;
       }
 
       if ($this->getEntityTypeId() == 'election') {

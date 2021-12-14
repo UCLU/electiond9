@@ -413,9 +413,9 @@ class ElectionCandidate extends EditorialContentEntityBase implements ElectionCa
     $votes_query = \Drupal::database()->select('election_ballot_vote', 'ev');
     $votes_query->join('election_ballot', 'eb', 'eb.id = ev.ballot_id');
     $votes_query->fields('ev', ['id'])
-      ->condition('eb.value', 0, '>')
-      ->orderBy('eb.ballot_id')
-      ->orderBy('ev.rank');
+      ->condition('ev.ranking', 0, '>')
+      ->orderBy('ev.ballot_id')
+      ->orderBy('ev.ranking');
 
     if ($confirmedOnly) {
       $votes_query->condition('eb.confirmed', 1);

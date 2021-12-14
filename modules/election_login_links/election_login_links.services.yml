@@ -1,0 +1,5 @@
+services:
+  election_login_links.event_subscriber:
+    class: Drupal\election_login_links\EventSubscriber\LoginSubscriber
+    tags:
+      - { name: event_subscriber }

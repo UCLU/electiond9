@@ -707,6 +707,7 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
   }
 
   public function countBallots($confirmedOnly = FALSE) {
-    return count($this->getBallots($confirmedOnly));
+    $ballots = $this->getBallots($confirmedOnly);
+    return $ballots ? count($ballots) : 0;
   }
 }

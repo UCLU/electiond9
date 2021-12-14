@@ -36,7 +36,7 @@ class ElectionPostAccessControlHandler extends EntityAccessControlHandler {
 
       case 'delete':
         $ballots = $entity->countBallots(TRUE);
-        if (count($ballots) > 0) {
+        if ($ballots > 0) {
           if (!\Drupal::currentUser()->hasPermission('delete posts with ballots')) {
             \Drupal::messenger()->addWarning(t('Cannot delete this post because votes have already been cast.'));
           }

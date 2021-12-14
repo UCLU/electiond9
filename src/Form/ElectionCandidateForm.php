@@ -91,7 +91,7 @@ class ElectionCandidateForm extends ContentEntityForm {
 
     // Set published by default (or not)
     if ($status == SAVED_NEW) {
-      $entity->set('status', $entity->getPost()->publish_candidates_automatically->value);
+      $entity->set('status', $entity->getElectionPost()->publish_candidates_automatically->value);
       $entity->save();
     }
 

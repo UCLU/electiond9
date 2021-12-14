@@ -1,0 +1,7 @@
+name: 'Election One-Time Login Links'
+type: module
+description: 'Generate one-time login links for users to vote in the election without needing to log in.'
+core_version_requirement: ^8 || ^9
+package: 'Election'
+dependencies:
+  - election:election

@@ -1,0 +1,4 @@
+election_login_links.login:
+  path: '/election/login/{hash}'
+  defaults:
+    _controller: '\Drupal\election_login_links\Controller\LoginController'

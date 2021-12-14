@@ -70,8 +70,8 @@ class ElectionCandidateAccessControlHandler extends EntityAccessControlHandler {
         }
 
       case 'delete':
-        $votes = $entity->countBallotVotes(TRUE);
-        if (count($votes) > 0) {
+        $votesCount = $entity->countBallotVotes(TRUE);
+        if ($votesCount > 0) {
           if (!\Drupal::currentUser()->hasPermission('delete candidates with votes')) {
             \Drupal::messenger()->addWarning(t('Cannot delete this candidate because votes have already been cast.'));
           }
