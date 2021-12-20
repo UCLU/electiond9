@@ -12,7 +12,7 @@ use Drupal\user\EntityOwnerInterface;
  *
  * @ingroup election
  */
-interface ElectionBallotVoteInterface extends ContentEntityInterface, EntityChangedInterface, EntityPublishedInterface, EntityOwnerInterface {
+interface ElectionBallotVoteInterface extends ContentEntityInterface, EntityChangedInterface, EntityPublishedInterface {
 
   /**
    * Add get/set methods for your configuration properties here.
@@ -55,5 +55,4 @@ interface ElectionBallotVoteInterface extends ContentEntityInterface, EntityChan
    *   The called Election ballot vote entity.
    */
   public function setCreatedTime($timestamp);
-
 }

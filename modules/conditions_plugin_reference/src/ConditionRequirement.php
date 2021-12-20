@@ -57,11 +57,11 @@ final class ConditionRequirement {
       }
     }
 
-    $this->id = !empty($definition['id']) ? $definition['id'] : NULL;
-    $this->label = !empty($definition['label']) ? $definition['label'] : NULL;
-    $this->pass = !empty($definition['pass']) ? $definition['pass'] : NULL;
-    $this->description = !empty($definition['description']) ? $definition['description'] : NULL;
-    $this->group = !empty($definition['group']) ? $definition['group'] : NULL;
+    $this->id          = isset($definition['id'])          ? $definition['id'] : NULL;
+    $this->label       = isset($definition['label'])       ? $definition['label'] : NULL;
+    $this->pass        = isset($definition['pass'])        ? $definition['pass'] : NULL;
+    $this->description = isset($definition['description']) ? $definition['description'] : NULL;
+    $this->group       = isset($definition['group'])       ? $definition['group'] : NULL;
   }
 
   public function id() {

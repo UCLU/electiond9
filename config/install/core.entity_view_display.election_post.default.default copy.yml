@@ -1,0 +1,101 @@
+uuid: 123d3c8e-00c3-4d52-a78a-2d81b64df59d
+langcode: en
+status: true
+dependencies:
+  config:
+    - election.election_post_type.default
+  module:
+    - text
+_core:
+  default_config_hash: OMTqP1_P8kBdVfC2xJzF_uOB2NvAHDyJe3zKR2SJ7Ug
+id: election_post.default.default
+targetEntityType: election_post
+bundle: default
+mode: default
+content:
+  count_results_html:
+    label: above
+    type: text_default
+    region: content
+    weight: 5
+    settings: {}
+    third_party_settings: {}
+  description:
+    label: hidden
+    type: text_default
+    region: content
+    weight: 4
+    settings: {}
+    third_party_settings: {}
+  election:
+    label: inline
+    type: entity_reference_label
+    region: content
+    weight: 3
+    settings:
+      link: true
+    third_party_settings: {}
+  field_post_actions:
+    weight: 0
+    region: content
+    settings: {}
+    third_party_settings: {}
+  field_status_summary:
+    weight: 1
+    region: content
+    settings: {}
+    third_party_settings: {}
+  name:
+    label: hidden
+    type: string
+    region: content
+    weight: 2
+    settings:
+      link_to_entity: false
+    third_party_settings: {}
+hidden:
+  abstentions_allowed: true
+  allow_candidate_editing: true
+  candidate_type: true
+  category: true
+  conditions_inherit_election: true
+  conditions_interest: true
+  conditions_interest_same_as: true
+  conditions_nominations: true
+  conditions_nominations_same_as: true
+  conditions_voting: true
+  conditions_voting_same_as: true
+  count_candidates_all: true
+  count_candidates_defeated: true
+  count_candidates_elected: true
+  count_candidates_included: true
+  count_candidates_published: true
+  count_method: true
+  count_results_text: true
+  count_timestamp: true
+  count_total_abstentions: true
+  count_total_ballots: true
+  count_total_votes: true
+  count_total_voters: true
+  entity_print_view_epub: true
+  entity_print_view_pdf: true
+  entity_print_view_word_docx: true
+  exclusive: true
+  include_reopen_nominations: true
+  langcode: true
+  publish_candidates_automatically: true
+  search_api_excerpt: true
+  skip_allowed: true
+  status: true
+  status_interest: true
+  status_interest_close: true
+  status_interest_open: true
+  status_nominations: true
+  status_nominations_close: true
+  status_nominations_open: true
+  status_voting: true
+  status_voting_close: true
+  status_voting_open: true
+  user_id: true
+  vacancies: true
+  voting_method: true

@@ -61,6 +61,12 @@ class ElectionForm extends ContentEntityForm {
     return $form;
   }
 
+  public function validateForm(array &$form, FormStateInterface $form_state) {
+    parent::validateForm($form, $form_state);
+
+    $this->validateScheduling($form, $form_state);
+  }
+
   /**
    * {@inheritdoc}
    */

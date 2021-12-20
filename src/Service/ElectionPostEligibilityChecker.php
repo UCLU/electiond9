@@ -80,7 +80,7 @@ class ElectionPostEligibilityChecker {
       ]);
 
       if ($election->isPublished()) {
-        $requirements[] = new ConditionRequirement([
+        $requirements['election_post_published'] = new ConditionRequirement([
           'id' => 'election_post_published',
           'label' => t('%positionName %positionTypeName published', $titleParams),
           'pass' => $election_post->isPublished(),
@@ -90,7 +90,7 @@ class ElectionPostEligibilityChecker {
       // Phase enabled for election
       $electionPhases = $election->getEnabledPhases();
       if ($phase != 'voting') {
-        $requirements[] = new ConditionRequirement([
+        $requirements[$phase . '_enabled'] = new ConditionRequirement([
           'id' => $phase . '_enabled',
           'label' => t('@phaseName enabled for the %electionName election', $titleParams),
           'pass' => in_array($phase, $electionPhases),
@@ -105,15 +105,6 @@ class ElectionPostEligibilityChecker {
           'label' => t('@phaseName open for %positionTypeName %positionName', $titleParams),
           'pass' => $postStatus[$phase] == 'open',
         ]);
-
-        if ($postStatus[$phase] != 'open') {
-          $electionStatus = $election->getPhaseStatuses();
-          $requirements[] = new ConditionRequirement([
-            'id' => $phase . '_open_election',
-            'label' => t('@phaseName open for election %electionName', $titleParams),
-            'pass' => $electionStatus[$phase] == 'open',
-          ]);
-        }
       }
 
       // Check if logged in:
@@ -133,7 +124,7 @@ class ElectionPostEligibilityChecker {
           'voting' => 'vote',
         ];
 
-        $requirements[] = new ConditionRequirement([
+        $requirements['permission_' . $phase] = new ConditionRequirement([
           'id' => 'permission_' . $phase,
           'label' => t('User has permission to @phaseAction in elections on this website', $titleParams),
           'pass' => $account->hasPermission($permissions[$phase]),
@@ -142,7 +133,7 @@ class ElectionPostEligibilityChecker {
         // Check if already completed phase (e.g. voted)
         $already = static::checkIfUserAlreadyCompletedPhase($election_post, $account, $phase);
         if (!is_null($already)) {
-          $requirements[] = new ConditionRequirement([
+          $requirements['not_already_' . $phase] = new ConditionRequirement([
             'id' => 'not_already_' . $phase,
             'label' => t('Must not already have @phasePastTense', $titleParams),
             'pass' => !$already,
@@ -154,7 +145,7 @@ class ElectionPostEligibilityChecker {
         // @todo check number of candidates
         $candidates = $election_post->getCandidatesForVoting();
 
-        $requirements[] = new ConditionRequirement([
+        $requirements['enough_candidates'] = new ConditionRequirement([
           'id' => 'enough_candidates',
           'label' => t('Enough candidates', $titleParams),
           'pass' => count($candidates) > 0,

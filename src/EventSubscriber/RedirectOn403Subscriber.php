@@ -51,7 +51,9 @@ class RedirectOn403Subscriber extends HttpExceptionSubscriberBase {
     } else {
       $routeMatch = RouteMatch::createFromRequest($request);
       $election_post = $routeMatch->getParameters()->get('election_post');
-      // $election_post = ElectionPost::load($election_post_id);
+      if (is_string($election_post)) {
+        $election_post = ElectionPost::load($election_post);
+      }
       if (!$election_post) {
         return;
       }

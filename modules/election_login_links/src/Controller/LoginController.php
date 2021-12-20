@@ -52,7 +52,11 @@ class LoginController extends ControllerBase implements ContainerInjectionInterf
     if ($loggedIn) {
       return $this->redirect('user.login', [], [
         'absolute' => TRUE,
-        'query' => ['destination' => Url::fromRoute($this->getDestinationRoute($hash), ['election' => $hash->getElectionId()])->toString()]
+        'query' => [
+          'destination' => Url::fromRoute($this->getDestinationRoute($hash), [
+            'election' => $hash->getElectionId(),
+          ])->toString(),
+        ],
       ]);
     } else {
       return $this->redirect($this->getDestinationRoute($hash), ['election' => $hash->getElectionId()]);

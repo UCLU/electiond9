@@ -1,0 +1,14 @@
+uuid: 84eb9096-c8d2-4615-b2a4-d671a5706de2
+langcode: en
+status: true
+dependencies:
+  module:
+    - election
+id: election_post
+label: 'Election post'
+type: 'canonical_entities:election_post'
+pattern: 'election/[election_post:election:entity:name]/[election_post:name]'
+selection_criteria: {  }
+selection_logic: and
+weight: 0
+relationships: {  }

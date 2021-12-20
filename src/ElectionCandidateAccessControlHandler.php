@@ -31,7 +31,11 @@ class ElectionCandidateAccessControlHandler extends EntityAccessControlHandler {
           return AccessResult::allowedIfHasPermission($account, 'view unpublished election candidate entities');
         }
 
-        return AccessResult::allowedIfHasPermission($account, 'view published election candidate entities');
+        if ($entity->getElectionPost()->isOpenOrPartiallyOpen('voting')) {
+          return AccessResult::allowedIfHasPermission($account, 'view published election candidate entities when voting open');
+        } else {
+          return AccessResult::allowedIfHasPermission($account, 'view published election candidate entities when voting closed');
+        }
 
       case 'update':
         $editPermission = $account->hasPermission('edit election candidate entities');

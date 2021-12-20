@@ -1,0 +1,7 @@
+election_ballot_export.form:
+  path: '/election/{election}/export-ballots'
+  defaults:
+    _form: '\Drupal\election_ballot_export\Form\SettingsForm'
+    _title_callback: '\Drupal\election_ballot_export\Form\SettingsForm::getFormTitle'
+  requirements:
+    _permission: 'export election ballots'

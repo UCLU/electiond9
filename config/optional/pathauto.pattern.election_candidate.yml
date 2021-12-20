@@ -1,0 +1,14 @@
+uuid: e772c08f-02be-4551-9293-957d00e91041
+langcode: en
+status: true
+dependencies:
+  module:
+    - election
+id: election_candidate
+label: 'Election candidate'
+type: 'canonical_entities:election_candidate'
+pattern: 'election/[election_candidate:election_post:entity:election:entity:name]/[election_candidate:election_post:entity:name]/[election_candidate:name]'
+selection_criteria: {  }
+selection_logic: and
+weight: 0
+relationships: {  }

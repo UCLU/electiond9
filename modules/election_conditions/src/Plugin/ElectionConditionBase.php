@@ -18,15 +18,14 @@ abstract class ElectionConditionBase extends ConditionBase {
     ];
   }
 
-  /**
-   * Return true or false if access.
-   *
-   * @param string $phase
-   *
-   * @return boolean
-   */
-  public function evaluate(EntityInterface $entity, AccountInterface $account, $parameters = []) {
+  public function evaluateRequirements(EntityInterface $entity, AccountInterface $account, $parameters = []) {
     $this->assertParameters($parameters);
+    $requirements = [];
+
+    // This is where you would generate and evaluate your requirements.
+
+    $this->dispatchRequirementEvents($requirements);
+    return $requirements;
   }
 
   public function getCacheContextsForEligibility(ElectionPost $post, AccountInterface $account) {

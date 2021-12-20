@@ -1,0 +1,7 @@
+name: 'Election Statistics'
+type: module
+description: 'Provides a statistics page and block for the election, and an extensible framework to add to those.'
+core_version_requirement: ^8 || ^9
+package: 'Election'
+dependencies:
+  - election:election

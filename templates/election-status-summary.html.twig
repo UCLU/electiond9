@@ -7,18 +7,22 @@
         ? 'eligible'
         : 'ineligible'
       }}">
-      <b>{{ phase.name }}</b>:
-      {{ phase.status_full }}
-      {% if phase.status == 'open' %}
-        {% if phase.eligible == true %}
-          - <a href="{{ phase.eligibility_link }}">{{ phase.eligibility_label }}</a>
+      <span class="election_phase__label"><b>{{ phase.name }}</b>:</span>
+      <span class="election_phase__status">
+        {{ phase.status_full }}
+        {% if phase.status == 'open' %}
+          {% if phase.eligible == true %}
+            - <a href="{{ phase.eligibility_link }}">{{
+                phase.eligibility_label
+              }}</a>
+          {% endif %}
         {% endif %}
-      {% endif %}
+      </span>
 
       {% if phase.status == 'open' %}
         {% if phase.eligible == true %}
 
-        {% else %}
+        {% elseif phase.ineligibility_reasons|length %}
           <ul>
             {% for listItem in phase.ineligibility_reasons %}
               {% if listItem|length %}

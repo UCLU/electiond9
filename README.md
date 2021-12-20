@@ -14,6 +14,9 @@ You must set up a key called "election" under /admin/config/system/keys
 
 # TODO
 
+- For all below, add message to delete form:
 - Delete posts when election is deleted
 - Delete candidates when post is deleted
+- Delete ballots when post or candidate is deleted
+
 - Customise "express interest", e.g. "proposal"

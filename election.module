@@ -161,7 +161,7 @@ function election_election_post_view(array &$build, EntityInterface $entity, Ent
 function election_election_post_view_field_status_summary(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
   $summary = [
     '#theme' => 'election_status_summary',
-    '#phases' => $entity->getUserEligibilityInformation(\Drupal::currentUser()),
+    '#phases' => $entity->getUserEligibilityInformation(\Drupal::currentUser(), $entity->getEnabledPhases()),
   ];
 
   $build['field_status_summary'] = [

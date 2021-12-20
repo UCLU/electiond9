@@ -10,6 +10,8 @@ use Drupal\election\Entity\ElectionPost;
 
 trait ElectionStatusesTrait {
 
+  // @todo validate scheduling
+
   public static function addElectionStatusesFields(&$fields, string $entity_type) {
     // Create nominations and voting status and opening and closing times
     $weightCounter = 0;
@@ -173,28 +175,55 @@ trait ElectionStatusesTrait {
     $finalPhases = [];
     foreach (Election::ELECTION_PHASES as $phase) {
       $field = 'status_' . $phase;
-      if ($election->$field != 'disabled') {
+      if ($election->$field->value != 'disabled') {
         $finalPhases[] = $phase;
       }
     }
     return $finalPhases;
   }
 
-  public function getPhaseStatuses() {
+  public function isOpenOrPartiallyOpen($phase, $inherit = TRUE) {
+    $statuses = $this->getPhaseStatuses($inherit);
+    return $statuses[$phase] == 'open' || $statuses[$phase] == 'closed but posts open';
+  }
+
+  public function getPhaseStatus($phase, $inherit = TRUE) {
+    $statuses = $this->getPhaseStatuses($inherit);
+    return $statuses[$phase];
+  }
+
+  public function getPhaseStatuses($inherit = TRUE) {
     $results = [];
 
     $phases = $this->getEnabledPhases();
     foreach ($phases as $phase_key) {
-      if ($this->getEntityTypeId() == 'election_post' && $this->get('status_' . $phase_key)->value == 'inherit') {
+      if ($inherit && $this->getEntityTypeId() == 'election_post' && $this->get('status_' . $phase_key)->value == 'inherit') {
         $electionResults = $this->getElection()->getPhaseStatuses();
         $results[$phase_key] = $electionResults[$phase_key];
       } else {
         $status = $this->get('status_' . $phase_key)->value;
         $text = $status;
+
+        $anyPostsOpen = FALSE;
+        if ($this->getEntityTypeId() == 'election') {
+          // Check if any posts are open
+          $posts = $this->getPosts();
+          foreach ($posts as $post) {
+            $postPhaseStatuses = $post->getPhaseStatuses(FALSE);
+            if ($postPhaseStatuses[$phase_key] == 'open') {
+              $anyPostsOpen = TRUE;
+              break;
+            }
+          }
+        }
+
         if ($status == 'open') {
           $text = 'open';
         } elseif ($status == 'closed') {
           $text = 'closed';
+          if ($anyPostsOpen) {
+            $text .= ' but posts open';
+          }
         } elseif ($status == 'scheduled') {
           $dateStatus = $this->checkScheduledState($phase_key);
           if ($dateStatus == 'open') {
@@ -204,7 +233,12 @@ trait ElectionStatusesTrait {
           } else {
             $text = ' scheduled to open in '; // TODO
           }
+          if ($anyPostsOpen) {
+            $text .= ' but posts open';
+          }
         }
+
+
         $results[$phase_key] = $text;
       }
     }
@@ -234,6 +268,11 @@ trait ElectionStatusesTrait {
       $phases = $electionPhases;
     }
 
+    $electionPhaseStatuses = [];
+    if ($this->getEntityTypeId() == 'election_post') {
+      $electionPhaseStatuses = $this->getElection()->getPhaseStatuses();
+    }
+
     foreach ($phases as $phase) {
       $phase_label = Election::getPhaseName($phase);
 
@@ -243,8 +282,9 @@ trait ElectionStatusesTrait {
       ];
 
       if ($phaseStatuses[$phase] == 'inherit') {
-        $phaseStatuses[$phase] = $this->getElection()->getPhaseStatuses()[$phase];
+        $phaseStatuses[$phase] = $electionPhaseStatuses[$phase];
       }
+
       switch ($phaseStatuses[$phase]) {
         case 'open':
           $status_full = '@phase open';
@@ -252,6 +292,10 @@ trait ElectionStatusesTrait {
 
         case 'closed':
           $status_full = '@phase closed';
+          break;
+
+        case 'closed but posts open':
+          $status_full = '@phase closed for election overall but some @posts are open';
           break;
 
         case 'scheduled':
@@ -282,7 +326,11 @@ trait ElectionStatusesTrait {
           $result[$phase]['eligible'] = FALSE;
           $result[$phase]['eligibility_label'] = t('Not eligible to @action', ['@action' => strtolower(Election::getPhaseAction($phase))]);
 
-          $result[$phase]['already_' . $phase] = isset($requirements['not_already_' . $phase]) && $requirements['not_already_' . $phase]->isPassed();
+          $notAlreadyDone = $requirements['not_already_' . $phase];
+          $result[$phase]['already_' . $phase] = isset($requirements['not_already_' . $phase]) && $notAlreadyDone->isFailed();
+          if ($phase == 'voting') {
+            // dd(isset($requirements['not_already_' . $phase]), $requirements['not_already_' . $phase]->isFailed(), $result[$phase]['already_' . $phase]);
+          }
 
           $formattedFailedRequirements = $post->formatEligibilityRequirements($requirements, TRUE);
           $result[$phase]['ineligibility_reasons'] = array_column($formattedFailedRequirements, 'title');
@@ -295,7 +343,7 @@ trait ElectionStatusesTrait {
 
       $eligibleText = '';
       if ($result[$phase]['already_' . $phase]) {
-        $status_full = 'You have already ' . Election::getPhaseActionPastTense($phase);
+        $status_full = 'You have already ' . Election::getPhaseActionPastTense($phase, TRUE);
         $result[$phase]['ineligibility_reasons'] = [];
       } else if ($phaseStatuses[$phase] == 'open') {
         $eligibleText = $result[$phase]['eligible'] ? ' and you are eligible' : ' but you are not eligible';
@@ -307,6 +355,7 @@ trait ElectionStatusesTrait {
       $result[$phase]['status_full'] = t($status_full . '@eligible', [
         '@phase' => $phase_label,
         '@eligible' => $eligibleText,
+        '@posts' => 'posts'
       ]);
     }
 
@@ -376,5 +425,56 @@ trait ElectionStatusesTrait {
     }
     $results = array_filter($results);
     return implode($separator, $results);
+  }
+
+  public function validateScheduling(&$form, &$form_state) {
+
+    foreach (Election::ELECTION_PHASES as $phase) {
+      if (isset($form['status_' . $phase]) && $form['status_' . $phase] == 'scheduled') {
+        $phaseName = Election::getPhaseName($phase);
+
+        $priorPhase = isset(Election::ELECTION_PHASES_DEPENDENT_PHASE[$phase]) ? static::ELECTION_PHASES_DEPENDENT_PHASE[$phase] : NULL;
+
+        $opens = $form_state->getValue('status_' . $phase . '_open');
+        $closes = $form_state->getValue('status_' . $phase . '_close');
+
+        if (!$opens || !$closes) {
+          $form_state->setErrorByName(
+            'status_' . $phase,
+            $this->t(
+              'You must set the opening and closing times when the status is Scheduled for @phaseName.',
+              [
+                '@phaseName' => $phaseName,
+              ]
+            )
+          );
+        } elseif ($close <= $open) {
+          $form_state->setErrorByName(
+            'status_' . $phase . '_close',
+            $this->t(
+              'You must set the closing time to be after the opening time when the status is Scheduled for @phaseName.',
+              [
+                '@phaseName' => $phaseName,
+              ]
+            )
+          );
+        } elseif ($form_state->getValue('status_' . $priorPhase) == 'scheduled') {
+          $priorCloses = $form_state->getValue('status_' . $phase . '_close');
+          if ($priorCloses > $opens) {
+
+            $form_state->setErrorByName(
+              'status_' . $priorPhase . '_close',
+              $this->t(
+                '@priorPhaseName can only be scheduled so that they close before the start of @phaseName.',
+                [
+                  '@phaseName' => $phaseName,
+                  '@priorPhaseName' => $priorPhaseName,
+                ]
+              )
+            );
+          }
+        }
+      }
+    }
   }
 }

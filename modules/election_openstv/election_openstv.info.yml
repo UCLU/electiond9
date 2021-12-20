@@ -1,7 +1,8 @@
-name: "Election OpenSTV"
+name: 'Election OpenSTV'
 type: module
-description: "Provides OpenSTV voting method."
+description: 'Provides OpenSTV voting method.'
 core_version_requirement: ^8 || ^9
-package: "Election"
+package: 'Election'
 dependencies:
   - election:election
+  - election:election_ballot_export

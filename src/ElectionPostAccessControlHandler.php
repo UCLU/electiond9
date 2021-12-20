@@ -6,6 +6,7 @@ use Drupal\Core\Entity\EntityAccessControlHandler;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Entity\EntityType;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 
@@ -22,6 +23,8 @@ class ElectionPostAccessControlHandler extends EntityAccessControlHandler {
   protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account) {
     /** @var \Drupal\election\Entity\ElectionPostInterface $entity */
 
+    $electionAccess = new ElectionAccessControlHandler($entity->getElection()->getEntityType());
+
     switch ($operation) {
 
       case 'view':
@@ -32,9 +35,21 @@ class ElectionPostAccessControlHandler extends EntityAccessControlHandler {
         return AccessResult::allowedIfHasPermission($account, 'view published election post entities');
 
       case 'update':
-        return AccessResult::allowedIfHasPermission($account, 'edit election post entities');
+        if ($entity && $entity->isOpenOrPartiallyOpen('voting') && !$account->hasPermission('bypass running election lock')) {
+          // Deny deleting running elections.
+          // Use the permission 'bypass running election lock' to bypass this.
+          return AccessResult::forbidden();
+        }
+
+        return $electionAccess->checkAccess($entity->getElection(), $operation, $account);
 
       case 'delete':
+        // Cannot delete if cannot edit election
+        if ($electionAccess->checkAccess($entity->getElection(), 'update', $account)->isForbidden()) {
+          return AccessResult::forbidden();
+        }
+
+        // Cannot delete if ballots exist and they don't have permission
         $ballots = $entity->countBallots(TRUE);
         if ($ballots > 0) {
           if (!\Drupal::currentUser()->hasPermission('delete posts with ballots')) {

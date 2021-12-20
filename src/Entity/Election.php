@@ -97,11 +97,25 @@ class Election extends EditorialContentEntityBase implements ElectionInterface {
   use ElectionStatusesTrait;
   use ElectionConditionsTrait;
 
-  // @todo move to YML files for configuration maybe
+  /**
+   * The phases an election post goes through.
+   */
   const ELECTION_PHASES = [
     'interest',
     'nominations',
     'voting',
+  ];
+
+  /**
+   * As a general rule the prior phase must be complete
+   * before the next phase can continue
+   * (if defined here).
+   *
+   * subsequent phase => prior phase
+   */
+  const ELECTION_PHASES_DEPENDENT_PHASE = [
+    'nominations' => 'interest',
+    'voting' => 'nominations',
   ];
 
   const SCHEDULING_STATES = [
@@ -135,16 +149,16 @@ class Election extends EditorialContentEntityBase implements ElectionInterface {
     }
   }
 
-  public static function getPhaseActionPastTense($phase) {
+  public static function getPhaseActionPastTense($phase, $lowerCase = FALSE) {
     switch ($phase) {
       case 'interest':
-        return t('Expressed interest');
+        return $lowerCase ? t('expressed interest') : t('Expressed interest');
 
       case 'nominations':
-        return t('Nominated');
+        return $lowerCase ? t('nominated') : t('Nominated');
 
       case 'voting':
-        return t('Voted');
+        return $lowerCase ? t('voted') : t('Voted');
     }
   }
 
@@ -462,6 +476,21 @@ class Election extends EditorialContentEntityBase implements ElectionInterface {
       ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
 
+    $fields['voting_method'] = BaseFieldDefinition::create('plugin_reference')
+      ->setLabel(t('Voting method'))
+      ->setDescription(t('This can be overridden per post.'))
+      ->setSettings([
+        'target_type' => 'election_voting_method_plugin',
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'plugin_reference_select',
+        'configuration_form' => 'full',
+        'provider_grouping' => FALSE,
+      ])
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setRequired(TRUE);
+
     return $fields;
   }
 
@@ -553,7 +582,7 @@ class Election extends EditorialContentEntityBase implements ElectionInterface {
   }
 
   public function canVote(AccountInterface $account) {
-    return $this->checkStatusForPhase('voting', 'open') && $this->getNextPostId($account);
+    return $this->getNextPostId($account) ? TRUE : FALSE;
   }
 
   public function getActionLinks(AccountInterface $account) {
@@ -622,5 +651,9 @@ class Election extends EditorialContentEntityBase implements ElectionInterface {
         )
       ];
     }
+  }
+
+  public function getVotingMethod() {
+    $this->voting_method->value;
   }
 }

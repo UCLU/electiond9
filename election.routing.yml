@@ -86,3 +86,29 @@ entity.election_post.eligibility:
         type: entity:election_post
     _admin_route: FALSE
     no_cache: 'TRUE'
+
+entity.election_post.count:
+  path: '/election/post/{election_post}/count'
+  defaults:
+    _form: '\Drupal\election\Form\ElectionPostCountForm'
+    _title_callback: '\Drupal\election\Form\ElectionPostCountForm::getCountFormTitle()'
+  requirements:
+    _permission: 'run election counts'
+  options:
+    parameters:
+      election_post:
+        type: entity:election_post
+    _admin_route: FALSE
+
+entity.election.count:
+  path: '/election/{election}/count'
+  defaults:
+    _form: '\Drupal\election\Form\ElectionCountForm'
+    _title_callback: '\Drupal\election\Form\ElectionCountForm::getCountFormTitle()'
+  requirements:
+    _permission: 'run election counts'
+  options:
+    parameters:
+      election:
+        type: entity:election
+    _admin_route: FALSE

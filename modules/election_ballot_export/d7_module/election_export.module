@@ -1,0 +1,137 @@
+<?php
+
+/**
+ * @file
+ * Main file for the Election Export module.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function election_export_menu() {
+  $items = array();
+  $items['election/%election/export'] = array(
+    'title' => 'Export',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('election_export_form', 1),
+    'file' => 'election_export.forms.inc',
+    'access callback' => 'election_export_access',
+    'access arguments' => array('export', 1),
+    'type' => MENU_LOCAL_TASK,
+    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+    'weight' => 8,
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function election_export_permission() {
+  return array(
+    'export any election results' => array(
+      'title' => t('Export any election results'),
+      'description' => t('This allows the user to export the results of any elections.'),
+    ),
+    'export own election results' => array(
+      'title' => t('Export own election results'),
+      'description' => t('This allows the user to export the results of their own elections (those to which they have editing access).'),
+    ),
+  );
+}
+
+/**
+ * Check whether an election type supports/allows exporting.
+ */
+function election_export_check_support($election) {
+  return (!empty($election->type_info['export']) && election_candidate_check_support($election));
+}
+
+/**
+ * Access callback for exporting results per election.
+ */
+function election_export_access($op, stdClass $election, $account = NULL) {
+  if (empty($account)) {
+    $account = $GLOBALS['user'];
+  }
+  // The $op can only be 'export' for now.
+  if ($op != 'export') {
+    return FALSE;
+  }
+  // Check that it's sane to export results for this election.
+  if (!election_export_check_support($election)) {
+    return FALSE;
+  }
+  // Check that the election isn't running, or that the user can 'bypass
+  // running election lock'.
+  if (election_voting_open($election) && !user_access('bypass running election lock', $account)) {
+    return FALSE;
+  }
+  // Check for permission to export own/any election results.
+  if (election_access('update', $election, $account) && user_access('export own election results', $account)) {
+    return TRUE;
+  }
+  if (user_access('export any election results', $account)) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+/**
+ * Generate ZIP archive of results files, for all the posts in an election.
+ *
+ * @see election_export_post()
+ *
+ * @param object $election
+ *   The election entity.
+ * @param string $destination
+ *   Optional: the path to the results archive file. This needs to be a
+ *   writeable filesystem path.
+ * @param array $options
+ *   Optional: an array of additional export options.
+ *
+ * @return string
+ *   The URI of the generated results archive file.
+ */
+function election_export_election(stdClass $election, $destination = NULL, array $options = array()) {
+  if (empty($destination)) {
+    $destination = drupal_tempnam('temporary://', 'election');
+  }
+  $default_options = array(
+    'zip flags' => ZIPARCHIVE::CREATE,
+  );
+  $options = array_merge($default_options, $options);
+  // The PHP ZipArchive utility requires absolute file system paths.
+  $destination_realpath = drupal_realpath($destination);
+  $zip = new ZipArchive();
+  $opened = $zip->open($destination_realpath, $options['zip flags']);
+  if ($opened !== TRUE) {
+    return FALSE;
+  }
+  if (!empty($options['post ids'])) {
+    $post_ids = $options['post ids'];
+  } else {
+    $post_ids = db_select('election_post')
+      ->fields('election_post', array('post_id'))
+      ->condition('election_id', $election->election_id)
+      ->execute()
+      ->fetchCol();
+  }
+  $posts = election_post_load_multiple($post_ids);
+  $tmp_files = array();
+  foreach ($posts as $post) {
+    $localname = $election->title . '-' . $post->election_id . '_' . $post->title . '-' . $post->post_id;
+    $localname = truncate_utf8(preg_replace('/[^A-Z0-9\-_]+/i', '-', $localname), 60, FALSE, FALSE);
+    $localname .= '.blt';
+    $post_results_file = election_export_post($post, NULL, $options);
+    $tmp_files[] = $post_results_file;
+    $zip->addFile(drupal_realpath($post_results_file), $localname);
+  }
+  $zip->close();
+  // Delete the temporary files created for each post. This must be done after
+  // $zip->close().
+  foreach ($tmp_files as $tmp_file) {
+    unlink($tmp_file);
+  }
+  return $destination_realpath;
+}

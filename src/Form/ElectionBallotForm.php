@@ -2,6 +2,7 @@
 
 namespace Drupal\election\Form;
 
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\TrustedRedirectResponse;
@@ -293,6 +294,7 @@ class ElectionBallotForm extends ContentEntityForm {
     $action = $triggering_element['#id'];
 
     $entity = $this->entity;
+    $account = \Drupal::currentUser();
 
     $election_post = ElectionPost::load($form_state->get('election_post'));
     $this->entity->election_post->entity = $election_post;
@@ -306,7 +308,7 @@ class ElectionBallotForm extends ContentEntityForm {
     ];
 
     // Check again if already voted
-    if (ElectionPostEligibilityChecker::ballotExists(\Drupal::currentUser(), $election_post)) {
+    if (ElectionPostEligibilityChecker::ballotExists($account, $election_post)) {
       \Drupal::messenger()->addError(t('You appear to have already voted for %position_label since opening the ballot form.'), $messageParams);
       $this->goNext($election_post, $form_state);
     }
@@ -344,6 +346,7 @@ class ElectionBallotForm extends ContentEntityForm {
         $status = parent::save($form, $form_state);
         static::submitFormVote($this->entity, $form, $form_state);
         static::addDonePost($election_post);
+        Cache::invalidateTags([$election_post->getUserEligibilityCacheTag($account, 'voting')]);
         break;
     }
 

@@ -229,4 +229,11 @@ class ElectionBallot extends ContentEntityBase implements ElectionBallotInterfac
       ->execute();
     return ElectionBallot::loadMultiple($ids);
   }
+
+  public function getVotes() {
+    $ids = \Drupal::entityQuery('election_ballot_vote')
+      ->condition('ballot_id', $this->id())
+      ->execute();
+    return ElectionBallotVote::loadMultiple($ids);
+  }
 }

@@ -1,0 +1,5 @@
+election.login_links:
+  route_name: entity.election.login_links
+  title: 'Login links'
+  base_route: entity.election.canonical
+  weight: 15

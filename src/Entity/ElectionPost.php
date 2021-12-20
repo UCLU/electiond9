@@ -10,6 +10,7 @@ use Drupal\Core\Entity\RevisionableInterface;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityPublishedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
 use Drupal\election_conditions\ElectionConditionsTrait;
@@ -83,7 +84,7 @@ use Drupal\user\UserInterface;
  *     "revision_revert" = "/election/post/{election_post}/revisions/{election_post_revision}/revert",
  *     "revision_delete" = "/election/post/{election_post}/revisions/{election_post_revision}/delete",
  *     "translation_revert" = "/election/post/{election_post}/revisions/{election_post_revision}/revert/{langcode}",
- *     "collection" = "/election",
+ *     "collection" = "/election/posts",
  *   },
  *   field_ui_base_route = "entity.election_post_type.edit_form"
  * )
@@ -94,6 +95,9 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
   use EntityPublishedTrait;
   use ElectionStatusesTrait;
   use ElectionConditionsTrait;
+
+  const COUNT_TOTALS = ['voters', 'ballots', 'votes', 'abstentions'];
+  const COUNT_CANDIDATE_GROUPS = ['all', 'published', 'included', 'elected', 'defeated'];
 
   /**
    * {@inheritdoc}
@@ -388,7 +392,7 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
 
     $fields['publish_candidates_automatically'] = BaseFieldDefinition::create('boolean')
       ->setLabel((t('Publish nominations when created')))
-      ->setDescription(t('If checked, newly submitted nominations will be published automatically. Otherwise, the approval of an administrator will be expected.'))
+      ->setDescription(t('If checked, newly submitted nominations will be published automatically. Otherwise, the administrator will need to publish them. Note there is an additional permission "view published election candidate entities when voting closed" required for any users who may need to view published candidates generally when voting is not open.'))
       ->setDisplayOptions('form', [
         'type' => 'boolean_checkbox',
       ])
@@ -397,56 +401,7 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
       ->setDisplayConfigurable('view', TRUE);
 
     // Count
-    $fields['count_timestamp'] = BaseFieldDefinition::create('timestamp')
-      ->setLabel(t('Time when run'));
-
-    $fields['count_method'] = BaseFieldDefinition::create('string')
-      ->setLabel(t('Count method'));
-
-    $fields['count_results_text'] = BaseFieldDefinition::create('text_long')
-      ->setLabel(t('Results in text format'))
-      ->setDisplayOptions('view', [
-        'label' => 'visible',
-        'type' => 'text_default',
-      ])
-      ->setDisplayOptions('form', [
-        'type' => 'text_textarea',
-        'weight' => 40,
-        'rows' => 6,
-      ])
-      ->setDisplayConfigurable('view', TRUE)
-      ->setDisplayConfigurable('form', TRUE);
-
-    $fields['count_results_html'] = BaseFieldDefinition::create('text_long')
-      ->setLabel(t('Results in HTML format'))
-      ->setDisplayOptions('view', [
-        'label' => 'visible',
-        'type' => 'text_default',
-      ])
-      ->setDisplayOptions('form', [
-        'type' => 'text_textarea',
-        'weight' => 40,
-        'rows' => 6,
-      ])
-      ->setDisplayConfigurable('view', TRUE)
-      ->setDisplayConfigurable('form', TRUE);
-
-    $totals = ['ballots', 'votes', 'abstentions'];
-    foreach ($totals as $total) {
-      $fields['count_total_' . $total] = BaseFieldDefinition::create('integer')
-        ->setLabel(t('Total ' . $total));
-    }
-
-    // We want a historical record of these categories of candidate
-    // Because as part of a count we may remove some
-    // And users could run counts with different combinations of candidates for fun or profit
-    // As posts are revisionable, this history will always be available
-    $candidate_groups = ['all', 'published', 'included', 'winning', 'losing'];
-    foreach ($candidate_groups as $candidate_group) {
-      $fields['count_candidates_' . $candidate_group] = BaseFieldDefinition::create('entity_reference')
-        ->setLabel(t('Candidates - ' . $candidate_group))
-        ->setSetting('target_type', 'election_candidate');
-    }
+    $fields = array_merge($fields, static::getCountFieldDefinitions($fields));
 
     $fields['allow_candidate_editing'] = BaseFieldDefinition::create('list_string')
       ->setLabel(t('Allow candidates to edit their nomination'))
@@ -466,6 +421,15 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE)
       ->setRequired(TRUE);
+
+    $fields['voting_method_inherit'] = BaseFieldDefinition::create('boolean')
+      ->setLabel((t('Use election\'s default voting method')))
+      ->setDisplayOptions('form', [
+        'type' => 'boolean_checkbox',
+      ])
+      ->setDefaultValue(TRUE)
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE);
 
     $fields['voting_method'] = BaseFieldDefinition::create('plugin_reference')
       ->setLabel(t('Voting method'))
@@ -603,7 +567,7 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
     $url = Url::fromRoute('entity.election_post.eligibility', [
       'election_post' => $this->id(),
     ]);
-    $actions[] = [
+    $actions['eligibility'] = [
       'title' => t('Your eligibility'),
       'link' => $url->toString(),
       'button_type' => 'secondary',
@@ -688,10 +652,18 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
     return $formattedRequirements;
   }
 
-  public function formatEligibilityRequirementsTable(array $requirements, $phase) {
+  public function formatEligibilityRequirementsTable($election_post, array $requirements, $phase) {
     $formattedRequirements = $this->formatEligibilityRequirements($requirements);
     $render = \Drupal::service('conditions_plugin_reference.conditions_renderer')->requirementsTable($requirements);
-    $render['#caption'] = Election::getPhaseName($phase);
+
+    $render = [
+      '#type' => 'details',
+      '#title' => Election::getPhaseName($phase),
+      '#open' => $election_post->isOpenOrPartiallyOpen($phase),
+      'requirements_table_' . $phase => $render,
+    ];
+
+    // $render['#caption'] = Election::getPhaseName($phase);
     return $render;
   }
 
@@ -703,11 +675,127 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
       $query->condition('confirmed', TRUE);
     }
 
-    return ElectionBallot::load($query->execute());
+    $ids = $query->execute();
+
+    return ElectionBallot::loadMultiple($ids);
   }
 
   public function countBallots($confirmedOnly = FALSE) {
     $ballots = $this->getBallots($confirmedOnly);
     return $ballots ? count($ballots) : 0;
+  }
+
+  public static function getCountFieldDefinitions() {
+    $fields = [];
+    $fields['count_timestamp'] = BaseFieldDefinition::create('timestamp')
+      ->setLabel(t('Time when count run'))
+      ->setDisplayConfigurable('view', TRUE);
+
+    $fields['count_method'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Count method'))
+      ->setDisplayConfigurable('view', TRUE);
+
+    $fields['count_results_text'] = BaseFieldDefinition::create('text_long')
+      ->setLabel(t('Count results in text format'))
+      ->setDisplayOptions('view', [
+        'label' => 'visible',
+        'type' => 'text_default',
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'text_textarea',
+        'weight' => 40,
+        'rows' => 6,
+      ])
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
+    $fields['count_results_html'] = BaseFieldDefinition::create('text_long')
+      ->setLabel(t('Count results'))
+      ->setDisplayOptions('view', [
+        'label' => 'visible',
+        'type' => 'text_default',
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'text_textarea',
+        'weight' => 40,
+        'rows' => 6,
+      ])
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
+    $fields['count_log'] = BaseFieldDefinition::create('text_long')
+      ->setLabel(t('Count log'))
+      ->setDisplayOptions('view', [
+        'label' => 'visible',
+        'type' => 'text_default',
+      ])
+      ->setDisplayConfigurable('view', TRUE);
+
+    foreach (static::COUNT_TOTALS as $total) {
+      $fields['count_total_' . $total] = BaseFieldDefinition::create('integer')
+        ->setLabel(t('Count: total ' . $total))
+        ->setDisplayConfigurable('view', TRUE);
+    }
+
+    // We want a historical record of these categories of candidate
+    // Because as part of a count we may remove some
+    // And users could run counts with different combinations of candidates for fun or profit
+    // As posts are revisionable, this history will always be available
+    foreach (static::COUNT_CANDIDATE_GROUPS as $candidate_group) {
+      $fields['count_candidates_' . $candidate_group] = BaseFieldDefinition::create('entity_reference')
+        ->setLabel(t('Count: candidates - ' . $candidate_group))
+        ->setSetting('target_type', 'election_candidate')
+        ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
+        ->setDisplayConfigurable('view', TRUE);
+    }
+    return $fields;
+  }
+
+  public function runCount($updateCandidates = FALSE) {
+    $pluginManager = \Drupal::service('plugin.manager.election_voting_method_plugin');
+    $votingMethodPlugin = $pluginManager->createInstance($this->get('voting_method'));
+
+    // Save as new revision
+    $this->setNewRevision(TRUE);
+    $this->revision_log = $this->t('Ran count - triggered at @time by @user', [
+      '@time' => \Drupal::time()->getRequestTime(),
+      '@user' => \Drupal::currentUser()->label() . ' (' . \Drupal::currentUser()->id() . ')',
+    ]);
+    $this->setRevisionCreationTime(\Drupal::time()->getRequestTime());
+    $this->setRevisionUserId(\Drupal::currentUser()->id());
+
+    // Work out candidates.
+    $candidates = $electionPost->getCandidates([
+      'hopeful',
+      'defeated',
+      'elected',
+    ]);
+
+    // Run count and set values
+    $options = [];
+    $result = $votingMethodPlugin->countPosition($this, $candidates, $options);
+    foreach ($result as $key => $value) {
+      $this->set($key, $value);
+    }
+
+    $this->save();
+
+    if ($updateCandidates) {
+      foreach ($result['count_candidates_elected'] as $candidate) {
+        $candidate->setCandidateStatus('elected')->save();
+      }
+
+      foreach ($result['count_candidates_defeated'] as $candidate) {
+        $candidate->setCandidateStatus('defeated')->save();
+      }
+    }
+  }
+
+  public function getVotingMethod() {
+    if ($this->voting_method_inherit) {
+      return $this->getElection()->getVotingMethod();
+    } else {
+      return $this->voting_method->value;
+    }
   }
 }

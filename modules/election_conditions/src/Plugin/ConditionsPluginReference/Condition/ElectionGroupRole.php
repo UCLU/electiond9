@@ -2,8 +2,14 @@
 
 namespace Drupal\election_conditions\Plugin\ConditionsPluginReference\Condition;
 
+use Drupal\conditions_plugin_reference\ConditionRequirement;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\election_conditions\Plugin\ElectionConditionBase;
+use Drupal\group\Entity\Group;
+use Drupal\group\Entity\GroupRole;
+use Drupal\user\UserInterface;
 
 /**
  * Condition.
@@ -19,7 +25,7 @@ use Drupal\election_conditions\Plugin\ElectionConditionBase;
  *   weight = 0,
  * )
  */
-class GroupRole extends ElectionConditionBase {
+class ElectionGroupRole extends ElectionConditionBase {
   /**
    * {@inheritdoc}
    */
@@ -95,5 +101,52 @@ class GroupRole extends ElectionConditionBase {
     $this->configuration['groups_any_or_all'] = $values['groups_any_or_all'];
     $this->configuration['group_roles'] = $values['group_roles'];
     $this->configuration['group_roles_any_or_all'] = $values['group_roles_any_or_all'];
+  }
+
+  /**
+   * Return true or false if access.
+   *
+   * @param string $phase
+   *
+   * @return boolean
+   */
+  public function evaluate(EntityInterface $entity, AccountInterface $account, $parameters = []) {
+    $this->assertParameters($parameters);
+    $requirements = [];
+
+    $rolesToCheck = $this->configuration['group_roles'];
+    $rolesNames = [];
+    foreach ($rolesToCheck as $roleId) {
+      $rolesNames[] = GroupRole::load($roleId)->label();
+    }
+
+    $groups = Group::loadMultiple(array_column($this->configuration['groups'], 'target_id'));
+
+    $groupMatches = [];
+
+    foreach ($groups as $group) {
+      $userRoles = $this->getGroupRoles($account, $group);
+      $groupMatches[$group->id()]['any'] = count(array_intersect($rolesToCheck, $userRoles)) > 0;
+      $groupMatches[$group->id()]['all'] = count(array_intersect($rolesToCheck, $userRoles)) == count($rolesToCheck);
+    }
+
+    // $requirements['has_any_group_roles'] = new ConditionRequirement([
+    //   'id' => 'has_any_group_roles',
+    //   'label' => t('User has any of the following group roles: @roles', [
+    //     '@roles' => implode(', ', $rolesNames),
+    //   ]),
+    //   'pass' => ,
+    // ]);
+
+    $this->dispatchRequirementEvents($requirements);
+    return $requirements;
+  }
+
+  public function getGroupRoles(UserInterface $account, Group $group) {
+    if ($member = $group->getMember($account)) {
+      $membership = $member->getGroupContent();
+      return $membership->group_roles;
+    }
+    return NULL;
   }
 }

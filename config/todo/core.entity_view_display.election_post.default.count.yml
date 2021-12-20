@@ -1,0 +1,184 @@
+uuid: b7b04f06-0208-4e0c-bae1-aa7ba477c54e
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.election_post.count
+    - election.election_post_type.default
+  module:
+    - text
+_core:
+  default_config_hash: OMTqP1_P8kBdVfC2xJzF_uOB2NvAHDyJe3zKR2SJ7Ug
+id: election_post.default.count
+targetEntityType: election_post
+bundle: default
+mode: count
+content:
+  count_candidates_all:
+    type: entity_reference_label
+    weight: 9
+    region: content
+    label: inline
+    settings:
+      link: true
+    third_party_settings: {}
+  count_candidates_defeated:
+    type: entity_reference_label
+    weight: 13
+    region: content
+    label: inline
+    settings:
+      link: true
+    third_party_settings: {}
+  count_candidates_elected:
+    type: entity_reference_label
+    weight: 12
+    region: content
+    label: inline
+    settings:
+      link: true
+    third_party_settings: {}
+  count_candidates_included:
+    type: entity_reference_label
+    weight: 11
+    region: content
+    label: inline
+    settings:
+      link: true
+    third_party_settings: {}
+  count_candidates_published:
+    type: entity_reference_label
+    weight: 10
+    region: content
+    label: inline
+    settings:
+      link: true
+    third_party_settings: {}
+  count_method:
+    type: string
+    weight: 6
+    region: content
+    label: inline
+    settings:
+      link_to_entity: false
+    third_party_settings: {}
+  count_results_html:
+    type: text_default
+    weight: 4
+    region: content
+    label: hidden
+    settings: {}
+    third_party_settings: {}
+  count_timestamp:
+    type: timestamp
+    weight: 5
+    region: content
+    label: inline
+    settings:
+      date_format: medium
+      custom_date_format: ''
+      timezone: ''
+    third_party_settings: {}
+  count_total_abstentions:
+    type: number_integer
+    weight: 14
+    region: content
+    label: above
+    settings:
+      thousand_separator: ''
+      prefix_suffix: true
+    third_party_settings: {}
+  count_total_ballots:
+    type: number_integer
+    weight: 8
+    region: content
+    label: inline
+    settings:
+      thousand_separator: ''
+      prefix_suffix: true
+    third_party_settings: {}
+  count_total_voters:
+    type: number_integer
+    weight: 7
+    region: content
+    label: inline
+    settings:
+      thousand_separator: ''
+      prefix_suffix: true
+    third_party_settings: {}
+  count_total_votes:
+    type: number_integer
+    weight: 7
+    region: content
+    label: inline
+    settings:
+      thousand_separator: ''
+      prefix_suffix: true
+    third_party_settings: {}
+  election:
+    label: inline
+    type: entity_reference_label
+    region: content
+    weight: 3
+    settings:
+      link: true
+    third_party_settings: {}
+  field_post_actions:
+    weight: 0
+    region: content
+    settings: {}
+    third_party_settings: {}
+  name:
+    label: hidden
+    type: string
+    region: content
+    weight: 2
+    settings:
+      link_to_entity: false
+    third_party_settings: {}
+  status:
+    type: boolean
+    weight: 1
+    region: content
+    label: inline
+    settings:
+      format: default
+      format_custom_false: ''
+      format_custom_true: ''
+    third_party_settings: {}
+hidden:
+  abstentions_allowed: true
+  allow_candidate_editing: true
+  candidate_type: true
+  category: true
+  conditions_inherit_election: true
+  conditions_interest: true
+  conditions_interest_same_as: true
+  conditions_nominations: true
+  conditions_nominations_same_as: true
+  conditions_voting: true
+  conditions_voting_same_as: true
+  count_results_text: true
+  description: true
+  entity_print_view_epub: true
+  entity_print_view_pdf: true
+  entity_print_view_word_docx: true
+  exclusive: true
+  field_status_summary: true
+  include_reopen_nominations: true
+  langcode: true
+  publish_candidates_automatically: true
+  search_api_excerpt: true
+  skip_allowed: true
+  status_interest: true
+  status_interest_close: true
+  status_interest_open: true
+  status_nominations: true
+  status_nominations_close: true
+  status_nominations_open: true
+  status_voting: true
+  status_voting_close: true
+  status_voting_open: true
+  user_id: true
+  vacancies: true
+  voting_method: true

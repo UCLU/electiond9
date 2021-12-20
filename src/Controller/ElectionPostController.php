@@ -207,7 +207,23 @@ class ElectionPostController extends ControllerBase implements ContainerInjectio
   }
 
   /**
-   * Generates an overview table of older revisions of a Election post.
+   * Generates title for eligibility page.
+   *
+   * @param \Drupal\election\Entity\ElectionPostInterface $election_post
+   *   A Election post object.
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup
+   *   Translatable title.
+   */
+  public function getEligibilitySummaryTitle(ElectionPostInterface $election_post) {
+    return $this->t(
+      'Eligibility for @post_name',
+      ['@post_name' => $election_post->label()]
+    );
+  }
+
+  /**
+   * Generates an overview table of eligibility per phase for Election post.
    *
    * @param \Drupal\election\Entity\ElectionPostInterface $election_post
    *   A Election post object.
@@ -218,10 +234,23 @@ class ElectionPostController extends ControllerBase implements ContainerInjectio
   public function getEligibilitySummary(ElectionPostInterface $election_post) {
     $account = $this->currentUser();
 
+    // Show action buttons
+    $actionLinks = $election_post->getActionLinks(\Drupal::currentUser());
+    unset($actionLinks['eligibility']);
+    $actions = [
+      '#theme' => 'election_post_actions',
+      '#actions' => $actionLinks,
+    ];
+    $build['actions'] = [
+      '#type' => 'markup',
+      '#markup' => render($actions),
+    ];
+
+    // Show details for each phase
     $phases = $election_post->getElection()->getEnabledPhases();
     foreach ($phases as $phase) {
       $requirements = ElectionPostEligibilityChecker::evaluateEligibilityRequirements($account, $election_post, $phase, TRUE, TRUE);
-      $build['requirements_table_' . $phase] = $election_post->formatEligibilityRequirementsTable($requirements, $phase);
+      $build['requirements_' . $phase] = $election_post->formatEligibilityRequirementsTable($election_post, $requirements, $phase);
     }
 
     return $build;

@@ -4,6 +4,7 @@ namespace Drupal\election_login_links\Entity;
 
 use DateTime;
 use Drupal\Component\Utility\Crypt;
+use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\EditorialContentEntityBase;
@@ -15,10 +16,12 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
 use Drupal\election_conditions\ElectionConditionsTrait;
 use Drupal\election\ElectionStatusesTrait;
+use Drupal\election\Entity\Election;
+use Drupal\election\Entity\ElectionInterface;
 use Drupal\user\UserInterface;
 
 /**
- * Defines the Election entity.
+ * Defines the Election Login Hash entity.
  *
  * @ingroup election
  *
@@ -41,10 +44,9 @@ use Drupal\user\UserInterface;
  *   },
  * )
  */
-class Election extends EditorialContentEntityBase implements ElectionInterface {
+class ElectionLoginHash extends ContentEntityBase implements ElectionLoginHashInterface {
 
   use EntityChangedTrait;
-  use EntityPublishedTrait;
 
   /**
    * {@inheritdoc}
@@ -108,16 +110,16 @@ class Election extends EditorialContentEntityBase implements ElectionInterface {
   /**
    * {@inheritdoc}
    */
-  public function setElectionId($uid) {
-    $this->set('election_id', $uid);
+  public function setElectionId($election_id) {
+    $this->set('election_id', $election_id);
     return $this;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function setElection(UserInterface $account) {
-    $this->set('election_id', $account->id());
+  public function setElection(ElectionInterface $election) {
+    $this->set('election_id', $election->id());
     return $this;
   }
 
@@ -126,9 +128,6 @@ class Election extends EditorialContentEntityBase implements ElectionInterface {
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields = parent::baseFieldDefinitions($entity_type);
-
-    // Add the published field.
-    $fields += static::publishedBaseFieldDefinitions($entity_type);
 
     $fields['user_id'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('User to log in'))
@@ -168,13 +167,6 @@ class Election extends EditorialContentEntityBase implements ElectionInterface {
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
-    $fields['status']
-      ->setDescription(t('Enabled?'))
-      ->setDisplayOptions('form', [
-        'type' => 'boolean_checkbox',
-        'weight' => -48,
-      ]);
-
     $fields['used'] = BaseFieldDefinition::create('timestamp')
       ->setLabel(t('Used time'));
 
@@ -202,5 +194,13 @@ class Election extends EditorialContentEntityBase implements ElectionInterface {
 
   public function getHash() {
     return $this->hash->value;
+  }
+
+  public function getUrl() {
+    return Url::fromRoute('election_login_links.login', ['hash' => $this->getHash()]);
+  }
+
+  public function getLink() {
+    return $this->getUrl->toString();
   }
 }

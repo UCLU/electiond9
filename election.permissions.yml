@@ -1,5 +1,5 @@
 express interest in posts:
-  title: 'Nominate for posts (subject to eligibility)'
+  title: 'Express interest in posts (subject to eligibility)'
 
 nominate for posts:
   title: 'Nominate for posts (subject to eligibility)'
@@ -12,6 +12,9 @@ vote:
 
 view full nomination form:
   title: 'View full nomination form (including admin fields) '
+
+run election counts:
+  title: 'Run election post counts'
 
 add election ballot entities:
   title: 'Create ballots'
@@ -33,11 +36,16 @@ delete posts with ballots:
   title: 'Delete election posts even if votes already cast for them'
   restrict access: true
 
+# @todo implemented in election access for delete, need to implement in other places
+bypass running election lock:
+  title: Bypass running election lock
+  description: This permission allows the user to delete elections, or edit posts, or view results, even while voting is open (if they have the other relevant permissions).
+  restrict access: true
+
 # Below are automatically generated
 
-edit election post entities:
-  title: 'Edit election posts
-  '
+# We do not have an independent permission for editing or deleting posts - if you can edit the election, you can edit its posts
+
 add elections:
   title: 'Create new elections'
 
@@ -102,8 +110,11 @@ administer election candidate entities:
   description: 'Allow to access the administration form to configure election candidates.'
   restrict access: true
 
-view published election candidate entities:
-  title: 'View published election candidates'
+view published election candidate entities when voting open:
+  title: 'View published election candidates when voting open'
+
+view published election candidate entities when voting closed:
+  title: 'View published election candidates when voting closed'
 
 view unpublished election candidate entities:
   title: 'View unpublished election candidates'

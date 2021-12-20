@@ -72,7 +72,7 @@ use Drupal\user\UserInterface;
  *     "revision_revert" = "/election/candidate/{election_candidate}/revisions/{election_candidate_revision}/revert",
  *     "revision_delete" = "/election/candidate/{election_candidate}/revisions/{election_candidate_revision}/delete",
  *     "translation_revert" = "/election/candidate/{election_candidate}/revisions/{election_candidate_revision}/revert/{langcode}",
- *     "collection" = "/admin/content/election/candidate",
+ *     "collection" = "/election/candidates",
  *   },
  *   field_ui_base_route = "entity.election_candidate_type.edit_form"
  * )
@@ -193,6 +193,11 @@ class ElectionCandidate extends EditorialContentEntityBase implements ElectionCa
    */
   public function setOwner(UserInterface $account) {
     $this->set('user_id', $account->id());
+    return $this;
+  }
+
+  public function setCandidateStatus($status) {
+    $this->set('candidate_status', $status);
     return $this;
   }
 

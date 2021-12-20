@@ -48,6 +48,11 @@ class ElectionPostForm extends ContentEntityForm {
     // Hide and show fields:
     static::addStatusesStatesToForm($form);
     static::addConditionStatesToForm($form);
+    $form['voting_method']['#states'] = [
+      'visible' => [
+        ':input[name="voting_method_inherit[value]"]' => ['checked' => FALSE],
+      ],
+    ];
 
     $election_post = $this->entity;
     if ($election_post) {

@@ -500,7 +500,7 @@ display:
       access:
         type: perm
         options:
-          perm: 'view unpublished election candidate entities'
+          perm: 'view unpublished election candidate entities when voting open'
     cache_metadata:
       max-age: -1
       contexts:

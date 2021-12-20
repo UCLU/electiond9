@@ -1,0 +1,3 @@
+export election ballots:
+  title: 'Export election ballots'
+  restrict_access: TRUE

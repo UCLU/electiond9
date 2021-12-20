@@ -1,4 +1,24 @@
 election_login_links.login:
   path: '/election/login/{hash}'
   defaults:
-    _controller: '\Drupal\election_login_links\Controller\LoginController'
+    _controller: '\Drupal\election_login_links\Controller\LoginController::login'
+  options:
+    parameters:
+      hash:
+        type: string
+    no_cache: 'TRUE'
+
+entity.election.login_links:
+  path: '/election/{election}/login-links'
+  defaults:
+    _form: '\Drupal\election_login_links\Form\GenerateLinksForm'
+    _title: 'One-time login links'
+  requirements:
+    _entity_access: 'election.view'
+    permission: generate election login links
+  options:
+    parameters:
+      election:
+        type: entity:election
+    _admin_route: FALSE
+    no_cache: 'TRUE'

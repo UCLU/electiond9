@@ -1,0 +1,7 @@
+name: 'Election Ballot Export'
+type: module
+description: 'Exports ballots in zip file of *.blt files.'
+core_version_requirement: ^8 || ^9
+package: 'Election'
+dependencies:
+  - election:election
