@@ -2,7 +2,7 @@
 
 namespace Drupal\election_conditions\Plugin;
 
-use Drupal\conditions_plugin_reference\Plugin\ConditionsPluginReference\Condition\ConditionBase;
+use Drupal\complex_conditions\Plugin\ComplexConditions\Condition\ConditionBase;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\election\Entity\ElectionPost;

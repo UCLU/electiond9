@@ -12,7 +12,7 @@ use Drupal\Component\Annotation\Plugin;
  *
  * @Annotation
  */
-class ElectionVotingMethodPlugin extends Plugin {
+class ElectionVotingMethod extends Plugin {
 
 
   /**
@@ -30,5 +30,4 @@ class ElectionVotingMethodPlugin extends Plugin {
    * @ingroup plugin_translatable
    */
   public $label;
-
 }

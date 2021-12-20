@@ -1,0 +1,69 @@
+<?php
+
+// /**
+//  * Implements hook_config_schema_info_alter().
+//  */
+// function election_conditions_config_schema_info_alter(&$definitions) {
+//   $definitions['election_condition_configuration']['mapping'] = [
+//     'parent' => [
+//       'type' => 'string',
+//       'label' => 'Parent condition',
+//     ],
+//     'depth' => [
+//       'type' => 'integer',
+//       'label' => 'Depth',
+//     ],
+//     'weight' => [
+//       'type' => 'integer',
+//       'label' => 'Weight',
+//     ],
+//     // We name this `negate_condition` to handle plugins which also have
+//     // their own negate functionality to prevent conflicts.
+//     'negate_condition' => [
+//       'type' => 'boolean',
+//       'label' => 'Negate',
+//     ],
+//   ];
+// }
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Element;
+
+
+/**
+ * Implements hook_form_alter().
+ */
+function complex_conditions_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if ($form_state->get('has_conditions_inline_forms')) {
+    complex_conditions_alter_inline_forms($form, $form_state, $form);
+  }
+}
+
+/**
+ * Invokes inline form alter hooks for the given element's inline forms.
+ *
+ * @param array $element
+ *   The form element.
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ *   The current state of the form.
+ * @param array $complete_form
+ *   The complete form structure.
+ */
+function complex_conditions_alter_inline_forms(array &$element, FormStateInterface $form_state, array &$complete_form) {
+  foreach (Element::children($element) as $key) {
+    if (isset($element[$key]['#inline_form'])) {
+      $inline_form = &$element[$key];
+      /** @var \Drupal\complex_conditions\Plugin\ComplexConditions\InlineForm\InlineFormInterface $plugin */
+      $plugin = $inline_form['#inline_form'];
+      // Invoke hook_complex_conditions_inline_form_alter() and
+      // hook_complex_conditions_inline_form_PLUGIN_ID_alter() implementations.
+      $hooks = [
+        'complex_conditions_inline_form',
+        'complex_conditions_inline_form_' . $plugin->getPluginId(),
+      ];
+      \Drupal::moduleHandler()->alter($hooks, $inline_form, $form_state, $complete_form);
+    }
+
+    complex_conditions_alter_inline_forms($element[$key], $form_state, $complete_form);
+  }
+}

@@ -25,6 +25,6 @@ services:
   election.post_eligibility_checker:
     class: Drupal\election\Service\ElectionPostEligibilityChecker
     arguments: []
-  plugin.manager.election_voting_method_plugin:
+  plugin.manager.election_voting_method:
     class: Drupal\election\Plugin\ElectionVotingMethodPluginManager
     parent: default_plugin_manager

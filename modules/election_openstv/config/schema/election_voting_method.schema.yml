@@ -1,0 +1,7 @@
+election.election_voting_method.open_stv:
+  type: election_voting_method.schema
+  label: 'OpenSTV voting plugin configuration'
+  mapping:
+    method:
+      type: string
+      label: 'STV voting method'

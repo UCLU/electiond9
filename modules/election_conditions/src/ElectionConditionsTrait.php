@@ -2,7 +2,7 @@
 
 namespace Drupal\election_conditions;
 
-use Drupal\conditions_plugin_reference\ConditionsEntityTrait;
+use Drupal\complex_conditions\ConditionsEntityTrait;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\election\Entity\Election;
 
@@ -70,14 +70,14 @@ trait ElectionConditionsTrait {
         ->setDisplayConfigurable('form', TRUE)
         ->setDisplayConfigurable('view', TRUE);
 
-      $fields['conditions_' . $key] = BaseFieldDefinition::create('conditions_plugin_item:conditions_plugin_reference')
+      $fields['conditions_' . $key] = BaseFieldDefinition::create('conditions_plugin_item:complex_conditions')
         ->setLabel(t('@name conditions', [
           '@name' => $name,
         ]))
         ->setDescription($typeNotice)
         ->setCardinality(BaseFieldDefinition::CARDINALITY_UNLIMITED)
         ->setDisplayOptions('form', [
-          'type' => 'conditions_plugin_reference_conditions_table_election',
+          'type' => 'complex_conditions_conditions_table_election',
         ])
         ->setDisplayConfigurable('form', TRUE)
         ->setDisplayConfigurable('view', TRUE);

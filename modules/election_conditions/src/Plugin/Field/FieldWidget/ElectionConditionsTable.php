@@ -2,14 +2,14 @@
 
 namespace Drupal\election_conditions\Plugin\Field\FieldWidget;
 
-use Drupal\conditions_plugin_reference\Plugin\Field\FieldWidget\ConditionsTable as FieldWidgetConditionsTable;
+use Drupal\complex_conditions\Plugin\Field\FieldWidget\ConditionsTable as FieldWidgetConditionsTable;
 
 /**
  * @FieldWidget(
- *   id = "conditions_plugin_reference_conditions_table_election",
+ *   id = "complex_conditions_conditions_table_election",
  *   label = @Translation("Election Conditions Table"),
  *   field_types = {
- *     "conditions_plugin_item:conditions_plugin_reference"
+ *     "conditions_plugin_item:complex_conditions"
  *   },
  *   multiple_values = TRUE
  * )

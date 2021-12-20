@@ -9,3 +9,4 @@ dependencies:
   - encrypt
   - election:election_conditions
   - election:election_fptp
+  - election:election_openstv

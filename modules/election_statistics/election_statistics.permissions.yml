@@ -1,0 +1,6 @@
+view election statistics:
+  title: View all election statistics
+  description: This allows the user to view election statistics (if they already have permission to view the election).
+view election statistics block:
+  title: View election statistics summary block
+  description: This allows the user to view a block containing limited election statistics (if they already have permission to view the election).

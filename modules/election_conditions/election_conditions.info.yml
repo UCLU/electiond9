@@ -6,4 +6,4 @@ package: 'Election'
 dependencies:
   - pluginreference
   - election
-  - conditions_plugin_reference
+  - complex_conditions

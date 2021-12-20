@@ -1,0 +1,11 @@
+services:
+  plugin.manager.election_statistics:
+    class: Drupal\election_statistics\ElectionStatisticPluginManager
+    arguments:
+      [
+        '@container.namespaces',
+        '@cache.discovery',
+        '@module_handler',
+        '@entity_type.manager',
+        '@event_dispatcher',
+      ]

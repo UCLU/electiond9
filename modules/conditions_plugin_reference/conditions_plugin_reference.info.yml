@@ -1,5 +1,0 @@
-name: 'Conditions Plugin Reference'
-type: module
-description: 'Generic conditions management using plugins'
-core_version_requirement: ^8 || ^9
-package: 'Custom'

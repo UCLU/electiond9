@@ -24,9 +24,9 @@ class ElectionVotingMethodPluginManager extends DefaultPluginManager {
    *   The module handler to invoke the alter hook with.
    */
   public function __construct(\Traversable $namespaces, CacheBackendInterface $cache_backend, ModuleHandlerInterface $module_handler) {
-    parent::__construct('Plugin/ElectionVotingMethodPlugin', $namespaces, $module_handler, 'Drupal\election\Plugin\ElectionVotingMethodPluginInterface', 'Drupal\election\Annotation\ElectionVotingMethodPlugin');
+    parent::__construct('Plugin/ElectionVotingMethod', $namespaces, $module_handler, 'Drupal\election\Plugin\ElectionVotingMethodInterface', 'Drupal\election\Annotation\ElectionVotingMethod');
 
-    $this->alterInfo('election_election_voting_method_plugin_info');
-    $this->setCacheBackend($cache_backend, 'election_election_voting_method_plugin_plugins');
+    $this->alterInfo('election_election_voting_method_info');
+    $this->setCacheBackend($cache_backend, 'election_election_voting_method_plugins');
   }
 }

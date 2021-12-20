@@ -1,0 +1,5 @@
+name: 'Complex Conditions'
+type: module
+description: 'Conditions management using plugins'
+core_version_requirement: ^8 || ^9
+package: 'Custom'

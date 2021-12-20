@@ -434,7 +434,7 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
     $fields['voting_method'] = BaseFieldDefinition::create('plugin_reference')
       ->setLabel(t('Voting method'))
       ->setSettings([
-        'target_type' => 'election_voting_method_plugin',
+        'target_type' => 'election_voting_method',
       ])
       ->setDisplayOptions('form', [
         'type' => 'plugin_reference_select',
@@ -654,7 +654,7 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
 
   public function formatEligibilityRequirementsTable($election_post, array $requirements, $phase) {
     $formattedRequirements = $this->formatEligibilityRequirements($requirements);
-    $render = \Drupal::service('conditions_plugin_reference.conditions_renderer')->requirementsTable($requirements);
+    $render = \Drupal::service('complex_conditions.conditions_renderer')->requirementsTable($requirements);
 
     $render = [
       '#type' => 'details',
@@ -752,7 +752,7 @@ class ElectionPost extends EditorialContentEntityBase implements ElectionPostInt
   }
 
   public function runCount($updateCandidates = FALSE) {
-    $pluginManager = \Drupal::service('plugin.manager.election_voting_method_plugin');
+    $pluginManager = \Drupal::service('plugin.manager.election_voting_method');
     $votingMethodPlugin = $pluginManager->createInstance($this->get('voting_method'));
 
     // Save as new revision

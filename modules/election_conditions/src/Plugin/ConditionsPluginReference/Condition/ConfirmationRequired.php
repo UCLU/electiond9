@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\election_conditions\Plugin\ConditionsPluginReference\Condition;
+namespace Drupal\election_conditions\Plugin\ComplexConditions\Condition;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\election_conditions\Plugin\ElectionConditionBase;
@@ -10,7 +10,7 @@ use Drupal\election_conditions\Plugin\ElectionConditionBase;
  *
  * In this case, a text is shown and checkbox, but could e.g. be a self-definition question
  *
- * @ConditionsPluginReference(
+ * @ComplexConditions(
  *   id = "election_confirmation_required",
  *   condition_types = {
  *     "election",

@@ -44,7 +44,7 @@ content:
     settings: {}
     third_party_settings: {}
   conditions_interest:
-    type: conditions_plugin_reference_conditions_table_election
+    type: complex_conditions_conditions_table_election
     weight: 18
     region: content
     settings:
@@ -57,7 +57,7 @@ content:
     settings: {}
     third_party_settings: {}
   conditions_nominations:
-    type: conditions_plugin_reference_conditions_table_election
+    type: complex_conditions_conditions_table_election
     weight: 20
     region: content
     settings:
@@ -70,7 +70,7 @@ content:
     settings: {}
     third_party_settings: {}
   conditions_voting:
-    type: conditions_plugin_reference_conditions_table_election
+    type: complex_conditions_conditions_table_election
     weight: 22
     region: content
     settings:

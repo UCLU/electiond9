@@ -18,7 +18,7 @@ class ElectionAccessControlHandler extends EntityAccessControlHandler {
   /**
    * {@inheritdoc}
    */
-  protected function checkAccess(ElectionInterface $entity, $operation, AccountInterface $account) {
+  protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account) {
     /** @var \Drupal\election\Entity\ElectionInterface $entity */
 
     switch ($operation) {

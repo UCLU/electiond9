@@ -7,7 +7,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\SubformState;
 use Drupal\Core\Plugin\PluginWithFormsInterface;
 use Drupal\Core\Url;
-use Drupal\election\Annotation\ElectionVotingMethodPlugin;
+use Drupal\election\Annotation\ElectionVotingMethod;
 use Drupal\election\Entity\ElectionCandidateType;
 
 /**
@@ -92,7 +92,7 @@ class ElectionPostTypeForm extends EntityForm {
 
   public function getVotingMethodPlugin(FormStateInterface $form_state) {
     $election_post_type = $this->entity;
-    $pluginManager = \Drupal::service('plugin.manager.election_voting_method_plugin');
+    $pluginManager = \Drupal::service('plugin.manager.election_voting_method');
     if ($election_post_type->get('voting_method')) {
       return $pluginManager->createInstance($election_post_type->get('voting_method'));
     }
@@ -158,9 +158,9 @@ class ElectionPostTypeForm extends EntityForm {
     $form_state->setRedirectUrl($election_post_type->toUrl('collection'));
   }
 
-  public function getVotingMethodForm(ElectionVotingMethodPlugin $voting_method) {
+  public function getVotingMethodForm(ElectionVotingMethod $voting_method) {
     if ($voting_method instanceof PluginWithFormsInterface) {
-      $pluginManager = \Drupal::service('plugin.manager.election_voting_method_plugin');
+      $pluginManager = \Drupal::service('plugin.manager.election_voting_method');
       return $pluginManager->createInstance($voting_method, 'configure');
     }
     return $voting_method;

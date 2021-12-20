@@ -1,0 +1,21 @@
+services:
+  plugin.manager.complex_conditions:
+    class: Drupal\complex_conditions\ConditionManager
+    arguments:
+      [
+        '@container.namespaces',
+        '@cache.discovery',
+        '@module_handler',
+        '@entity_type.manager',
+        '@event_dispatcher',
+      ]
+  complex_conditions.referenceable_plugin_types_subscriber:
+    class: \Drupal\complex_conditions\EventSubscriber\ReferenceablePluginTypesSubscriber
+    tags:
+      - { name: event_subscriber }
+  plugin.manager.conditions_inline_form:
+    class: Drupal\complex_conditions\InlineFormManager
+    arguments: ['@container.namespaces', '@cache.discovery', '@module_handler']
+  complex_conditions.conditions_renderer:
+    class: Drupal\complex_conditions\ConditionsRenderer
+    arguments: []

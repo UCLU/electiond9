@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\election_conditions\Plugin\ConditionsPluginReference\Condition;
+namespace Drupal\election_conditions\Plugin\ComplexConditions\Condition;
 
 use Drupal\Core\Form\FormStateInterface;
 
@@ -11,7 +11,7 @@ use function PHPSTORM_META\map;
  *
  * In this case, a text is shown and checkbox, but could e.g. be a self-definition question
  *
- * @ConditionsPluginReference(
+ * @ComplexConditions(
  *   id = "su_election_self_definition",
  *   condition_types = {
  *     "election",

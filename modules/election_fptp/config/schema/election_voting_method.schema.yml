@@ -1,0 +1,7 @@
+election.election_voting_method.election_fptp:
+  type: election_voting_method.schema
+  label: 'First past the post voting plugin configuration'
+  mapping:
+    tiebreaker:
+      type: string
+      label: 'Tiebreaker method'

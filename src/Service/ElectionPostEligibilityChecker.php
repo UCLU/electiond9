@@ -2,8 +2,8 @@
 
 namespace Drupal\election\Service;
 
-use Drupal\conditions_plugin_reference\ConditionRequirement;
-use Drupal\conditions_plugin_reference\ConditionsEvaluator;
+use Drupal\complex_conditions\ConditionRequirement;
+use Drupal\complex_conditions\ConditionsEvaluator;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\election\Entity\Election;

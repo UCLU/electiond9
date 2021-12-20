@@ -1,0 +1,7 @@
+election.election_voting_method.base:
+  type: config_entity
+  label: 'Voting method configuration'
+  mapping:
+    id:
+      type: string
+      label: 'ID'

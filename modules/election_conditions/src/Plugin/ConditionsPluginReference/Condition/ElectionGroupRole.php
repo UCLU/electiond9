@@ -1,8 +1,8 @@
 <?php
 
-namespace Drupal\election_conditions\Plugin\ConditionsPluginReference\Condition;
+namespace Drupal\election_conditions\Plugin\ComplexConditions\Condition;
 
-use Drupal\conditions_plugin_reference\ConditionRequirement;
+use Drupal\complex_conditions\ConditionRequirement;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
@@ -14,7 +14,7 @@ use Drupal\user\UserInterface;
 /**
  * Condition.
  *
- * @ConditionsPluginReference(
+ * @ComplexConditions(
  *   id = "election_group_role",
  *   condition_types = {
  *     "election",

@@ -480,7 +480,7 @@ class Election extends EditorialContentEntityBase implements ElectionInterface {
       ->setLabel(t('Voting method'))
       ->setDescription(t('This can be overridden per post.'))
       ->setSettings([
-        'target_type' => 'election_voting_method_plugin',
+        'target_type' => 'election_voting_method',
       ])
       ->setDisplayOptions('form', [
         'type' => 'plugin_reference_select',
